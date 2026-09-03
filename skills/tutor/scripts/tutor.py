@@ -648,7 +648,7 @@ def cmd_mark(args):
             die("grade must look like A, B+, C- …")
         lstate["grade"] = args.grade
     if args.note:
-        lstate["note"] = args.note
+        lstate["notes"] = args.note
     lstate["updated_at"] = now()
     hist = lstate.setdefault("history", [])
     hist.append(
