@@ -163,7 +163,7 @@ Packs (insertion points where prerequisites are met, typically after S3/S5):
   - [x] pack: containers (8)
   - [x] pack: web-services (8)
   - [x] pack: cli-tooling (6)
-- [ ] Phase 4 — End-to-end validation: scaffold scratch workspace; exercise init/sync/resume/conflict/needs_review paths; run all solution tests
+- [x] Phase 4 — End-to-end validation: scratch workspace driven only through `tutor.py`. Covered init/status/graph/verify/mark/guidance, byte-identical no-op sync and re-init, and every sync quadrant against a mutated curriculum copy (pristine update in place, sidecar + conflict, `needs_review` for passed and skipped, added lesson, removal to attic, stage/pack reorder with renames), then resume from saved state and a green `ci`. Engine deviations found were fixed in separate commits (no-op sync wrote state, `attempts`/`notes` missing from state, files added upstream not detected, attic clobbered on re-removal)
 - [ ] Phase 5 — Symlink install (`~/.claude/skills/tutor`), final review, tag v0.1.0
 
 Conventions for resuming a build session: read this file, `git log --oneline -10`,
