@@ -43,6 +43,10 @@ GUIDANCE_MODES = ("guided", "standard", "spartan")
 GRADE_RE = re.compile(r"^[A-F][+-]?$")
 TUTOR_ONLY_FILES = {"TUTOR.md", "quiz.json"}
 TUTOR_ONLY_DIRS = {"solution", "solutions"}
+# Editor and tool droppings that land in a curriculum checkout but are never
+# content. Without this list a .DS_Store next to LESSON.md would be scaffolded
+# and hashed into the learner's manifest.
+JUNK_NAMES = {".DS_Store", "__pycache__", ".ruff_cache", ".pytest_cache", ".mypy_cache"}
 VERIFY_COMMANDS = {
     "gotest": ["go", "test", "-race", "./..."],
     "pytest": ["python3", "-m", "pytest"],
@@ -191,6 +195,8 @@ class Registry:
             rel = src.relative_to(src_root)
             parts = rel.parts
             if parts[0] in TUTOR_ONLY_DIRS or rel.name in TUTOR_ONLY_FILES:
+                continue
+            if JUNK_NAMES.intersection(parts):
                 continue
             if parts[0] == "exercises":
                 if len(parts) < 3 or parts[1] != language:
@@ -898,6 +904,8 @@ def run_validate(strict: bool):
         if not path.is_file():
             continue
         rel = path.relative_to(CONTENT_DIR)
+        if JUNK_NAMES.intersection(rel.parts):
+            continue
         if path.stat().st_size > 512 * 1024:
             errors.append(f"content file over 512KB (built artifact?): {rel}")
         elif os.access(path, os.X_OK) and path.suffix not in (".sh", ".py"):
