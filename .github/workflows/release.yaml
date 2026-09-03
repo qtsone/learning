@@ -15,7 +15,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Semantic Release
-        uses: qtsone/actions/release@main
+        uses: qtsone/actions/release@4c7d501b5a7dfa1b58552c6ffe6059c0d2f9c791 # main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           ssh-key: ${{ secrets.DEPLOY_KEY }}
