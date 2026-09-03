@@ -44,9 +44,10 @@ process state. That discipline is worth naming aloud.
 - **`ExitOnError` (or plain `flag.String`).** Any `os.Exit` inside `Load` makes
   the package untestable and unusable as a library. Same trap as the global
   `flag` set they already avoided in S3.
-- **Value receiver on `Set`.** `func (t TagList) Set(...)` compiles but appends
-  to a copy; the flag package's `Var` also then rejects the type. Point at the
-  methods lesson: pointer receiver for anything that mutates.
+- **Value receiver on `Set`.** `func (t TagList) Set(...)` compiles (a
+  `*TagList` still has the method) but appends to a copy, so every `-tag`
+  vanishes. Point at the methods lesson: pointer receiver for anything that
+  mutates.
 - **Forgetting `Origins` on some path.** Origins written only in the flag layer,
   or only when the value changes. Every write of a field writes its origin, in
   the same breath.
