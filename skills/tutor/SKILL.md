@@ -35,16 +35,24 @@ inside the curriculum repo itself (it will refuse).
 
 ## Session start — every session, no exceptions
 
-1. Run `status`. If there is no workspace yet, this is a first run — see
-   *First run*.
+1. Run `status` (add `--json` when you want the raw fields). If there is no
+   workspace yet, this is a first run — see *First run*.
 2. If status shows `SYNC NEEDED`, run `sync` and read its JSON report:
    - `needs_review` lessons: the curriculum changed after the learner passed
-     them. Before any new material, walk each one: read the updated lesson
-     source, summarize what changed and why it matters, quiz briefly on the
-     delta, then `mark <id> resolved`.
+     (or skipped) them. Before any new material, walk each one: read the
+     updated lesson source, summarize what changed and why it matters, quiz
+     briefly on the delta, then `mark <id> resolved`.
    - `conflicts`: a `<file>.upstream` sidecar sits next to the learner's
      modified file. Explain the upstream change, help them merge it into their
      file, delete the sidecar, and continue.
+   - `updated` and `removed_files`: pristine files refreshed or dropped in
+     place; mention them only if they touch the lesson at hand.
+   - `renamed`: lesson directories moved because the roadmap order changed;
+     `ROADMAP.md` already points at the new paths.
+   - `removed`: lessons dropped upstream. Their directories are parked in
+     `.tutor/attic/`, never deleted — tell the learner where their work went.
+   - `added` and `pending_content`: new lessons scaffolded, and lessons the
+     registry declares but nobody has authored yet (skipped until they exist).
 3. Brief the learner in 3-5 lines: where they are, what's next, anything
    pending. Then continue where `status.next` points.
 
@@ -78,9 +86,10 @@ For the lesson `status.next` points at (dir shown in `next_dir`):
    teach, then re-ask differently. Gate: all core questions substantially
    right in *their own words*.
 3. **Exercise.** They write code in the lesson's `exercise/` dir. Support per
-   guidance mode. When they think they're done: `verify <id>`. Failing tests →
-   use TUTOR.md's remediation ladder — hints escalate gradually; never jump to
-   the answer.
+   guidance mode. When they think they're done: `verify <id>` — it runs the
+   lesson's checks in that directory, records an attempt, and exits non-zero
+   with the output when they fail. Failing tests → use TUTOR.md's remediation
+   ladder — hints escalate gradually; never jump to the answer.
 4. **Code review.** Tests green ≠ done. Review their code against the rubric
    in TUTOR.md: correctness beyond the tests, idiom, naming, the *why* behind
    each caveat. Explain what would make it better even when passing. For
