@@ -26,11 +26,12 @@ jobs:
         run: |
           # Unknown base (new branch, force push) means "run everything" rather than guess.
           if git rev-parse -q --verify "$BASE^{commit}" >/dev/null 2>&1 \
-             && git diff --quiet "$BASE" HEAD -- skills/tutor .github/workflows/ci.yaml; then
+             && git diff --quiet "$BASE" HEAD -- skills/tutor; then
             echo "curriculum=false" >> "$GITHUB_OUTPUT"
-            echo "no changes under skills/tutor: the solutions job will be skipped"
+            echo "skills/tutor unchanged since $BASE: skipping the solutions job"
           else
             echo "curriculum=true" >> "$GITHUB_OUTPUT"
+            echo "skills/tutor changed since ${BASE:-<unknown base>}: running the solutions job"
           fi
       - uses: actions/setup-python@v5
         with:
