@@ -20,6 +20,7 @@ workspace is the current directory (or --workspace).
 """
 
 import argparse
+import copy
 import hashlib
 import json
 import os
@@ -273,7 +274,13 @@ def capstone_rel_from_exercise() -> str:
     return "../" * depth + "projects/capstone"
 
 
-def sync_workspace(ws: Workspace, reg: Registry) -> dict:
+def sync_workspace(ws: Workspace, reg: Registry, apply: bool = True) -> dict:
+    """Diff the workspace against the curriculum and, if apply, bring it up to date.
+
+    With apply=False nothing on disk changes and the report is what a real
+    sync would do. The in-memory state and manifest are still walked, so
+    dry runs go through preview_sync, which hands in a throwaway copy.
+    """
     report = {
         "added": [],
         "updated": [],
@@ -307,7 +314,7 @@ def sync_workspace(ws: Workspace, reg: Registry) -> dict:
                 report["added"].append(lid)
             elif entry["dir"] != expected_dir:
                 old, new = ws.root / entry["dir"], ws.root / expected_dir
-                if old.exists():
+                if apply and old.exists():
                     new.parent.mkdir(parents=True, exist_ok=True)
                     old.rename(new)
                 report["renamed"].append(
@@ -326,15 +333,17 @@ def sync_workspace(ws: Workspace, reg: Registry) -> dict:
                 if src_hash == man_hash:
                     continue
                 if ws_hash is None or ws_hash == man_hash:
-                    dest.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(src, dest)
+                    if apply:
+                        dest.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copy2(src, dest)
                     if not new_lesson:
                         report["updated"].append(f"{lid}:{rel}")
                 elif ws_hash == src_hash:
                     pass
                 else:
                     sidecar = dest.with_name(dest.name + ".upstream")
-                    shutil.copy2(src, sidecar)
+                    if apply:
+                        shutil.copy2(src, sidecar)
                     report["conflicts"].append(
                         {
                             "lesson": lid,
@@ -347,7 +356,7 @@ def sync_workspace(ws: Workspace, reg: Registry) -> dict:
 
             for rel in [r for r in entry["files"] if r not in smap]:
                 dest = dest_root / rel
-                if dest.exists() and sha256_file(dest) == entry["files"][rel]:
+                if apply and dest.exists() and sha256_file(dest) == entry["files"][rel]:
                     dest.unlink()
                 report["removed_files"].append(f"{lid}:{rel}")
                 del entry["files"][rel]
@@ -362,7 +371,7 @@ def sync_workspace(ws: Workspace, reg: Registry) -> dict:
     for lid in [x for x in man_lessons if x not in seen]:
         entry = man_lessons.pop(lid)
         src = ws.root / entry["dir"]
-        if src.exists():
+        if apply and src.exists():
             name = Path(entry["dir"]).name
             attic = ws.tutor_dir / "attic" / name
             attic.parent.mkdir(parents=True, exist_ok=True)
@@ -373,12 +382,32 @@ def sync_workspace(ws: Workspace, reg: Registry) -> dict:
             src.rename(attic)
         report["removed"].append(lid)
 
-    prune_empty_dirs(ws.root / "lessons")
     ws.manifest["curriculum_version"] = reg.version
     ws.manifest["registry_hash"] = reg.hash()
-    write_roadmap(ws, reg)
-    ws.save()
+    if apply:
+        prune_empty_dirs(ws.root / "lessons")
+        write_roadmap(ws, reg)
+        ws.save()
     return report
+
+
+SYNC_ACTIONS = (
+    "added",
+    "updated",
+    "conflicts",
+    "renamed",
+    "removed",
+    "removed_files",
+    "needs_review",
+)
+
+
+def preview_sync(ws: Workspace, reg: Registry) -> dict:
+    """The report a sync would produce right now, touching neither disk nor ws."""
+    scratch = Workspace(ws.root)
+    scratch.state = copy.deepcopy(ws.state)
+    scratch.manifest = copy.deepcopy(ws.manifest)
+    return sync_workspace(scratch, reg, apply=False)
 
 
 def prune_empty_dirs(root: Path):
@@ -571,7 +600,11 @@ def cmd_status(args):
         if (ws.root / "lessons").exists()
         else []
     )
-    stale = ws.manifest.get("registry_hash") != reg.hash()
+    pending = preview_sync(ws, reg)
+    pending_actions = [k for k in SYNC_ACTIONS if pending[k]]
+    stale = (
+        ws.manifest.get("registry_hash") != reg.hash() or bool(pending_actions)
+    )
 
     data = {
         "workspace": str(ws.root),
@@ -580,6 +613,7 @@ def cmd_status(args):
         "guidance": st["guidance"],
         "curriculum_version": reg.version,
         "sync_needed": stale,
+        "pending": pending,
         "progress": {**counts, "composed": len(ordered), "authored": authored},
         "needs_review": [
             x for x in ordered if ws.lesson_state(x)["status"] == "needs_review"
@@ -610,14 +644,13 @@ def cmd_status(args):
         f"language   {st['language']}   "
         f"focuses: {', '.join(st['focuses']) or 'none'}   guidance: {st['guidance']}"
     )
-    print(
-        f"curriculum {reg.version}"
-        + (
-            "   ⚠ SYNC NEEDED (curriculum changed — run: tutor.py sync)"
-            if stale
-            else ""
+    line = f"curriculum {reg.version}"
+    if stale:
+        summary = ", ".join(
+            f"{len(pending[k])} {k.replace('_', ' ')}" for k in pending_actions
         )
-    )
+        line += f"   ⚠ SYNC NEEDED ({summary or 'registry changed'} — run: tutor.py sync)"
+    print(line)
     print(
         f"progress   {p['passed']}/{p['composed']} passed · "
         f"{p['in_progress']} in progress · {p['needs_review']} need review · "

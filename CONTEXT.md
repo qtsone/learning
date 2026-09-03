@@ -95,7 +95,8 @@ workspace/
 init <language> [--focus a,b]    # create workspace / add focuses; idempotent (implies sync)
 sync                             # re-scaffold + JSON diff report (added/updated/conflicts/
                                  #   removed→attic/renamed/needs_review)
-status [--json]                  # session briefing: progress, next lesson, needs_review
+status [--json]                  # session briefing: progress, next lesson, needs_review,
+                                 #   pending sync preview (read-only diff against upstream)
 mark <lesson-id> <status|resolved> [--grade A..F] [--note ...]
                                  #   resolved: needs_review → the status held before the change
 verify <lesson-id>               # run the lesson's tests (e.g. go test in exercise dir); counts an attempt

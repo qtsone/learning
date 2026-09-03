@@ -37,7 +37,8 @@ inside the curriculum repo itself (it will refuse).
 
 1. Run `status` (add `--json` when you want the raw fields). If there is no
    workspace yet, this is a first run — see *First run*.
-2. If status shows `SYNC NEEDED`, run `sync` and read its JSON report:
+2. If status shows `SYNC NEEDED` (its `pending` field previews the report
+   below without changing anything), run `sync` and read its JSON report:
    - `needs_review` lessons: the curriculum changed after the learner passed
      (or skipped) them. Before any new material, walk each one: read the
      updated lesson source, summarize what changed and why it matters, quiz

@@ -54,7 +54,7 @@ result.
 |------------|--------------|
 | `init <language> [--focus a,b]` | Create the workspace, or add focus packs to an existing one, then sync. Refuses to run inside this repo. |
 | `sync` | Re-scaffold from the curriculum and print a diff report: `added`, `updated`, `conflicts`, `renamed`, `removed`, `removed_files`, `needs_review`, `pending_content`. |
-| `status [--json]` | Session briefing: progress counts, lessons needing review, open conflicts, the next lesson and its directory. Flags `sync_needed` when the registry changed since the last sync. |
+| `status [--json]` | Session briefing: progress counts, lessons needing review, open conflicts, the next lesson and its directory. Compares the workspace against the curriculum and flags `sync_needed` with a preview of the sync report under `pending`; writes nothing. |
 | `mark <lesson-id> <status\|resolved> [--grade A..F] [--note ...]` | Set a lesson to `todo`, `in_progress`, `passed`, `skipped`, or `needs_review`. `resolved` returns a reviewed lesson to the status it held before the change. |
 | `verify <lesson-id>` | Run the lesson's checks in its exercise directory (`go test -race ./...` or `bash ./check.sh`), record an attempt, and exit with the check's status. Discussion lessons have no automated check. |
 | `guidance <guided\|standard\|spartan>` | Set how much hand-holding the tutor gives. |
