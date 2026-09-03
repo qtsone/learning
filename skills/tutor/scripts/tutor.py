@@ -73,6 +73,10 @@ def die(msg: str, code: int = 1) -> NoReturn:
     sys.exit(code)
 
 
+def canonical(data) -> str:
+    return json.dumps(data, sort_keys=True)
+
+
 def write_json_atomic(path: Path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = tempfile.NamedTemporaryFile(
@@ -208,6 +212,8 @@ class Workspace:
         self.journal_path = self.tutor_dir / "journal.md"
         self.state: dict = {}
         self.manifest: dict = {}
+        self.loaded_state = None
+        self.loaded_manifest = None
 
     def exists(self) -> bool:
         return self.state_path.exists()
@@ -220,12 +226,17 @@ class Workspace:
             die("no tutor workspace here — run: tutor.py init <language>")
         except json.JSONDecodeError as e:
             die(f"corrupt state under .tutor/ ({e}); restore from git or re-init")
+        self.loaded_state = canonical(self.state)
+        self.loaded_manifest = canonical(self.manifest)
         return self
 
     def save(self):
-        self.state["updated"] = now()
-        write_json_atomic(self.state_path, self.state)
-        write_json_atomic(self.manifest_path, self.manifest)
+        """Write only what changed: a no-op sync must leave the workspace byte-identical."""
+        if canonical(self.state) != self.loaded_state:
+            self.state["updated"] = now()
+            write_json_atomic(self.state_path, self.state)
+        if canonical(self.manifest) != self.loaded_manifest:
+            write_json_atomic(self.manifest_path, self.manifest)
 
     def lesson_state(self, lid: str) -> dict:
         return self.state["lessons"].setdefault(lid, {"status": "todo"})
