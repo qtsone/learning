@@ -1,5 +1,7 @@
 # tutor
 
+[![CI](https://github.com/qtsone/learning/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/qtsone/learning/actions/workflows/ci.yaml)
+
 An open-source curriculum engine plus a Claude skill that turns an agent into a
 0-to-expert programming tutor. The full curriculum is pre-authored and versioned in
 this repo; a deterministic script scaffolds it into any workspace and tracks your

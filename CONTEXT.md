@@ -164,7 +164,7 @@ Packs (insertion points where prerequisites are met, typically after S3/S5):
   - [x] pack: web-services (8)
   - [x] pack: cli-tooling (6)
 - [x] Phase 4 — End-to-end validation: scratch workspace driven only through `tutor.py`. Covered init/status/graph/verify/mark/guidance, byte-identical no-op sync and re-init, and every sync quadrant against a mutated curriculum copy (pristine update in place, sidecar + conflict, `needs_review` for passed and skipped, added lesson, removal to attic, stage/pack reorder with renames), then resume from saved state and a green `ci`. Engine deviations found were fixed in separate commits (no-op sync wrote state, `attempts`/`notes` missing from state, files added upstream not detected, attic clobbered on re-removal)
-- [ ] Phase 5 — Symlink install (`~/.claude/skills/tutor`), final review, tag v0.1.0
+- [x] Phase 5 — Release: symlink install verified from a clean shell; docs reconciled with the engine (README engine reference + workspace layout, SKILL.md sync report fields, CONTRIBUTING and the authoring guide matched to the shipped lesson anatomy and length bands); one lesson per stage and pack spot-checked against the golden lesson, drift fixed per commit; engine fix (tool caches next to lessons were scaffolded); `validate`, `ci`, and the CI workflow green; CI badge; tagged v0.1.0 with a GitHub release
 
 Conventions for resuming a build session: read this file, `git log --oneline -10`,
 then continue the first unchecked phase. Commit at phase boundaries to `main` with
