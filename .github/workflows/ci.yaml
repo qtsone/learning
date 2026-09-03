@@ -46,11 +46,12 @@ jobs:
           fi
 
   solutions:
-    # Skipped via `if` still reports success, so the ruleset's required check
-    # passes for docs-only changes; a path filter on the trigger would leave it
-    # pending and block the merge.
+    # Pull requests only: the merged tree was already tested there, so a push to
+    # main would only repeat ~90 Go test suites. Skipped via `if` still reports
+    # success, so the ruleset's required check passes for docs-only changes; a
+    # path filter on the trigger would leave it pending and block the merge.
     needs: validate
-    if: needs.validate.outputs.curriculum == 'true'
+    if: github.event_name == 'pull_request' && needs.validate.outputs.curriculum == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
