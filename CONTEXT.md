@@ -96,10 +96,14 @@ init <language> [--focus a,b]    # create workspace / add focuses; idempotent (i
 sync                             # re-scaffold + JSON diff report (added/updated/conflicts/
                                  #   removed→attic/renamed/needs_review)
 status [--json]                  # session briefing: progress, next lesson, needs_review
-mark <lesson-id> <status> [--grade A..F] [--note ...]
-verify <lesson-id>               # run the lesson's tests (e.g. go test in exercise dir)
+mark <lesson-id> <status|resolved> [--grade A..F] [--note ...]
+                                 #   resolved: needs_review → the status held before the change
+verify <lesson-id>               # run the lesson's tests (e.g. go test in exercise dir); counts an attempt
 guidance <guided|standard|spartan>
+custom add <slug> --title T      # register a tutor-generated custom lesson (excluded from sync)
 graph [--language X] [--focus ..] [--format tree|mermaid|json]   # no workspace needed
+validate [--strict]              # repo-level: registry schema, DAG order, content presence
+ci [--filter substr]             # validate + run every solution against its tests
 ```
 
 ### Sync semantics (per file)
