@@ -296,7 +296,13 @@ func TestGetOrLoadKeepsOtherKeysReadable(t *testing.T) {
 		loaded <- v
 	}()
 
-	<-loading
+	select {
+	case <-loading:
+	case v := <-loaded:
+		t.Fatalf(`GetOrLoad("slow") = %d without ever calling the loader; on a miss it must call loader`, v)
+	case <-time.After(10 * time.Second):
+		t.Fatal(`GetOrLoad("slow") never called the loader`)
+	}
 
 	got := make(chan int, 1)
 	go func() {
