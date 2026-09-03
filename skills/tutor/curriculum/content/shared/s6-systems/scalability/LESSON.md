@@ -300,7 +300,7 @@ behaviour you cannot predict.
 
 ## Exercise
 
-Open [`exercises/go/`](exercises/go/) — one module, four files, each mapping
+Open [`exercise/`](exercise/) — one module, four files, each mapping
 to one objective. `app.go` is a service instance with a scaling bug;
 `limiter.go`, `queue.go`, and `ring.go` are skeletons. The `*_test.go` files
 are the specification: read them first. The limiter takes an injected
@@ -340,10 +340,10 @@ Acceptance criteria:
    nothing else. `MovedFraction` quantifies both, and the tests contrast it
    with hash-mod-N on the same change.
 
-Run the tests from inside `exercises/go/`:
+Run the tests from inside `exercise/`:
 
 ```sh
-cd exercises/go
+cd exercise
 go test -race ./...
 ```
 

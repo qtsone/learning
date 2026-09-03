@@ -237,7 +237,7 @@ collapsed yourself.
 
 ## Exercise
 
-Open [`exercises/go/`](exercises/go/) — a module with a skeleton in
+Open [`exercise/`](exercise/) — a module with a skeleton in
 `cache.go` and the specification in `cache_test.go`. Build a concurrency-safe
 generic cache with TTL expiry, LRU eviction, and singleflight loading. The
 constructor takes an injected `now func() time.Time`; the tests drive a fake
@@ -261,10 +261,10 @@ Acceptance criteria:
    the loader exactly once, and every caller receives its result.
 7. All of the above is safe under the race detector with concurrent use.
 
-Run the tests from inside `exercises/go/`:
+Run the tests from inside `exercise/`:
 
 ```sh
-cd exercises/go
+cd exercise
 go test -race ./...
 ```
 

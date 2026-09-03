@@ -220,7 +220,7 @@ timeout and tells the broker nothing:
 
 ## Exercise
 
-Open [`exercises/go/`](exercises/go/) — a Go module where you build the whole
+Open [`exercise/`](exercise/) — a Go module where you build the whole
 story end to end, in three files: `broker.go` (a tiny broker with acks,
 visibility timeouts, redelivery, and a DLQ), `consumer.go` (the idempotent
 consumer), and `outbox.go` (a simulated transactional store with an outbox
@@ -266,10 +266,10 @@ Acceptance criteria:
    runs the side effect once, while `ByMessageID` would run it twice.
 10. `go test -race ./...` passes and the code is `gofmt`-formatted.
 
-Run the tests from inside `exercises/go/`:
+Run the tests from inside `exercise/`:
 
 ```sh
-cd exercises/go
+cd exercise
 go test -race ./...
 ```
 

@@ -285,7 +285,7 @@ an L7 fleet, with health checks at both layers ejecting dead backends.
 
 ## Exercise
 
-Open [`exercises/go/`](exercises/go/) — a Go module for a package `netlab`. You
+Open [`exercise/`](exercise/) — a Go module for a package `netlab`. You
 will build the two layers this lesson dissected: framing over a raw
 connection, and a TLS configuration that actually verifies who it talks
 to. No real network is involved: tests drive your code over `net.Pipe`,
@@ -325,10 +325,10 @@ Acceptance criteria:
    name and trusted CA, and fail with a wrong name or an empty pool.
 5. `go test -race ./...` passes and the code is `gofmt`-formatted.
 
-Run the tests from inside `exercises/go/`:
+Run the tests from inside `exercise/`:
 
 ```sh
-cd exercises/go
+cd exercise
 go test -race ./...
 ```
 
