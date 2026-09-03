@@ -77,8 +77,8 @@ behind the only artifact that stops the bug returning during a refactor.
 
 Name it for the behaviour it defends — `TestParseRejectsPathTraversal`, not
 `TestBug17` — and keep it beside that package's other tests rather than in a
-`regressions_test.go` ghetto. Regressions are not a category of test; they are
-tests that happen to have been written in anger.
+`regressions_test.go` dumping ground. Regressions are not a category of test;
+they are tests that happen to have been written in anger.
 
 ## Fuzzing your own boundaries
 
