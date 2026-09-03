@@ -41,22 +41,28 @@ composition. Content pools hold the actual lesson directories. A lesson is
 
 ## Authoring a lesson
 
+Read [`docs/authoring-guide.md`](docs/authoring-guide.md) before writing content. It
+holds the file-by-file anatomy, the tone and length bands, and the self-checks. The
+exemplar to copy is `skills/tutor/curriculum/content/go/s1-basics/hello-world/`.
+
 ### Lesson directory anatomy
 
 ```
 <lesson>/
-├── LESSON.md          # theory, objectives, curated further-reading   [scaffolded]
-├── exercise/          # starter code + _test.go verification          [scaffolded]
-│                      # shared lessons use exercises/<lang>/ instead
-├── TUTOR.md           # teaching notes, misconceptions, grilling pts  [never scaffolded]
-├── quiz.json          # question bank + grading rubric                [never scaffolded]
-└── solution/          # canonical solution (per-lang for shared)      [never scaffolded]
+├── LESSON.md          # theory, objectives, exercise brief, further reading   [scaffolded]
+├── exercise/          # starter code + tests, or check.sh                     [scaffolded]
+│                      # shared lessons with a language-specific exercise use
+│                      # exercises/<lang>/ instead (scaffolded as exercise/)
+├── TUTOR.md           # teaching notes, misconceptions, rubric, hint ladder   [never scaffolded]
+├── quiz.json          # question bank + pass rule                             [never scaffolded]
+└── solution/          # reference solution, overlaid onto exercise/ by ci     [never scaffolded]
+                       # shared lessons use solutions/<lang>/ instead
 ```
 
-Only `LESSON.md` and `exercise/` reach the learner's workspace. `TUTOR.md`,
+Only `LESSON.md` and the exercise reach the learner's workspace. `TUTOR.md`,
 `quiz.json`, and `solution/` are tutor-only: the skill reads them from this repo to
 teach, quiz, and review — they must never be scaffolded. Solutions must actually
-pass the exercise tests (CI runs them).
+pass the exercise tests under `go test -race` (`ci` runs them).
 
 ### IDs and ordering
 
@@ -82,8 +88,9 @@ persona `ada` (`/home/ada/...`) wherever a path is needed, never a real username
 
 ## Commits
 
-Use [Conventional Commits](https://www.conventionalcommits.org/)
-(`feat:`, `fix:`, `docs:`, `content:` scoped per stage, etc.).
+Use [Conventional Commits](https://www.conventionalcommits.org/). Types in use:
+`feat`, `fix(engine)`, `docs`, `ci`, `chore(deps)`, and `content(<stage or pack>)`
+for curriculum changes.
 
 ## Curriculum feedback from learners
 
