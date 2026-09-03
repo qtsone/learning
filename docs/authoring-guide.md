@@ -14,7 +14,9 @@ for ids/titles/ordering; `registry.json` for objectives/duration/verify.
 │                        #    exercise is language-specific)
 ├── TUTOR.md             # tutor-only (never scaffolded)
 ├── quiz.json            # tutor-only
-└── solution/            # tutor-only — overlay of only the files that change
+└── solution/            # tutor-only — test-verified: overlay of only the files
+                         #   that change; script-verified: the reference
+                         #   artifacts the grader and tutor check against
                          #   (solutions/<lang>/ for shared language-specific)
 ```
 
@@ -44,18 +46,19 @@ Tone and craft:
 
   | Where | Lines | Why |
   |-------|-------|-----|
-  | S0-S1 foundations & basics | 90-150 | one new idea at a time, nothing assumed |
-  | Code-first stages (S2-S4) | 120-250 | the exercise carries the teaching |
-  | S5 advanced Go | 250-350 | systems theory the code cannot show, plus production-scale acceptance criteria |
-  | S6 systems & design | ≤350 | the theory *is* the lesson; the exercise is a worksheet, not a compiler |
-  | S7 expert capstone | 320-380 | theory, a grading contract for a project the author cannot see, and two sets of criteria (mechanical + review) |
-  | Focus packs | ≤400 | a pack compresses a specialist domain into 6-8 lessons, so each carries context a stage lesson would borrow from its neighbours |
+  | S0-S1 foundations & basics | 130-250 | one new idea at a time, nothing assumed; the exemplar sits at the bottom of the band |
+  | Code-first stages (S2-S4) | 230-340 | the exercise carries the teaching |
+  | S5 advanced Go | 250-360 | systems theory the code cannot show, plus production-scale acceptance criteria |
+  | S6 systems & design | ≤380 | the theory *is* the lesson; the exercise is a worksheet, not a compiler |
+  | S7 expert capstone | 330-400 | theory, a grading contract for a project the author cannot see, and two sets of criteria (mechanical + review) |
+  | Focus packs | ≤440 | a pack compresses a specialist domain into 6-8 lessons, so each carries context a stage lesson would borrow from its neighbours |
 
   **Hard ceiling ~450 lines, anywhere.** Only a lesson that walks complete
-  worked designs end to end earns it (`shared.systems.case-studies`), because
-  half a worked design teaches worse than a long one. Past your band: split
-  or cut. Dense beats long everywhere — length is never the goal, and a
-  lesson that hits its band by padding has failed at both.
+  worked designs end to end earns it (`shared.systems.case-studies` is the
+  one lesson past it), because half a worked design teaches worse than a
+  long one. Past your band: split or cut. Dense beats long everywhere —
+  length is never the goal, and a lesson that hits its band by padding has
+  failed at both.
 - Go accuracy bar: Go 1.22+ idioms — `log/slog`, generics where natural,
   1.22 `net/http` mux patterns, `errors.Is/As`, no `ioutil`, no deprecated
   APIs. When in doubt, check current docs.
@@ -66,15 +69,22 @@ Tone and craft:
 ## exercise/
 
 - Go lessons: a self-contained module — `go.mod` with
-  `module tutor.local/<slug>` and `go 1.22`. Starter code **must compile** but
-  tests **must fail** (learners fight the problem, not the scaffolding).
-  Mark work sites with `// TODO:` comments.
+  `module tutor.local/<name>` (the lesson slug unless a shorter name reads
+  better in import paths, as in `tutor.local/board`) and `go 1.22`. Starter
+  code **must compile** but tests **must fail** (learners fight the problem,
+  not the scaffolding). Mark work sites with `// TODO:` comments. Two
+  deliberate exceptions: lessons whose exercise *is* writing tests
+  (`go.basics.testing-basics`, `shared.eng.tdd`, `go.advanced.advanced-testing`)
+  ship stub tests as the starter and the finished tests in the solution, and
+  debugging-style lessons ship complete, seeded-bug code with no `TODO`s.
 - Tests (`*_test.go`) are the specification: table-driven where natural,
   failure messages that teach (`got %q, want %q`). Test the acceptance
-  criteria exactly — no hidden requirements.
+  criteria exactly — no hidden requirements. `verify` and `ci` run
+  `go test -race ./...`, so tests and solutions must be race-clean.
 - `script`-verify lessons: `exercise/check.sh` — bash, self-contained,
   idempotent, exits non-zero with a clear "what to fix" message per failed
-  check. The learner runs it repeatedly until green.
+  check. The engine runs it as `bash ./check.sh` from the exercise dir; the
+  learner runs it repeatedly until green.
 - `discussion`-verify lessons: exercise dir optional; if present it's an
   exploration task the tutor reviews in conversation.
 - Shared lessons whose exercise is language-specific use `exercises/go/…`
@@ -83,10 +93,19 @@ Tone and craft:
 
 ## solution/
 
-Only for test-verified lessons. Contains **only the files that differ** from
-the starter (it is overlaid onto `exercise/` at CI time). Must be idiomatic,
+Test-verified lessons: contains **only the files that differ** from the
+starter (it is overlaid onto `exercise/` at CI time). Must be idiomatic,
 gofmt-clean, and the code you'd defend in review — it is also the tutor's
 reference during grading.
+
+Script-verified lessons: the reference artifacts the exercise asks for
+(Dockerfile, manifests, a `NOTES.md` with the expected observations). `ci`
+overlays them onto the exercise and runs `check.sh`, so the reference must
+pass its own grader. A script lesson without a `solution/` is skipped by
+`ci`, which is acceptable only when the grader inspects the learner's
+machine rather than files (the S0 terminal and git lessons).
+
+Discussion-verified lessons have no `solution/`.
 
 ## TUTOR.md
 
@@ -116,8 +135,8 @@ objective. Prompts are conversation starters, not exam prose.
 ## Self-check before you're done (all must pass)
 
 ```sh
-cd exercise[|s/go] && go test ./... ; cd -   # must FAIL on the starter
-gofmt -l <lesson-dir>                        # no output
+cd exercise[|s/go] && go test -race ./... ; cd -   # must FAIL on the starter
+gofmt -l <lesson-dir>                              # no output
 python3 -m json.tool <lesson>/quiz.json      # parses
 python3 skills/tutor/scripts/tutor.py ci --filter <lesson-id>   # solution passes
 ```
