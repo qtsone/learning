@@ -1,9 +1,19 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "description": [
-    "Only GitHub Actions are managed. Versions pinned inside the curriculum (go.mod, Dockerfiles, images, manifests) are teaching material, not dependencies."
+    "Only this repo's own GitHub Actions workflow is managed. Everything under the curriculum, including workflow files inside exercises and solutions, is teaching material with deliberately pinned versions."
   ],
-  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
-  "enabledManagers": ["github-actions"],
-  "labels": ["dependencies"]
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "enabledManagers": [
+    "github-actions"
+  ],
+  "ignorePaths": [
+    "skills/tutor/curriculum/**"
+  ],
+  "labels": [
+    "dependencies"
+  ]
 }
