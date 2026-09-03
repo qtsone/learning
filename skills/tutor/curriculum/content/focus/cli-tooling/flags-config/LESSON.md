@@ -18,7 +18,7 @@ By the end of this lesson you can:
 ## Configuration is an interface, not a detail
 
 Your S3 link checker already had its own `flag.FlagSet` and a
-`Run(args, stdin, stdout, stderr) int` entry point — the skeleton. Real tools
+`run(ctx, args, in, out) error` entry point — the skeleton. Real tools
 take settings from several places at once, and the *rules* for combining them
 are as much a part of your public interface as the flag names. The question
 that decides where a setting belongs is always: **who changes it, and how

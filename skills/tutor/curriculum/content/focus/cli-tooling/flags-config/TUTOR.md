@@ -6,8 +6,8 @@ First lesson of the CLI focus pack, inserted right after S3. They know the
 whole of intermediate Go: interfaces, generics, errors with `Is`/`As`, JSON
 (including pointer fields for absent-vs-zero), `time`, `io.Reader`/`io.Writer`,
 table-driven tests, and the full concurrency arc. They have shipped two CLIs —
-the S1 habit tracker and the S3 concurrent link checker, whose
-`Run(args, stdin, stdout, stderr) int` shape and own `flag.FlagSet` are the
+the S1 todo tracker and the S3 concurrent link checker, whose
+`run(ctx, args, in, out) error` shape and own `flag.FlagSet` are the
 direct ancestors of this lesson's `Loader`.
 
 What is genuinely new: `flag.Value`/`flag.Func`, `FlagSet.Visit`, controlling
