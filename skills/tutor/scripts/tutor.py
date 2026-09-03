@@ -357,10 +357,13 @@ def sync_workspace(ws: Workspace, reg: Registry) -> dict:
         entry = man_lessons.pop(lid)
         src = ws.root / entry["dir"]
         if src.exists():
-            attic = ws.tutor_dir / "attic" / Path(entry["dir"]).name
+            name = Path(entry["dir"]).name
+            attic = ws.tutor_dir / "attic" / name
             attic.parent.mkdir(parents=True, exist_ok=True)
-            if attic.exists():
-                shutil.rmtree(attic)
+            generation = 1
+            while attic.exists():
+                attic = attic.with_name(f"{name}.{generation}")
+                generation += 1
             src.rename(attic)
         report["removed"].append(lid)
 
