@@ -94,8 +94,9 @@ rules are few and strict:
 
 - **Only the sender closes.** A receiver closing would make the sender's next
   send panic. When several goroutines send on one channel, none of them can
-  safely close it — coordinating that is next-stage material; in this lesson
-  every channel has exactly one sending goroutine, which closes it.
+  safely close it — the concurrency-patterns lesson later in this stage
+  solves that; here every channel has exactly one sending goroutine, which
+  closes it.
 - **Receiving from a closed channel never blocks.** It first drains any
   buffered leftovers, then yields the element type's zero value, forever.
 - **The comma-ok form tells you which you got.** `v, ok := <-ch` — `ok` is
