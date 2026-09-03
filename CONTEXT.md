@@ -38,7 +38,7 @@ copies/derivatives must stay open (see Licensing).
 | 15 | Invocation | One skill `/tutor` + freeform args; LLM maps intent to deterministic script calls |
 | 16 | Lesson IDs | Stable slugs (`go.basics.slices`); ordering computed; sync renames dirs safely (never clobbers content) |
 | 17 | License | **AGPL-3.0-or-later on everything** + enforced CLA (sublicense rights enable qtsone's commercial dual-licensing) + §7 learner exception (learners' exercise solutions unencumbered) + explicit qtsone copyright |
-| 18 | OSS hygiene | README, CONTRIBUTING → CLA, CLA CI check, CI validates registry schema / DAG acyclicity / content presence / Go solutions pass tests |
+| 18 | OSS hygiene | README, CONTRIBUTING → CLA, CLA CI check, SECURITY.md, CODE_OF_CONDUCT.md, issue forms, CODEOWNERS; CI validates registry schema / DAG acyclicity / content presence / Go solutions pass tests, and rejects machine-specific paths (lesson prose uses the example persona `ada`). Renovate manages GitHub Actions only. Local, uncommitted git hooks keep private names and machine paths out of files and commit messages |
 
 ## Architecture contract
 
@@ -46,9 +46,12 @@ copies/derivatives must stay open (see Licensing).
 ```
 learning/
 ├── CONTEXT.md                  # this file
-├── README.md, CONTRIBUTING.md, CLA.md, LICENSE, LICENSE-EXCEPTION.md
-├── .github/workflows/ci.yaml
-├── docs/DESIGN.md
+├── README.md, CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md
+├── LICENSE, LICENSE-EXCEPTION.md, NOTICE
+├── renovate.json               # GitHub Actions only: pins inside the curriculum are teaching material
+├── .github/                    # CLA.md, CODEOWNERS, workflows/ci.yaml, issue forms, PR template
+├── docs/                       # DESIGN.md, authoring-guide.md, curriculum-outline.md
+├── tools/                      # authoring and review workflow scripts
 └── skills/tutor/
     ├── SKILL.md                # tutor behavior: teaching protocol, intent → script map
     ├── scripts/tutor.py        # deterministic engine (stdlib only)
@@ -144,18 +147,18 @@ Packs (insertion points where prerequisites are met, typically after S3/S5):
 - [x] Phase 0 — CONTEXT.md (this file) committed
 - [x] Phase 1 — Framework: `tutor.py`, `SKILL.md`, registry schema, OSS files (LICENSE+exception, CLA, CONTRIBUTING, README), CI workflow, docs/DESIGN.md
 - [x] Phase 2 — Full registry graph: 136 lessons declared (112 Go path incl. packs + 24 Python stubs); `validate` passes with 0 errors. Golden template lesson `go.basics.hello-world` fully authored — USE IT AS THE EXEMPLAR for all Phase 3 authoring (file anatomy, tone, exercise/test/solution/TUTOR.md/quiz.json conventions)
-- [ ] Phase 3 — Content authoring (multi-agent workflows; author → adversarial review → fix; solutions actually run against tests):
-  - [x] S0 foundations (8) — committed 5b5d9b2
-  - [x] S1 go basics (15) — committed 596d7ad
-  - [x] S2 cs fundamentals (12) — committed 596d7ad
-  - [x] S3 go intermediate (15) — committed e8879bb
-  - [x] S4 engineering practice (10) — committed 3460438
-  - [x] S5 go advanced (12) — committed e85d97c
-  - [x] S6 systems & design (12) — committed 57bc268
-  - [x] S7 capstone (6) — committed 3dc30e0
-  - [x] pack: containers (8) — committed 685ec8d
-  - [x] pack: web-services (8) — committed 0b1a6e9
-  - [x] pack: cli-tooling (6) — committed 3dc30e0
+- [x] Phase 3 — Content authoring (multi-agent workflows; author → adversarial review → fix; solutions actually run against tests). All 112 Go-path lessons authored; every solution passes `ci`:
+  - [x] S0 foundations (8)
+  - [x] S1 go basics (15)
+  - [x] S2 cs fundamentals (12)
+  - [x] S3 go intermediate (15)
+  - [x] S4 engineering practice (10)
+  - [x] S5 go advanced (12)
+  - [x] S6 systems & design (12)
+  - [x] S7 capstone (6)
+  - [x] pack: containers (8)
+  - [x] pack: web-services (8)
+  - [x] pack: cli-tooling (6)
 - [ ] Phase 4 — End-to-end validation: scaffold scratch workspace; exercise init/sync/resume/conflict/needs_review paths; run all solution tests
 - [ ] Phase 5 — Symlink install (`~/.claude/skills/tutor`), final review, tag v0.1.0
 

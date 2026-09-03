@@ -1,0 +1,44 @@
+name: Curriculum issue
+description: A lesson, exercise, test, quiz, or solution is wrong, unclear, or broken
+title: "[lesson-id] "
+labels: [curriculum]
+body:
+  - type: input
+    id: lesson
+    attributes:
+      label: Lesson id
+      description: The stable slug, as in docs/curriculum-outline.md or your ROADMAP.md
+      placeholder: go.basics.slices
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of problem
+      options:
+        - Factual error in LESSON.md
+        - Explanation is unclear or assumes something not taught yet
+        - Exercise test is wrong or flaky
+        - Exercise is much harder or easier than its stage
+        - Solution does not pass its own tests
+        - Quiz question or rubric is wrong
+        - Typo or formatting
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What is wrong
+      description: Quote the passage, or paste the failing test output.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+  - type: input
+    id: version
+    attributes:
+      label: Curriculum version
+      description: The tag you installed, or the commit of your clone (git rev-parse --short HEAD)
