@@ -252,13 +252,16 @@ Acceptance criteria:
    value.
 3. LRU: the cache never holds more than `capacity` entries; inserting a new
    key into a full cache evicts the least-recently-used entry, where both
-   `Get` hits and `Set` count as use.
+   `Get` hits and `Set` count as use. A capacity below 1 is clamped to 1: the
+   type never builds an unbounded cache.
 4. `Delete` removes a key; deleting an absent key is a no-op.
 5. `GetOrLoad` returns a cached value without calling the loader; on a miss
    it calls the loader, caches a successful result, and returns it. A loader
    error is returned to the caller and nothing is cached.
 6. Singleflight: concurrent `GetOrLoad` calls for the same missing key run
-   the loader exactly once, and every caller receives its result.
+   the loader exactly once, and every caller receives its result. The loader
+   runs outside your lock, so other keys stay readable while a load is in
+   flight.
 7. All of the above is safe under the race detector with concurrent use.
 
 Run the tests from inside `exercise/`:
