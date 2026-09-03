@@ -30,9 +30,14 @@ type Note struct {
 	Created time.Time
 }
 
-// New validates and normalises a note: the title is trimmed and bounded, the
-// tags are lower-cased, de-duplicated and sorted, and the timestamp is UTC.
+// New validates and normalises a note: the id must satisfy ValidID, the title
+// is trimmed and bounded, the tags are lower-cased, de-duplicated and sorted,
+// and the timestamp is UTC.
 func New(id, title string, tags []string, created time.Time) (Note, error) {
+	id = strings.TrimSpace(id)
+	if !ValidID(id) {
+		return Note{}, ErrInvalidID
+	}
 	title = strings.TrimSpace(title)
 	if title == "" {
 		return Note{}, ErrTitleEmpty
@@ -41,7 +46,7 @@ func New(id, title string, tags []string, created time.Time) (Note, error) {
 		return Note{}, fmt.Errorf("%w: %d runes, limit %d", ErrTitleTooLong, n, MaxTitleRunes)
 	}
 	return Note{
-		ID:      strings.TrimSpace(id),
+		ID:      id,
 		Title:   title,
 		Tags:    NormaliseTags(tags),
 		Created: created.UTC(),
