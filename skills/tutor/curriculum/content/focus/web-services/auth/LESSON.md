@@ -279,7 +279,7 @@ Deliberately, so you know they exist: multi-factor and passkeys (WebAuthn),
 e-mail verification, password-reset tokens (single-use, hashed at rest,
 short-lived), CSRF tokens, secret storage and rotation, a body-size limit on
 the login handler (an unbounded body in front of a deliberately expensive
-password hash is an amplifier — `http.MaxBytesReader`, two lessons away), and
+password hash is an amplifier — `http.MaxBytesReader`, three lessons away), and
 login rate limiting
 — that last one belongs to the API-hardening lesson later in this pack, as
 authorization does to the next one.
