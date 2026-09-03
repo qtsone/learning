@@ -292,9 +292,10 @@ def sync_workspace(ws: Workspace, reg: Registry) -> dict:
                 continue
             expected_dir = lesson_workspace_dir(gi, group["slug"], li, reg.slug(lid))
             entry = man_lessons.get(lid)
+            new_lesson = entry is None
             changed = False
 
-            if entry is None:
+            if new_lesson:
                 entry = {"dir": expected_dir, "files": {}}
                 man_lessons[lid] = entry
                 report["added"].append(lid)
@@ -321,7 +322,7 @@ def sync_workspace(ws: Workspace, reg: Registry) -> dict:
                 if ws_hash is None or ws_hash == man_hash:
                     dest.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copy2(src, dest)
-                    if man_hash is not None:
+                    if not new_lesson:
                         report["updated"].append(f"{lid}:{rel}")
                 elif ws_hash == src_hash:
                     pass
@@ -336,7 +337,7 @@ def sync_workspace(ws: Workspace, reg: Registry) -> dict:
                         }
                     )
                 entry["files"][rel] = src_hash
-                changed = changed or man_hash is not None
+                changed = changed or not new_lesson
 
             for rel in [r for r in entry["files"] if r not in smap]:
                 dest = dest_root / rel
