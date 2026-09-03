@@ -16,7 +16,7 @@ jobs:
     outputs:
       curriculum: ${{ steps.changes.outputs.curriculum }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
       - name: did the tutor skill change?
@@ -33,7 +33,7 @@ jobs:
             echo "curriculum=true" >> "$GITHUB_OUTPUT"
             echo "skills/tutor changed since ${BASE:-<unknown base>}: running the solutions job"
           fi
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.12"
       - run: python3 skills/tutor/scripts/tutor.py validate
@@ -53,11 +53,11 @@ jobs:
     if: needs.validate.outputs.curriculum == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: stable
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.12"
       - run: python3 skills/tutor/scripts/tutor.py ci
@@ -75,7 +75,7 @@ jobs:
       pull-requests: write
       statuses: write
     steps:
-      - uses: contributor-assistant/github-action@v2.6.1
+      - uses: contributor-assistant/github-action@ca4a40a7d1004f18d9960b404b97e5f30a505a08 # v2.6.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
