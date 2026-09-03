@@ -239,7 +239,9 @@ class Workspace:
             write_json_atomic(self.manifest_path, self.manifest)
 
     def lesson_state(self, lid: str) -> dict:
-        return self.state["lessons"].setdefault(lid, {"status": "todo"})
+        entry = self.state["lessons"].setdefault(lid, {"status": "todo"})
+        entry.setdefault("attempts", 0)
+        return entry
 
 
 def find_workspace(args) -> Workspace:
@@ -696,6 +698,9 @@ def cmd_verify(args):
     cwd = lesson_dir / "exercise" if (lesson_dir / "exercise").exists() else lesson_dir
     cmd = VERIFY_COMMANDS[vtype]
     proc = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
+    lstate = ws.lesson_state(lid)
+    lstate["attempts"] = lstate.get("attempts", 0) + 1
+    ws.save()
     print(
         json.dumps(
             {
