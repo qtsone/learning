@@ -1,0 +1,6 @@
+# TODO: the prod half of the patch pair.
+#
+# Same shape as dev/resources-patch.yaml: apiVersion, kind and metadata.name
+# so kustomize knows which object you mean, then only the fields you are
+# changing. Prod gets more CPU and more memory than dev — and one env var in
+# the base stops being right the moment you change the memory limit.

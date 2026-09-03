@@ -1,0 +1,107 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "exec-basics",
+      "difficulty": "core",
+      "prompt": "You run `git log` from your tool and need its output, its error messages and whether it worked. Walk me through the code, and tell me what your function returns when git exits 1.",
+      "expected_points": [
+        "exec.Command takes an executable plus an argument list — no shell is involved",
+        "assign separate io.Writers (bytes.Buffer) to cmd.Stdout and cmd.Stderr rather than using CombinedOutput, which destroys the split",
+        "cmd.Run waits, including for the goroutines copying the pipes, so the buffers are safe to read afterwards and unsafe before",
+        "a non-zero exit is data, not a Go error: errors.As the *exec.ExitError and read ExitCode()",
+        "the error is reserved for 'it never ran' — exec.ErrNotFound, a bad Dir",
+        "a child killed by a signal reports ExitCode() == -1"
+      ]
+    },
+    {
+      "id": "injection",
+      "difficulty": "core",
+      "prompt": "A colleague writes `exec.Command(\"sh\", \"-c\", \"grep \"+pattern+\" notes.txt\")` where pattern comes from a flag. What can go wrong, and why is passing pattern as an argument different rather than just tidier?",
+      "expected_points": [
+        "the shell interprets the whole string: ; && | $(...) > * $VAR and word splitting all apply to attacker-controlled data",
+        "a pattern like `x; rm -rf ~` becomes a second command",
+        "as an argument it is one element of an array handed to the kernel — nothing parses it, so grep just searches for that literal string",
+        "quoting/escaping is not the fix: rules differ per shell and per platform, and one gap is code execution",
+        "running a user-supplied script through sh -c can be legitimate, but it is a deliberate decision, not a default"
+      ]
+    },
+    {
+      "id": "exec-cancellation",
+      "difficulty": "core",
+      "prompt": "Your tool gives a child 30 seconds. It gets killed. How does your code know that was the timeout rather than the program failing on its own?",
+      "expected_points": [
+        "exec.CommandContext kills the child when the context is done",
+        "the returned error is an ordinary *exec.ExitError ('signal: killed') and looks like any other failure",
+        "so you check ctx.Err() before interpreting the exit status, and wrap it with %w so errors.Is(err, context.DeadlineExceeded) works for the caller",
+        "getting the order wrong reports a timeout as a command failure and sends people hunting the wrong bug",
+        "kill is SIGKILL: no cleanup in the child — cmd.Cancel plus WaitDelay is how you send SIGTERM and grant a grace period",
+        "the kill does not reach grandchildren; they can hold the pipes open, which is what WaitDelay bounds"
+      ]
+    },
+    {
+      "id": "signals",
+      "difficulty": "core",
+      "prompt": "Someone presses Ctrl-C while your tool is mid-run, and later Kubernetes sends it SIGTERM. Describe what happens in your program in both cases, from the signal to the exit code.",
+      "expected_points": [
+        "signal.NotifyContext(parent, os.Interrupt, syscall.SIGTERM) turns the signal into a context that becomes done; defer stop() unregisters and restores default behaviour",
+        "SIGINT is Ctrl-C to the foreground process group, SIGTERM is the polite stop from init systems, docker and kubernetes; SIGKILL follows a grace period and cannot be caught",
+        "the handler does nothing slow — it cancels a context, and the ordinary code watching ctx.Done unwinds and runs its defers",
+        "os.Exit on that path skips every defer: leftover lock files, temp files, a hidden cursor",
+        "map the outcome to an exit code in main: 130 for an interrupt, following the 128+N shell convention",
+        "124 for a timeout, borrowed from timeout(1) — a different convention, deliberately, because no signal reached your process",
+        "Windows has no Unix signals, so signal-specific tests go behind a //go:build unix constraint"
+      ]
+    },
+    {
+      "id": "atomic-write",
+      "difficulty": "core",
+      "prompt": "Why does replacing the user's config with os.WriteFile risk losing it, and what does your WriteFileAtomic do instead — step by step, and what each step buys?",
+      "expected_points": [
+        "os.WriteFile truncates first: mid-write the file is empty or partial, and a crash or full disk makes that permanent; a concurrent reader sees the truncated version",
+        "temp file in the SAME directory as the target — rename is only atomic within one filesystem, so os.TempDir() risks a cross-device error on the user's machine",
+        "chmod the temp file (CreateTemp makes it 0600, and chmod is not filtered by the umask)",
+        "Sync before the rename, or the rename can outlive the data; check Close's error, which is where a failed write surfaces",
+        "os.Rename swaps it in: a reader sees the whole old file or the whole new one",
+        "defer os.Remove of the temp path so no failure leaves rubbish; after a rename it is a harmless no-op",
+        "the trade-off: the file's identity changes, so ownership, ACLs and hard links do not carry over"
+      ]
+    },
+    {
+      "id": "cross-platform-paths",
+      "difficulty": "core",
+      "prompt": "Your tool needs a config file, a cache, and a path a user supplied in that config. How do you build each so the tool works on Linux, macOS and Windows?",
+      "expected_points": [
+        "path/filepath for the local filesystem, path only for slash-separated things like URLs, io/fs and archive entries",
+        "os.UserConfigDir / os.UserCacheDir / os.UserHomeDir instead of hand-building $HOME/.config — the answers differ per platform",
+        "config is what the user edits and would hate to lose; cache is what you may delete at any time",
+        "filepath.Join cleans, so it happily resolves .. into an escape — it is not a security boundary",
+        "filepath.IsLocal rejects empty, absolute, rooted, escaping and Windows device names; it says nothing about symlinks (EvalSymlinks, or os.Root in newer Go)",
+        "other traps: case-insensitive APFS/NTFS vs case-sensitive ext4, and permission bits being advisory on Windows and umask-filtered on Unix"
+      ]
+    },
+    {
+      "id": "helper-process",
+      "difficulty": "stretch",
+      "prompt": "Your tests spawn child processes but never run sleep, echo or python. What is the child, and how does it know to be one?",
+      "expected_points": [
+        "the child is this test binary, found with os.Executable and re-run with a sentinel environment variable set on the child only",
+        "TestMain checks the variable before m.Run: set means 'be the little program and exit', unset means 'run the tests'",
+        "so the child exists on every platform, is the same build with the same race instrumentation, and needs no PATH, network or fixtures",
+        "assuming /bin/sleep or a shell builtin is what makes exec tests flaky on someone else's machine",
+        "helper modes stay tiny and deterministic; blocking with select{} trips the runtime's deadlock detector, so sleep instead"
+      ]
+    },
+    {
+      "id": "environment",
+      "difficulty": "stretch",
+      "prompt": "How do you give a child one extra environment variable, and why is `cmd.Env = []string{\"TOKEN=abc\"}` a bug?",
+      "expected_points": [
+        "a nil cmd.Env means inherit; a non-nil one replaces the environment entirely, so the child loses PATH and HOME",
+        "append(os.Environ(), \"TOKEN=abc\") — duplicates resolve last-wins at start, which is what makes appended entries overrides",
+        "secrets belong in the environment rather than in arguments: command lines are visible in ps and land in shell history",
+        "use cmd.Dir for the child's working directory; os.Chdir moves the whole process and races with everything else"
+      ]
+    }
+  ]
+}

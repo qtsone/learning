@@ -1,0 +1,78 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "why-ci",
+      "difficulty": "core",
+      "prompt": "What classes of bugs does continuous integration catch that testing on your own machine before a release does not? Why does running checks at merge time beat a manual pre-release test pass?",
+      "expected_points": [
+        "works-on-my-machine bugs: uncommitted files, locally installed tools, local environment leaking in — the fresh machine has none of it",
+        "combination breakage between changes that are each fine alone",
+        "humans skip checks under pressure; the machine runs every check on every push",
+        "feedback distance: a bug caught minutes after its push is easy to place, weeks later it hides among hundreds of commits"
+      ]
+    },
+    {
+      "id": "workflow-anatomy",
+      "difficulty": "core",
+      "prompt": "Walk me through your workflow file: what do `on:`, `jobs:`, `runs-on:`, and `steps:` each declare, and what is the difference between a `uses:` step and a `run:` step?",
+      "expected_points": [
+        "on: lists the triggers — push and pull_request cover the CI contract",
+        "each job gets a fresh machine named by runs-on:",
+        "steps run in order; a non-zero exit code fails the run",
+        "uses: invokes a published reusable action (checkout clones the repo, setup-go installs the toolchain); run: executes a shell command"
+      ]
+    },
+    {
+      "id": "ci-cd-cd",
+      "difficulty": "core",
+      "prompt": "Explain the difference between continuous integration, continuous delivery, and continuous deployment.",
+      "expected_points": [
+        "integration: every push and merge request is built and tested automatically — output is a red/green verdict",
+        "delivery: every green main build is packaged and could be released; a human decides when",
+        "deployment: every green main build ships to production automatically — the tests are the release decision",
+        "it is a trust ladder: each level requires believing the one below"
+      ]
+    },
+    {
+      "id": "quality-gates",
+      "difficulty": "core",
+      "prompt": "What makes a workflow step a quality gate, and why did your gofmt gate need the `test -z \"$(gofmt -l .)\"` idiom while `go vet ./...` could stand alone?",
+      "expected_points": [
+        "a gate is a step whose non-zero exit code fails the run — exit codes are the whole contract",
+        "gofmt -l always exits 0 even when it lists offenders, so bare it can never fail",
+        "test -z exits non-zero when the output is non-empty, turning findings into a red step",
+        "go vet already exits non-zero on findings"
+      ]
+    },
+    {
+      "id": "diagnose-red",
+      "difficulty": "core",
+      "prompt": "A pipeline run just went red. Describe your first moves, and what it means if you cannot reproduce the failure locally.",
+      "expected_points": [
+        "open the failing step's log, not the summary; find the first error",
+        "reproduce by running that step's exact command locally",
+        "reproduces: ordinary debugging of your code; does not: an environment difference — uncommitted file, version mismatch, local-only state",
+        "fix the underlying cause — never delete the test or skip the step to go green"
+      ]
+    },
+    {
+      "id": "fresh-machine",
+      "difficulty": "stretch",
+      "prompt": "Why does the runner start from an empty machine and clone your repo with actions/checkout, instead of reusing a machine that already has everything set up?",
+      "expected_points": [
+        "the empty machine proves the repository is self-contained — everything needed is declared or committed",
+        "a reused machine accumulates state, hiding works-on-my-machine bugs and making runs non-reproducible"
+      ]
+    },
+    {
+      "id": "gate-order",
+      "difficulty": "stretch",
+      "prompt": "You put the gofmt and vet gates before the tests. What is the argument for that order, and when might you run gates in parallel jobs instead?",
+      "expected_points": [
+        "cheapest feedback first: a three-second formatting complaint should not wait on the whole test suite",
+        "parallel jobs trade machine time for wall-clock time — worth it once suites are slow enough that developers wait on them"
+      ]
+    }
+  ]
+}

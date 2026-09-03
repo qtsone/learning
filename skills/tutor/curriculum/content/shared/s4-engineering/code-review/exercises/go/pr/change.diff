@@ -1,0 +1,77 @@
+--- a/signup.go
++++ b/signup.go
+@@ -5,16 +5,20 @@
+ 	"database/sql"
+ 	"errors"
+ 	"fmt"
++	"strings"
+ )
+ 
+ // ErrInvalidUsername reports a username that fails the rules in
+-// ValidUsername.
++// IsValidUsername.
+ var ErrInvalidUsername = errors.New("signup: invalid username")
+ 
+-// ValidUsername reports whether name is 3-20 characters long and
++// ErrInvalidEmail reports an email address that fails validation.
++var ErrInvalidEmail = errors.New("signup: invalid email")
++
++// IsValidUsername reports whether name is 3-20 characters long and
+ // contains only lowercase letters, digits, or hyphens, starting with
+ // a letter.
+-func ValidUsername(name string) bool {
++func IsValidUsername(name string) bool {
+ 	if len(name) < 3 || len(name) > 20 {
+ 		return false
+ 	}
+@@ -33,15 +37,23 @@
+ 	return true
+ }
+ 
++// check the email
++func validEmail(e string) bool {
++	return strings.Contains(e, "@")
++}
++
+ // Register stores a new account for username. It returns
+-// ErrInvalidUsername if the username fails validation, and wraps any
++// ErrInvalidUsername if the username fails validation,
++// ErrInvalidEmail if the email fails validation, and wraps any
+ // database error otherwise.
+-func Register(db *sql.DB, username string) error {
+-	if !ValidUsername(username) {
++func Register(db *sql.DB, username, email string) error {
++	if !IsValidUsername(username) {
+ 		return fmt.Errorf("%w: %q", ErrInvalidUsername, username)
+ 	}
+-	if _, err := db.Exec("INSERT INTO users (username) VALUES (?)", username); err != nil {
+-		return fmt.Errorf("store user %q: %w", username, err)
++	if !validEmail(email) {
++		return fmt.Errorf("%w: %q", ErrInvalidEmail, email)
+ 	}
++	q := fmt.Sprintf("INSERT INTO users (username, email) VALUES ('%s', '%s')", username, email)
++	db.Exec(q)
+ 	return nil
+ }
+--- a/signup_test.go
++++ b/signup_test.go
+@@ -2,7 +2,7 @@
+ 
+ import "testing"
+ 
+-func TestValidUsername(t *testing.T) {
++func TestIsValidUsername(t *testing.T) {
+ 	tests := []struct {
+ 		name string
+ 		in   string
+@@ -21,8 +21,8 @@
+ 	}
+ 	for _, tt := range tests {
+ 		t.Run(tt.name, func(t *testing.T) {
+-			if got := ValidUsername(tt.in); got != tt.want {
+-				t.Errorf("ValidUsername(%q) = %v, want %v", tt.in, got, tt.want)
++			if got := IsValidUsername(tt.in); got != tt.want {
++				t.Errorf("IsValidUsername(%q) = %v, want %v", tt.in, got, tt.want)
+ 			}
+ 		})
+ 	}

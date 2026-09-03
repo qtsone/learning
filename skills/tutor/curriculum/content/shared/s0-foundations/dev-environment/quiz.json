@@ -1,0 +1,78 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "verify-install",
+      "difficulty": "core",
+      "prompt": "You just installed the Go toolchain. How do you prove the installation actually worked, and why do we check in a new terminal rather than trusting the installer?",
+      "expected_points": [
+        "run go version and read the version line",
+        "installers change startup configuration that open terminals never re-read",
+        "a version line proves the tool is both installed and reachable via PATH"
+      ]
+    },
+    {
+      "id": "env-vars",
+      "difficulty": "core",
+      "prompt": "What is an environment variable? Walk me through creating one that is still there after you close the terminal and open a new one.",
+      "expected_points": [
+        "a named text value the shell hands to every program it starts",
+        "export NAME=value sets it for the current session only",
+        "persistence means putting the export line in the shell profile (~/.zshrc or ~/.bashrc)",
+        "verify in a new terminal with echo \"$NAME\""
+      ]
+    },
+    {
+      "id": "path-fix",
+      "difficulty": "core",
+      "prompt": "A friend installs a tool, but typing its name gives 'command not found'. What is most likely going on, and how do you fix it?",
+      "expected_points": [
+        "the shell searches only the directories listed in PATH, in order",
+        "the tool's directory is probably not on PATH, not missing from disk",
+        "diagnose with command -v and by printing PATH",
+        "fix by appending the directory to PATH in the shell profile, then opening a new terminal"
+      ]
+    },
+    {
+      "id": "project-hygiene",
+      "difficulty": "core",
+      "prompt": "You are starting a brand-new project. Which folders and files do you create before writing any real code, and why git init on day one?",
+      "expected_points": [
+        "one subdirectory per project inside a single projects home",
+        "README.md describing the project and .gitignore for build outputs",
+        "for Go, go mod init creating go.mod",
+        "git init immediately so every experiment is recorded and undoable"
+      ]
+    },
+    {
+      "id": "smoke-test",
+      "difficulty": "core",
+      "prompt": "The exercise ended with building and running a tiny program you don't fully understand yet. What did that step prove, and why is it worth doing before learning the language?",
+      "expected_points": [
+        "it exercises the whole chain end to end: editor, toolchain, build, run, git",
+        "if the smallest program works, future failures are in the code, not the setup",
+        "understanding the program text was not the point — that comes next stage"
+      ]
+    },
+    {
+      "id": "two-bin-dirs",
+      "difficulty": "stretch",
+      "prompt": "go version already works, so why did check.sh also demand that $(go env GOPATH)/bin be on PATH?",
+      "expected_points": [
+        "the go command and go-installed tools live in different directories",
+        "tools like gopls are installed into GOPATH/bin, which is often not on PATH by default",
+        "without it the language works but editor tooling mysteriously fails"
+      ]
+    },
+    {
+      "id": "profile-debugging",
+      "difficulty": "stretch",
+      "prompt": "You add an export line to ~/.zshrc, but echo still prints nothing. Name two different causes and how you'd tell them apart.",
+      "expected_points": [
+        "still in the old terminal — the profile is only read at startup, so open a new one",
+        "wrong profile for the shell in use — check echo $SHELL",
+        "a typo in the line itself — re-read the file, or watch for errors when a new terminal opens"
+      ]
+    }
+  ]
+}

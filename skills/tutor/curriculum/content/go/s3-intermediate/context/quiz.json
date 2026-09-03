@@ -1,0 +1,80 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "cancellation-propagation",
+      "difficulty": "core",
+      "prompt": "You call cancel() on a context and a worker goroutine three function calls away stops. Explain the mechanism end to end — what actually travels from cancel() to that goroutine?",
+      "expected_points": [
+        "cancel closes the context's Done channel, and the Done of every context derived from it",
+        "a closed channel unblocks every receiver — close is a one-to-many broadcast",
+        "the worker only stops because it selects on ctx.Done(); cancellation is cooperative, nothing kills goroutines",
+        "the worker returns ctx.Err() so callers learn why it stopped"
+      ]
+    },
+    {
+      "id": "timeout-vs-deadline",
+      "difficulty": "core",
+      "prompt": "When would you reach for WithDeadline instead of WithTimeout? And why does every With* call come with a defer cancel() on the next line, even when the operation succeeds?",
+      "expected_points": [
+        "WithTimeout is WithDeadline sugar: relative budget vs absolute instant",
+        "an absolute deadline propagates intact across hops; re-deriving a relative timeout at each hop silently extends the budget",
+        "cancel releases the deadline timer and unlinks the context from its parent's tree",
+        "goroutines blocked on that Done stay blocked until cancel; deferring covers every return path, and calling it after success is the point, not an error"
+      ]
+    },
+    {
+      "id": "first-param-not-struct",
+      "difficulty": "core",
+      "prompt": "Why does every context-aware function take ctx as its first parameter instead of the containing struct holding one context for all its methods?",
+      "expected_points": [
+        "a context's lifetime is one call tree; a struct's lifetime spans many calls or requests",
+        "a stored context couples unrelated requests — one caller's cancellation kills the others",
+        "explicit passing keeps cancellation flow visible at every call site",
+        "convention: first parameter, named ctx; pass context.Background() rather than nil"
+      ]
+    },
+    {
+      "id": "values-discipline",
+      "difficulty": "core",
+      "prompt": "A teammate passes the database handle to lower layers via context.WithValue \"to keep signatures clean\". What do you tell them — what does Value exist for, and how do you decide what belongs there?",
+      "expected_points": [
+        "Value carries request-scoped metadata riding alongside the call: request ID, trace span, authenticated user",
+        "the test: the function must still do its job if the value is absent — metadata yes, dependencies and parameters no",
+        "dependencies through Value are invisible and untyped: the compiler can't check them",
+        "keys should be unexported types with typed accessors so other packages cannot collide"
+      ]
+    },
+    {
+      "id": "canceled-vs-deadline",
+      "difficulty": "core",
+      "prompt": "A call into a slow service returns an error. How do you tell whether the budget ran out or someone gave up on purpose, and why should your code react differently to each?",
+      "expected_points": [
+        "ctx.Err() is one of two sentinels: context.DeadlineExceeded (clock ran out) vs context.Canceled (deliberate cancel)",
+        "compare with errors.Is, never ==, because layers wrap errors with %w",
+        "deadline exceeded is transient — retrying with a fresh budget can work",
+        "canceled is a decision — retrying wastes work or duplicates side effects"
+      ]
+    },
+    {
+      "id": "send-side-cancellation",
+      "difficulty": "stretch",
+      "prompt": "A worker selects on ctx.Done() while receiving jobs, then sends each result with a plain results <- r. Its consumer gets canceled and stops reading. What happens to the worker, and why does no test without a timeout ever catch it?",
+      "expected_points": [
+        "the unguarded send blocks forever once nobody drains results — a goroutine leak",
+        "cancellation must guard every blocking operation, sends included, via a second select",
+        "the race detector stays silent: nothing races, the goroutine just never ends"
+      ]
+    },
+    {
+      "id": "nil-done",
+      "difficulty": "stretch",
+      "prompt": "context.Background().Done() returns a nil channel. Why does a select with a case <-ctx.Done() still behave correctly when handed Background?",
+      "expected_points": [
+        "receiving from a nil channel blocks forever",
+        "in a select, that case simply never becomes ready, so the other cases proceed",
+        "Background is never canceled, so 'never ready' is exactly the right semantics"
+      ]
+    }
+  ]
+}

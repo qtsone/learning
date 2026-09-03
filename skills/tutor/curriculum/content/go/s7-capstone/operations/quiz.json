@@ -1,0 +1,89 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words, answered about their own project with concrete commands, files and numbers; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "ci-gates",
+      "difficulty": "core",
+      "prompt": "Which gates does your pipeline run, when does it run them, and what actually stops a red branch from being merged?",
+      "expected_points": [
+        "build, test with -race, vet, and govulncheck — each one named with what it catches",
+        "triggers on push and on proposed merges, so the check runs before the merge rather than after it",
+        "blocking is a repository setting (required status checks on the protected branch), not a line in the workflow file",
+        "a flaky gate teaches everyone to press re-run, so red must always mean broken",
+        "the pipeline runs on a clean machine, which is what proves nothing depends on their laptop"
+      ]
+    },
+    {
+      "id": "ship-and-rollback",
+      "difficulty": "core",
+      "prompt": "Walk me through deploying a new version of your project, and then rolling it back. What in your Dockerfile makes the artifact trustworthy?",
+      "expected_points": [
+        "the steps are in a file (script, Makefile target, manifests) and were run as written, not from memory",
+        "immutable versioned artifact: build once, tag it, promote that image; never rebuild the same tag",
+        "multi-stage build with a pinned base tag or digest and a non-root USER in the final stage — latest means the image debugged is not the image shipped",
+        "rollback is one rehearsed command, run before the incident is understood, with a known duration",
+        "an honest list of what rollback cannot undo (migrations, consumed messages, published releases) and what the forward fix is instead"
+      ]
+    },
+    {
+      "id": "telemetry-drill",
+      "difficulty": "core",
+      "prompt": "Your project is misbehaving and you cannot read the code or attach a debugger. Using only telemetry, how do you establish whether it is healthy, how badly it is failing, and since when?",
+      "expected_points": [
+        "metrics say something is wrong, traces say where, logs say what",
+        "structured logs with fixed keys so lines can be counted and filtered, not just read",
+        "counters over a metrics surface (expvar or a client library) covering rate, errors and duration",
+        "'since when' comes from a series over time, which is why a log-only answer is incomplete",
+        "any question they could only answer by reading source is a gap in instrumentation, not a gap in luck"
+      ]
+    },
+    {
+      "id": "lifecycle",
+      "difficulty": "core",
+      "prompt": "Your process gets SIGTERM one second into a five-second request during a rollout. What happens, in order? And what is the difference between your health and readiness endpoints?",
+      "expected_points": [
+        "catch the signal (signal.NotifyContext with os.Interrupt and SIGTERM) — a rollout, scale-down or restart always begins with SIGTERM",
+        "fail readiness first so the load balancer stops routing new work, then drain",
+        "srv.Shutdown(ctx) with a bounded timeout lets in-flight requests finish; then close what you own and exit with a meaningful code",
+        "liveness means 'restart me' and stays dumb; readiness means 'stop sending me work' without a restart",
+        "the shutdown timeout must be shorter than the platform's termination grace period or SIGKILL lands mid-drain"
+      ]
+    },
+    {
+      "id": "runbook",
+      "difficulty": "core",
+      "prompt": "I am on call at 3am, you are unreachable, and your service is down. Open your runbook: what does it tell me to do, and how do you know it is true?",
+      "expected_points": [
+        "deploy, rollback, what to check when it is down, and who to page — with literal commands, not prose",
+        "the triage section is ordered cheapest and most likely first, and says how to read each answer",
+        "two failure modes specific to this system: symptom, the check that confirms it, cause, action",
+        "it is true because they followed it themselves during the rollback and telemetry rehearsals and fixed every improvisation",
+        "'me, and nobody else' is an acceptable paging answer only with what happens when they are unreachable"
+      ]
+    },
+    {
+      "id": "config-surface",
+      "difficulty": "stretch",
+      "prompt": "Someone deploys your project with a typo in one environment variable. What happens, and how did they know the variable existed?",
+      "expected_points": [
+        "configuration is validated at startup and the process fails loudly, so the rollout fails while the old version still serves",
+        "a silently substituted default turns a typo into an outage that starts hours later",
+        "defaults that run: the program starts with no configuration at all",
+        "every knob is documented with name, meaning, default and whether it is a secret; the referee cross-checks os.Getenv against the docs",
+        "secrets arrive the same way and then never appear in logs, errors, metric labels or crash dumps"
+      ]
+    },
+    {
+      "id": "operational-blast-radius",
+      "difficulty": "stretch",
+      "prompt": "Name two operational choices in your project that limit blast radius, and one that could still take something down beyond your service.",
+      "expected_points": [
+        "non-root, minimal runtime image: a container escape does not start as root and has no shell or package manager to use",
+        "readiness separate from liveness: a slow dependency drains traffic instead of restarting the whole fleet",
+        "a metric label with unbounded values (user id, path, error text) can take down the metrics backend — S5's cardinality bomb",
+        "a liveness probe that checks a dependency turns one dependency blip into a fleet-wide restart",
+        "awareness that some failures are external to the process and are handled by rollback plus a runbook, not by code"
+      ]
+    }
+  ]
+}

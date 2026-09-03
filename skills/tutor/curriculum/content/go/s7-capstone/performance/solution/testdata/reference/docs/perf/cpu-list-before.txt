@@ -1,0 +1,20 @@
+$ go test -bench='BenchmarkListByTag/n=10000' -run='^$' -benchtime=6s \
+      -cpuprofile=cpu.out ./internal/store
+$ go tool pprof -list='Memory..List$' cpu.out
+
+Total: 14.99s
+ROUTINE ======================== tutor.local/capstone-reference/internal/store.(*Memory).List in internal/store/memory.go
+     150ms      940ms (flat, cum)  6.27% of Total
+         .          .     78:func (m *Memory) List(tag string) []note.Note {
+         .          .     79:	m.mu.RLock()
+         .          .     80:	defer m.mu.RUnlock()
+         .       70ms     81:	out := make([]note.Note, 0, len(m.order))
+         .          .     82:	for _, id := range m.order {
+      70ms      480ms     83:		n := m.byID[id]
+      70ms      380ms     84:		if tag == "" || n.HasTag(tag) {
+      10ms       10ms     85:			out = append(out, n)
+         .          .     86:		}
+         .          .     87:	}
+         .          .     88:	return out
+         .          .     89:}
+         .          .     90:

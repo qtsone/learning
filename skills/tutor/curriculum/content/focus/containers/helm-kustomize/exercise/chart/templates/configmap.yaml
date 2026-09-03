@@ -1,0 +1,8 @@
+# TODO: the whole file.
+#
+# Render the ConfigMap timesvc reads its environment from: PORT, LOG_LEVEL and
+# SHUTDOWN_TIMEOUT, all three from .Values.config, under a name built from the
+# same helper the Deployment's envFrom uses. Give it the standard labels.
+#
+# Quote the values. ConfigMap data is a map of strings, and an unquoted 8080 is
+# an integer as far as the API server is concerned.

@@ -1,0 +1,87 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "tcp-vs-udp",
+      "difficulty": "core",
+      "prompt": "Walk me through what TCP does for you that IP does not — handshake, flow control, in-order delivery — and then pick the transport for two workloads: a live voice call and a payments API. Justify both.",
+      "expected_points": [
+        "three-way handshake (SYN, SYN-ACK, ACK) costs a full round trip before any data, which is why connections are pooled and reused",
+        "flow control protects the receiver via the advertised window; congestion control protects the network by backing off on loss",
+        "in-order delivery causes head-of-line blocking: one lost segment stalls everything behind it, including logically independent streams",
+        "voice call: UDP — a retransmitted sample arrives too late to play, so stalling is worse than dropping",
+        "payments API: TCP — every byte must arrive, and the handshake cost is amortized over a kept-alive connection",
+        "choosing UDP means owning ordering, loss recovery and congestion control yourself"
+      ]
+    },
+    {
+      "id": "tls-guarantees",
+      "difficulty": "core",
+      "prompt": "What three things does TLS give you, and which one does a machine-in-the-middle exploit when it is missing? Sketch the TLS 1.3 handshake and say where certificate verification happens.",
+      "expected_points": [
+        "confidentiality, integrity, authenticity — losing any one voids the value of the others",
+        "authenticity is the one dropped by accident; an encrypted connection to an unverified peer is encrypted to the attacker, who terminates TLS and re-encrypts onward",
+        "handshake: ClientHello with versions/ciphers/SNI and a key share, ServerHello with its key share plus certificate and signature, then client verification and Finished on both sides — one round trip",
+        "verification checks the signature chain up to a trusted root, that the certificate covers the name the client intended (ServerName), and the validity window",
+        "ephemeral key shares give forward secrecy: recorded traffic is not decrypted by a later key compromise"
+      ]
+    },
+    {
+      "id": "http-versions",
+      "difficulty": "core",
+      "prompt": "HTTP/1.1, HTTP/2, HTTP/3: what problem does each generation fix, and where does head-of-line blocking live in each? Then pick one for a public mobile-facing API and one for service-to-service traffic inside a datacenter.",
+      "expected_points": [
+        "HTTP/1.1: one request at a time per connection, so browsers open ~6 connections and pay 6 handshakes; blocking is at the application level",
+        "HTTP/2: many streams multiplexed over one TCP connection as binary length-prefixed frames plus header compression; application-level blocking is gone but all streams share one TCP byte stream, so a lost segment stalls every stream",
+        "HTTP/3: same stream model over QUIC (UDP, userspace), streams are independent in the transport so loss stalls only its own stream; TLS 1.3 built in and connection IDs survive a network change",
+        "public mobile: HTTP/3 — lossy last mile, long RTTs, network hopping; usually enabled at the CDN or load balancer rather than in application code",
+        "inside the datacenter: HTTP/2 — loss is rare, RTT is sub-millisecond, and it is gRPC's mandatory transport"
+      ]
+    },
+    {
+      "id": "load-balancing",
+      "difficulty": "core",
+      "prompt": "Compare L4 and L7 load balancing, then explain this: a gRPC fleet behind an L4 balancer has one backend at 90% CPU and five nearly idle. What is happening, and what would you change?",
+      "expected_points": [
+        "L4 balances connections using IP/port only — cheap, protocol-agnostic, can pass TLS through untouched, but blind to requests",
+        "L7 terminates TLS and parses HTTP — path routing, per-request retries, canaries — at the cost of CPU per request, certificate management at the balancer, and being inside the trust boundary",
+        "gRPC uses long-lived HTTP/2 connections; an L4 balancer pins each connection to one backend, so all of a chatty client's multiplexed calls land on the same replica",
+        "fix: an L7 balancer that spreads individual requests, or client-side balancing with connections to every backend",
+        "real deployments layer them: L4 at the edge fanning into an L7 tier, health checks ejecting dead backends at both layers"
+      ]
+    },
+    {
+      "id": "framing",
+      "difficulty": "core",
+      "prompt": "In your exercise, why does a length prefix exist at all, and why must ReadFrame check the claimed length before allocating? Also: your code returns io.EOF in one case and io.ErrUnexpectedEOF in another — what does each tell an operator?",
+      "expected_points": [
+        "TCP is a byte stream: it preserves order but not write boundaries, so any protocol on top must define its own framing (length prefix or delimiter)",
+        "the length field is attacker-controlled input; allocating before checking it against MaxFrameSize is a memory-exhaustion bug",
+        "io.EOF between frames means the peer hung up cleanly — normal, not an error worth alerting on",
+        "io.ErrUnexpectedEOF inside a frame means truncation: a crash, a killed connection, or a broken peer",
+        "a short Read is normal, not an error — io.ReadFull loops until it has exactly N bytes"
+      ]
+    },
+    {
+      "id": "insecure-skip-verify",
+      "difficulty": "stretch",
+      "prompt": "A teammate fixes a failing deploy with InsecureSkipVerify: true and points out the traffic is still encrypted. What exactly did they turn off, and what would you do instead?",
+      "expected_points": [
+        "it disables chain verification and the hostname check — the encryption remains, but to an unauthenticated peer",
+        "a machine-in-the-middle now succeeds silently; encryption without authentication is encryption to the attacker",
+        "real fixes: add the internal CA to RootCAs, set ServerName to the name the certificate carries, or reissue the certificate with the right name; fix expiry rather than skip it"
+      ]
+    },
+    {
+      "id": "handshake-cost",
+      "difficulty": "stretch",
+      "prompt": "A user in Sydney hits your Frankfurt servers, roughly 250 ms round trip. Estimate the time before the first byte of your HTML can move on a brand-new HTTPS connection, and name two ways to reduce it.",
+      "expected_points": [
+        "TCP handshake ~1 RTT plus TLS 1.3 ~1 RTT, so roughly 2 RTTs ≈ 500 ms before the request is even sent, then another RTT for the response",
+        "connection reuse and pooling amortize the handshakes across many requests",
+        "terminate closer to the user at a CDN or edge PoP so the handshake RTT is small; HTTP/3 folds transport and crypto setup into one round trip and offers 0-RTT on resumption, with replay risk to name",
+        "shows the estimation habit: states the assumption (RTT) and multiplies rather than guessing"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tinysvc
+  labels:
+    app: tinysvc
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tinysvc
+  template:
+    metadata:
+      labels:
+        app: tinysvc
+    spec:
+      # The image is replaced by deploy.sh with an exact version tag.
+      containers:
+        - name: tinysvc
+          image: registry.example.internal/tinysvc:v0.1.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: TINYSVC_ADDR
+              value: ":8080"
+            - name: TINYSVC_LOG_LEVEL
+              value: "info"
+            - name: TINYSVC_SHUTDOWN_TIMEOUT
+              value: "15s"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8080
+            periodSeconds: 2
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+      # Longer than TINYSVC_SHUTDOWN_TIMEOUT, so the process finishes draining
+      # before the platform sends SIGKILL.
+      terminationGracePeriodSeconds: 30

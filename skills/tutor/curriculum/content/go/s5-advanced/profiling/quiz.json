@@ -1,0 +1,91 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words, citing their own NOTES.md numbers wherever the question asks for evidence; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "the-loop",
+      "difficulty": "core",
+      "prompt": "Describe the optimization loop you followed, step by step. Why is optimizing without a profile called malpractice rather than just wasteful?",
+      "expected_points": [
+        "measure a baseline, hypothesize (written down before editing), make the smallest change, re-measure with the same benchmark",
+        "no measured improvement means revert — the complexity is not paid for",
+        "correctness tests must still pass; an optimization that changes behavior is a bug",
+        "intuition about where time goes is reliably wrong, so guessing pays real costs (readability, risk, time) for unverified benefit",
+        "the profile turns 'I think the loop is slow' into 'this line is 84% of samples'"
+      ]
+    },
+    {
+      "id": "benchmark-craft",
+      "difficulty": "core",
+      "prompt": "What makes a benchmark meaningful rather than a random number? Cover b.N, b.ReportAllocs, the sink variable, sub-benchmarks, and why you ran benchstat instead of reading one run.",
+      "expected_points": [
+        "the framework grows b.N until the run is long enough for a stable ns/op, so the loop body must do identical work every iteration; b.ResetTimer keeps setup out of the measurement",
+        "b.ReportAllocs adds allocs/op and B/op — the GC-pressure currency, often a better production predictor than ns/op",
+        "assigning the result to a package-level sink stops dead-code elimination from deleting the work being measured",
+        "b.Run sweeps input sizes: watching ns/op as n grows 10x exposes super-linear behavior (their Render sweep grows ~200x for 20x input)",
+        "single runs move 5-20% with machine noise, so -count=10 plus benchstat; p=0.000 means the difference is real, '~' means no measured change",
+        "benchmarks and profiles run WITHOUT -race, which distorts every number 2-20x"
+      ]
+    },
+    {
+      "id": "profile-reading",
+      "difficulty": "core",
+      "prompt": "Walk me through reading your CPU profile: what do flat and cum mean, what does each combination tell you to do, and what did -list and the flame graph add that -top could not?",
+      "expected_points": [
+        "flat = time in the function's own code; cum = the function plus everything it called",
+        "high flat means fix it here; high cum with low flat means the cost is downstream, follow the call",
+        "runtime.mallocgc / growslice / GC workers near the top means 'you allocate too much — go read the heap profile'",
+        "-list annotates the function's source line by line, turning the theory into a per-line number",
+        "flame graph: width = share of samples, stacking = call depth; read widths to tell 'one callee dominates' from 'death by a thousand cuts'",
+        "the CPU profiler samples ~100 times/second, so costs are statistical and a short run is mostly noise"
+      ]
+    },
+    {
+      "id": "the-fix",
+      "difficulty": "core",
+      "prompt": "For each of TopUsers and Render: what did the profile blame, what did you change, and what did the measurement do? Why do the graded tests assert allocation counts instead of elapsed time?",
+      "expected_points": [
+        "TopUsers: strings.ToLower ran once per comparison inside the linear scan — O(entries x users) calls, each allocating an escaping string; a map index plus lowering once per entry took ~508,000 allocations to ~10,000",
+        "Render: += builds a new, longer string per line (O(n) allocations, O(n^2) bytes copied — ~81 MB for 98 KB of output) and fmt.Sprintf boxes every argument; a sized strings.Builder plus strconv.AppendInt into a reused buffer took it to one allocation",
+        "cites their own benchstat rows with p-values, not just the lesson's numbers",
+        "allocation counts are deterministic under the race detector's 2-20x slowdown and under machine noise, so they are a fair automated gate",
+        "an allocation count also points at a specific mistake, whereas a slower number only says 'something is wrong'"
+      ]
+    },
+    {
+      "id": "pprof-endpoints",
+      "difficulty": "core",
+      "prompt": "You mounted net/http/pprof in NewDebugMux. What does each profile type (cpu, heap, goroutine, block, mutex) answer, and how should these endpoints be exposed in production?",
+      "expected_points": [
+        "profile = CPU: where the CPU goes, sampled for ?seconds=N",
+        "heap: who allocates (alloc_space/alloc_objects) or who holds memory right now (inuse_space)",
+        "goroutine: every goroutine's stack — the deadlock and goroutine-leak tool",
+        "block: where goroutines wait on channels/locks, off until runtime.SetBlockProfileRate; mutex: who holds contended locks, off until runtime.SetMutexProfileFraction",
+        "pprof.Index owns the /debug/pprof/ subtree and serves the named runtime profiles; cmdline, profile, symbol and trace are separate exact patterns that win over the subtree under the 1.22 mux rules",
+        "serve them on a private/internal port, never the public mux — a heap dump is an information disclosure; but leave them enabled, the profile captured during the incident is worth ten postmortems"
+      ]
+    },
+    {
+      "id": "heap-sample-index",
+      "difficulty": "stretch",
+      "prompt": "Memory in a running service climbs steadily over hours. Which profile and which sample index do you reach for, and how would that differ from diagnosing GC pressure?",
+      "expected_points": [
+        "a leak/retention question is inuse_space (or inuse_objects): who is holding memory right now",
+        "GC pressure is alloc_space/alloc_objects: who is generating garbage, even if it dies immediately",
+        "picking the wrong index is the classic heap-profile mistake — this exercise's garbage is already collected, so inuse_space shows almost nothing",
+        "connects back to the GC lesson: allocation rate drives pacing, live set drives mark cost",
+        "compare two heap profiles over time, and check goroutine count too — a goroutine leak is also a memory leak"
+      ]
+    },
+    {
+      "id": "when-not-to",
+      "difficulty": "stretch",
+      "prompt": "The append-style Render is faster but longer and fussier than the fmt.Sprintf version. When would you reject that rewrite in review, and what would you need to see to approve it?",
+      "expected_points": [
+        "off the hot path, fmt.Sprintf / fmt.Fprintf is good Go — readability wins by default",
+        "approve it when a profile names the line and a benchstat comparison shows a significant win on a workload that matters",
+        "the cost side is real: more code, more places to get formatting wrong, so correctness tests (byte-identical output) are part of the price",
+        "the general rule: reach for append-style, pooling or preallocation because the measurement said so, never as a default style"
+      ]
+    }
+  ]
+}

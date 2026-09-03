@@ -1,0 +1,73 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "reference-layout",
+      "difficulty": "core",
+      "prompt": "Go layouts look like `2006-01-02 15:04` instead of `%Y-%m-%d %H:%M`. What is that string, why that exact date, and what goes wrong if you write `2007-01-02` instead?",
+      "expected_points": [
+        "the layout is an example: the reference time Mon Jan 2 15:04:05 MST 2006 formatted the way you want output",
+        "the components count 1-7 in US order (month 1, day 2, 3pm, minute 4, second 5, 2006, UTC-7) so it is memorable and unambiguous",
+        "any other date is not recognized as the reference, so parsing/formatting silently misbehaves — prefer named constants like time.RFC3339 or time.DateOnly"
+      ]
+    },
+    {
+      "id": "wall-vs-monotonic",
+      "difficulty": "core",
+      "prompt": "time.Now() secretly records two clocks. What are they, why does measuring elapsed time need the second one, and which operations strip it?",
+      "expected_points": [
+        "wall clock says what time it is but can jump (NTP, DST); monotonic only moves forward and is process-local",
+        "Sub/Since use the monotonic readings when both times carry one, so elapsed measurement survives clock adjustments",
+        "formatting, marshaling, In/UTC, and Round(0) strip the monotonic reading; parsed or constructed times never have one — so measure with two time.Now() calls in the same process"
+      ]
+    },
+    {
+      "id": "timer-ticker-after",
+      "difficulty": "core",
+      "prompt": "You need (a) a one-shot timeout you might cancel, (b) work every 30 seconds, (c) a quick one-off wait. Which of Timer, Ticker, time.After fits each, and what is the pitfall of time.After in a loop?",
+      "expected_points": [
+        "cancellable/resettable one-shot: NewTimer with Stop/Reset; periodic: NewTicker with defer Stop; throwaway single wait: time.After",
+        "time.After allocates an unstoppable timer each call; before Go 1.23 abandoned ones lived until they fired, leaking in loops",
+        "Go 1.23 made abandoned timers collectable, but a loop should still own one Ticker or one Reset Timer instead of allocating per iteration"
+      ]
+    },
+    {
+      "id": "equal-vs-eq",
+      "difficulty": "core",
+      "prompt": "In the exercise, `noon == noon.In(someZone)` was false but SameInstant had to say true. What does == compare on time.Time, and what arithmetic do Add/Sub give you instead?",
+      "expected_points": [
+        "== compares struct fields: wall reading, Location, and monotonic reading — same instant in another zone or after a monotonic strip compares unequal",
+        "Equal/Before/After compare only the instant, so they are the correct comparisons (and time.Time makes a bad map key)",
+        "Time+Duration=Time (Add), Time-Time=Duration (Sub), and durations divide/multiply as integers — e.g. end.Sub(start)/2 for a midpoint"
+      ]
+    },
+    {
+      "id": "zones-parsing",
+      "difficulty": "core",
+      "prompt": "The same string \"2026-03-14 09:30\" became a different instant depending on the zone in the exercise. How do Location and ParseInLocation shape parsing and formatting, and what does time.Parse assume when the layout has no zone?",
+      "expected_points": [
+        "a Location is the display lens; In/UTC change representation, never the instant",
+        "time.Parse with a zoneless layout assumes UTC, not local time — ParseInLocation states which zone the naive string was written in",
+        "store and compute in UTC, convert at the edges; LoadLocation needs the IANA database (system tzdata, or embed time/tzdata)"
+      ]
+    },
+    {
+      "id": "dst-tomorrow",
+      "difficulty": "stretch",
+      "prompt": "A daily 09:00 reminder implemented as t.Add(24 * time.Hour) drifts by an hour twice a year. Why, and what is the fix?",
+      "expected_points": [
+        "Add moves by physical duration; across a DST transition the day is 23 or 25 wall-clock hours long, so 24h lands at 08:00 or 10:00",
+        "calendar arithmetic — AddDate(0, 0, 1) in the user's Location — keeps the wall-clock hour"
+      ]
+    },
+    {
+      "id": "marshal-monotonic",
+      "difficulty": "stretch",
+      "prompt": "A start timestamp goes through JSON (remember last lesson) and later code computes time.Since on the unmarshaled value. What changed in transit, and does Since still work?",
+      "expected_points": [
+        "marshaling keeps only the wall reading — the monotonic part is dropped, as it is meaningless outside the process",
+        "Since still returns an answer but falls back to wall-clock subtraction, so it is exposed to clock adjustments — keep the original time.Now() value in-process for measurement"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "blocking-semantics",
+      "difficulty": "core",
+      "prompt": "You have `ch := make(chan int)` and `buf := make(chan int, 2)`. For each one: when does a send block, and when does a receive block?",
+      "expected_points": [
+        "unbuffered: send blocks until a receiver is ready and receive blocks until a sender is ready — a rendezvous that synchronizes both goroutines",
+        "buffered: send blocks only while the buffer is full, receive only while it is empty — two sends on buf succeed with no receiver, the third blocks",
+        "an unbuffered send returning proves the receiver has the value; a buffered send only proves it entered the queue"
+      ]
+    },
+    {
+      "id": "closing-rules",
+      "difficulty": "core",
+      "prompt": "Who is allowed to close a channel, and what happens on a receive from a closed channel versus a send to one?",
+      "expected_points": [
+        "only the sender closes — a receiver closing would make the sender's next send panic",
+        "receive from a closed channel never blocks: buffered leftovers first, then zero values, with comma-ok reporting false once drained",
+        "send to a closed channel panics, as does closing twice",
+        "closing is an optional broadcast signal, not cleanup — unclosed channels are garbage collected fine"
+      ]
+    },
+    {
+      "id": "pipeline-termination",
+      "difficulty": "core",
+      "prompt": "In your pipeline each stage runs `defer close(out)` in its goroutine. What breaks, and how loudly, if one stage forgets it?",
+      "expected_points": [
+        "the downstream range never terminates, so every stage after the gap blocks forever — a goroutine leak",
+        "termination normally cascades: source closes, next stage's range ends, its defer closes, and so on to the sink",
+        "the runtime deadlock detector only fires when ALL goroutines are stuck, so in a real program the leak is silent — which is why the exercise tests guard waits with timeouts"
+      ]
+    },
+    {
+      "id": "select-multiplexing",
+      "difficulty": "core",
+      "prompt": "What does select do when several cases are ready at once? What does adding a default case change? And how did Counter use select to become stoppable?",
+      "expected_points": [
+        "several ready cases: select picks one uniformly at random — never top-to-bottom priority",
+        "default runs immediately when no case is ready, making the select non-blocking — that is TryRecv",
+        "Counter selects between sending the next number and receiving from done; close(done) makes that case ready forever, so the goroutine returns and closes its output",
+        "close as broadcast: one close releases every goroutine selecting on done"
+      ]
+    },
+    {
+      "id": "nil-channels",
+      "difficulty": "core",
+      "prompt": "In MergeTwo, why set an exhausted input channel to nil instead of just leaving it in the select?",
+      "expected_points": [
+        "a closed channel is always ready, yielding zero values — left in place, the select spins on it or forwards garbage",
+        "a nil channel is never ready, so its case goes dormant and the select waits on the remaining input alone",
+        "outside select, any send or receive on a nil channel blocks forever — a hang, not an error",
+        "the loop exits and closes the output once both inputs are nil"
+      ]
+    },
+    {
+      "id": "ownership-handoff",
+      "difficulty": "stretch",
+      "prompt": "You send a pointer to a struct through a channel and the receiving goroutine mutates the struct. Is that a data race? What is the rule?",
+      "expected_points": [
+        "not a race if the sender stops using the value after sending — a channel send happens-before the corresponding receive completes",
+        "the idiom is ownership transfer: communicate the value instead of sharing it",
+        "if the sender keeps mutating after the send, it IS a race, and go test -race will flag it"
+      ]
+    }
+  ]
+}

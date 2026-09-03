@@ -1,0 +1,84 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words, answered about their own design rather than in generalities; stretch questions inform the grade, not the gate. Skip any question the review conversation already covered convincingly.",
+  "questions": [
+    {
+      "id": "design-tour",
+      "difficulty": "core",
+      "prompt": "Give me the tour of your design in three minutes: the must-have requirements, the dominant axis your estimates found (with the arithmetic), and the three boxes that matter.",
+      "expected_points": [
+        "functional must-haves stated as capabilities, with the non-goals they deliberately excluded",
+        "at least two non-functional requirements as numbers, not adjectives",
+        "the dominant axis named with the specific line of arithmetic that proves it, including any axis that turned out to be unimpressive",
+        "each of the three boxes tied to the requirement that pays for it"
+      ]
+    },
+    {
+      "id": "write-path",
+      "difficulty": "core",
+      "prompt": "Follow one write from the client's request to the moment you would swear the data is safe. Which API call carries it, where does it land in your data model, and what does a crash at each hop mean?",
+      "expected_points": [
+        "the API call with its request shape and what the client is told on success",
+        "the entity, its key, and the partitioning scheme it lands under",
+        "the durability boundary — the acknowledgement is sent after the durable write, not before",
+        "a crash story per hop, and what protects a client retry from causing a duplicate effect"
+      ]
+    },
+    {
+      "id": "rejected-alternative",
+      "difficulty": "core",
+      "prompt": "Take the component choice you are least sure about. What did you reject, what did rejecting it cost you, and what would flip the decision?",
+      "expected_points": [
+        "at least one real alternative, argued honestly rather than as a straw man",
+        "costs on both sides, including the cost of the option they chose",
+        "the pick tied to a requirement or estimate by ID",
+        "a concrete flip condition — a change in load, team, or requirement, not 'if it stopped working'"
+      ]
+    },
+    {
+      "id": "partial-outage",
+      "difficulty": "core",
+      "prompt": "The component with the widest blast radius in your diagram becomes unavailable for twenty minutes — and pick the version where it is slow rather than down. Walk me through it.",
+      "expected_points": [
+        "what users see, and what the system does automatically versus what an operator must do",
+        "blast radius stated concretely (which users, which shard, which region)",
+        "the detection signal and roughly how fast it fires",
+        "the degradation chosen in advance, and which non-negotiable breaks first if it lasts an hour",
+        "why slow is harder than down — capacity drains into waiting and nothing trips"
+      ]
+    },
+    {
+      "id": "ten-x",
+      "difficulty": "core",
+      "prompt": "Ten times the load arrives on the axis you consider realistic. What breaks first, what breaks second, and which fixes are config changes versus design changes versus rewrites?",
+      "expected_points": [
+        "the axis named and justified (users, activity per user, or concurrency on one key)",
+        "the estimates re-run, not guessed at",
+        "breakages ordered, each with the limit and the resource behind it",
+        "fixes classified, with the observation that only the first breakage is urgent",
+        "at least one breakage that adding nodes cannot fix — a hot key or a coordination cost"
+      ]
+    },
+    {
+      "id": "assumption-shift",
+      "difficulty": "core",
+      "prompt": "Name the assumption in your estimates that, if wrong by 10x, would change the architecture rather than just the sizing. Walk the chain: what moves, and what does it move to?",
+      "expected_points": [
+        "an assumption identified as load-bearing, with the factor at which it starts to matter",
+        "the chain propagated: estimate, then component, then decision, then failure story",
+        "an honest statement of what the design becomes instead",
+        "awareness that an input whose 10x change moves nothing was either inert or never connected to the design"
+      ]
+    },
+    {
+      "id": "version-one",
+      "difficulty": "stretch",
+      "prompt": "Four engineers, eight weeks, real users at the end. What ships, what is cut, and which cut is a one-way door?",
+      "expected_points": [
+        "a v1 that still exercises the hard axis rather than only the easy parts",
+        "cuts named with what they cost the user",
+        "a one-way door identified — a decision expensive to reverse — and how they keep the door open",
+        "the piece they would build first to retire the most risk"
+      ]
+    }
+  ]
+}

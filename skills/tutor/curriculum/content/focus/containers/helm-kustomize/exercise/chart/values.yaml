@@ -1,0 +1,31 @@
+# values.yaml is the chart's public API: the whole list of things an installer
+# is allowed to change without editing your templates. Every key here is a
+# promise you have to keep in the next chart version.
+#
+# Fill in the TODOs, then make templates/deployment.yaml and
+# templates/configmap.yaml read these instead of their hard-coded numbers.
+
+# TODO: replicaCount — how many pods, before any per-environment override.
+
+image:
+  repository: timesvc
+  # TODO: tag — the image tag this chart installs by default. A real tag, never
+  #       latest: a release you cannot name is a release you cannot roll back to.
+  # TODO: pullPolicy
+
+config:
+  # TODO: port, logLevel, shutdownTimeout (a Go duration such as 20s).
+  #       These three become the ConfigMap's PORT, LOG_LEVEL and
+  #       SHUTDOWN_TIMEOUT keys.
+
+# The two numbers the shutdown path spends, and the clock they spend it from.
+# Keep them here so an installer can raise them for a slow environment.
+terminationGracePeriodSeconds: 45
+preStopSleepSeconds: 10
+
+# TODO: goMemLimit — the Go runtime's soft memory ceiling, in Go's syntax
+#       (110MiB, not 110Mi), and below resources.limits.memory below.
+
+# TODO: resources — requests and limits, cpu and memory, exactly the shape the
+#       container's resources: block has. One key here, one toYaml in the
+#       template, and an installer can replace the whole block.

@@ -1,0 +1,83 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words, answered about their own project rather than in the abstract; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "scope-justification",
+      "difficulty": "core",
+      "prompt": "Justify your project's size to me. Why is it big enough to be worth 60 hours, and why do you believe you can finish it in the hours you actually have?",
+      "expected_points": [
+        "names the specific things that make it substantial: multiple packages, a real reason for concurrency, state that survives a restart, an interface with more than one implementation",
+        "names the hard part and why it is hard, rather than claiming difficulty in general",
+        "compares an hours estimate against hours actually available, pessimistically, and says what comes out if the estimate is wrong",
+        "acknowledges the pull between big enough, small enough, and interesting enough at hour 35"
+      ]
+    },
+    {
+      "id": "problem-and-non-goals",
+      "difficulty": "core",
+      "prompt": "State your problem without using a single technology noun. Then tell me the two non-goals you are least happy about, and why they are in the document.",
+      "expected_points": [
+        "problem names who hurts, what it costs them today, and what observable change means it worked",
+        "keeps the learning goal separate from the problem statement",
+        "non-goals are things a reasonable person would expect to be built, not filler",
+        "explains that non-goals are the part of the document that says no in advance, which is what makes cutting possible later"
+      ]
+    },
+    {
+      "id": "adr-threshold",
+      "difficulty": "core",
+      "prompt": "Of all the choices you made this week, why did these three get an ADR and the rest not? What does each record have to contain to be worth reading later?",
+      "expected_points": [
+        "reversibility test: a decision undoable in an afternoon does not need a record; one that would mean rewriting packages or migrating data on disk does",
+        "record carries context, at least two real alternatives with honest costs including the chosen one, the decision citing a requirement or non-goal, and consequences stated as the bill not the benefit",
+        "a flip condition they could actually observe",
+        "records are written while deciding and are immutable once accepted — you supersede, you do not edit"
+      ]
+    },
+    {
+      "id": "milestone-slicing",
+      "difficulty": "core",
+      "prompt": "Walk me through M0. Then tell me what makes it a milestone rather than a chunk of the codebase.",
+      "expected_points": [
+        "M0 is a walking skeleton: thinnest path touching entry point, core, and persisted output, with a test",
+        "vertical slices produce observable behavior; horizontal ones (\"the storage layer\") cannot be demoed or accepted",
+        "each milestone has two to four acceptance criteria written in advance and checkable by someone else",
+        "every milestone ends with the program runnable and build, vet and tests clean",
+        "ordering is by risk: the milestone that could invalidate the design comes early"
+      ]
+    },
+    {
+      "id": "cut-order",
+      "difficulty": "core",
+      "prompt": "You get half the hours you planned. What ships, what goes, and how did you decide the order?",
+      "expected_points": [
+        "names a specific first cut and what the project still does without it",
+        "the decision traces to the problem statement or a Must requirement, not to what is most fun",
+        "the remaining set is still a coherent, demonstrable tool",
+        "recognises that cut milestones move to a Cut section with a reason rather than being silently deleted"
+      ]
+    },
+    {
+      "id": "risk-triggers",
+      "difficulty": "stretch",
+      "prompt": "Take your most expensive risk. What would you see this week that tells you it is happening, and what experiment would settle it before it costs you?",
+      "expected_points": [
+        "a trigger they would genuinely notice, tied to a milestone or a date",
+        "a spike: timeboxed, throwaway, answering one question, scheduled before the milestone that assumes the answer",
+        "the timebox expiring without an answer is itself an answer and changes the plan",
+        "cost priced in hours, and at least one non-technical risk somewhere in the register"
+      ]
+    },
+    {
+      "id": "harness-location",
+      "difficulty": "stretch",
+      "prompt": "The next lesson's tests have to grade code that does not exist yet. Where does your project live, and how do those tests find it?",
+      "expected_points": [
+        "the project is a Go module at projects/capstone/ in the workspace, beside lessons/",
+        "resolution order: TUTOR_CAPSTONE_DIR, else capstone.path in that lesson's exercise dir, else the projects/capstone fallback the harness finds by walking up from its exercise dir",
+        "if nothing resolves to a directory with a go.mod, every harness test fails immediately and says how to fix it — a fresh scaffold failing that way is expected",
+        "verifying the path once (for example by listing the go.mod through it) is cheaper than debugging the failure later"
+      ]
+    }
+  ]
+}

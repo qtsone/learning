@@ -1,0 +1,3 @@
+module tutor.local/compose-app
+
+go 1.22

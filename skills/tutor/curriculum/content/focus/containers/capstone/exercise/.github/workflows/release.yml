@@ -1,0 +1,64 @@
+# The pipeline — a skeleton with the four jobs named and almost nothing in
+# them. Read the TODOs in order; each one is a decision, not a transcription.
+#
+# Keep it inside the YAML subset check.sh reads: spaces only (never a tab, not
+# even inside a run: block), two per level, a space after every colon and
+# after every "- ", no anchors or aliases.
+name: release
+
+# TODO 1: triggers. A merge to main should produce a release on its own, and
+#         during an incident you need to be able to start this by hand.
+on:
+  push:
+    branches: [main]
+
+# The token GitHub mints for this run starts read-only. Widen it in the job
+# that needs more, not here: a workflow-wide grant hands every step in every
+# job a token that can publish.
+permissions:
+  contents: read
+
+env:
+  IMAGE: ghcr.io/ada/timesvc
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Tests
+        run: go test ./...
+
+  build-push:
+    # TODO 2: this job publishes something the world can pull. Say which job
+    #         has to be green first, and grant it exactly the permissions a
+    #         push to GHCR needs — no more.
+    runs-on: ubuntu-latest
+    # TODO 3: publish the pushed image's digest as a job output, so the deploy
+    #         jobs can name the exact artifact instead of a tag that may have
+    #         moved since.
+    steps:
+      - uses: actions/checkout@v4
+      # TODO 4: log in to ghcr.io using the short-lived token this run already
+      #         has, not a registry password someone pasted into a secret.
+      # TODO 5: build and push. Tag the image with the commit SHA, and pass
+      #         that same SHA into the build so the binary can report it.
+
+  deploy-dev:
+    # TODO 6: needs the build. Get cluster credentials, point the dev overlay
+    #         at the artifact this run produced, apply it, and then *verify*:
+    #         a deploy that is not waited on is a hope, not a deploy.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+  deploy-prod:
+    # TODO 7: same again for prod, but it may only run after dev is green, and
+    #         it names a GitHub environment so a human can be asked first.
+    #         Include the step that runs when the rollout does not come up.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4

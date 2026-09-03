@@ -1,0 +1,75 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "sli-slo-budget",
+      "difficulty": "core",
+      "prompt": "Define SLI, SLO, and error budget in your own words — and tell me why 100% is the wrong availability target for almost any service.",
+      "expected_points": [
+        "SLI: a metric standing for user experience, canonically good events / valid events per user journey",
+        "SLO: a target for an SLI over a window, chosen from user need and measured baseline; the error budget is 1 minus the SLO — failure you are allowed",
+        "100% is imperceptible past the user's own network and each nine costs roughly 10x; a system that must never break can never change"
+      ]
+    },
+    {
+      "id": "budget-arithmetic",
+      "difficulty": "core",
+      "prompt": "A service holds a 99.9% availability SLO over 30 days at 1,000 requests/s. Work out the error budget in minutes and in requests — and what does the team do differently when the budget runs out?",
+      "expected_points": [
+        "0.1% of 43,200 minutes is about 43 minutes of full outage",
+        "about 2.6 billion requests per 30 days, so roughly 2.6 million allowed failures; partial outages spend it fractionally",
+        "budget as policy: while it lasts you spend it on risk (deploys, experiments); exhausted budget freezes releases in favor of reliability work"
+      ]
+    },
+    {
+      "id": "symptom-vs-cause",
+      "difficulty": "core",
+      "prompt": "Why should pages fire on symptoms (user impact) rather than causes like CPU or cache hit ratio — and what actually happens to a team whose pager is wired to causes?",
+      "expected_points": [
+        "a page must mean users are affected and a human must act now; causes are many, weakly correlated with impact, often self-healing",
+        "noisy pages train the on-call to ignore the pager (alert fatigue), so the real incident gets muted or detected by customers",
+        "causes still belong on dashboards consulted after a symptom pages, or in tickets when predictive (e.g. disk filling)"
+      ]
+    },
+    {
+      "id": "incident-flow",
+      "difficulty": "core",
+      "prompt": "Walk me through a well-run incident from first page to closed postmortem. Where does diagnosis fit, and what makes the postmortem blameless without being consequence-free?",
+      "expected_points": [
+        "detect (ideally a burn-rate page), mitigate first — roll back on change-correlated impact before understanding why — communicate on a cadence, diagnose after users are healthy",
+        "blameless: assume competent people acting on the information they had and ask why the system allowed it; multiple contributing factors, not one root cause",
+        "accountability lives in action items with an owner and a deadline that close detection, mitigation, prevention, or communication gaps"
+      ]
+    },
+    {
+      "id": "degradation-choice",
+      "difficulty": "core",
+      "prompt": "Your service synchronously calls a third-party notification API that just started hanging until its 10-second timeout. Which degradation tools do you reach for, and why is retrying harder the wrong first move?",
+      "expected_points": [
+        "the dependency is non-critical: take it off the critical path (async via a queue) and fail open — drop or delay notifications rather than fail the user's action",
+        "circuit breaker: fail fast locally after a failure threshold, probe recovery via half-open, instead of burning the request's latency budget per call",
+        "retries amplify load on a struggling dependency (retry storms); if used at all they must be bounded, backed off, jittered, and budgeted"
+      ]
+    },
+    {
+      "id": "burn-rate",
+      "difficulty": "stretch",
+      "prompt": "Why do SLO-based pages use burn rates over multiple windows instead of a simple 'error rate above X for 5 minutes' threshold?",
+      "expected_points": [
+        "burn rate normalizes error rate by the budget, so the alert speaks in budget consumed — the thing the SLO actually promises",
+        "a fast window (e.g. 14.4x over 1 h) catches outages in minutes while a slow window (e.g. 6x over 6 h) catches slow bleeds a short threshold misses",
+        "a short confirmation window makes the alert stop firing promptly once the issue is fixed"
+      ]
+    },
+    {
+      "id": "blameless-why",
+      "difficulty": "stretch",
+      "prompt": "Concretely, how does a blame-seeking postmortem culture make the next incident worse?",
+      "expected_points": [
+        "people hide or shade exactly the information the analysis needs, so contributing factors go unfound and unfixed",
+        "the next engineer in the same situation has the same information and the same system, so the failure repeats regardless of who was blamed",
+        "fear slows incident response itself — hesitation to roll back, to escalate, or to declare an incident at all"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+# The non-secret configuration timesvc reads at startup, carried over from the
+# Kubernetes Configuration lesson (the Secret, the mounted features.yaml and
+# the HPA are left out here so the only thing that changes is lifecycle).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: timesvc-config
+  namespace: timesvc
+  labels:
+    app: timesvc
+data:
+  PORT: "8080"
+  LOG_LEVEL: "info"
+  # TODO: the server needs a drain budget of its own — a Go duration, and a
+  # number you can defend against terminationGracePeriodSeconds.

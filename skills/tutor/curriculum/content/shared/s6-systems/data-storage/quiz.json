@@ -1,0 +1,78 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "store-choice",
+      "difficulty": "core",
+      "prompt": "Ledgerly has three datasets: the transactions ledger, the fraud feature store, and idempotency keys. Pick a store kind for each and tell me which of the three drivers actually decided it. One of them is a trap — which, and why?",
+      "expected_points": [
+        "the three drivers are consistency needs, query flexibility, and how it must scale — not taste",
+        "ledger relational: a refund-and-charge invariant spans rows (multi-row ACID) and support runs ad-hoc queries; NoSQL would cost exactly those two things",
+        "fraud features key-value: exact-key reads under a 10 ms p99, staleness tolerated, no joins or cross-key transactions wanted",
+        "idempotency keys are the trap — the workload looks like TTL key-value, but the key must commit atomically with the charge, so it lives in the same relational store; consistency needs outrank workload shape",
+        "'NoSQL because scale' without a number is worthless; move the dataset that breaks, not the whole system"
+      ]
+    },
+    {
+      "id": "btree-economics",
+      "difficulty": "core",
+      "prompt": "A lookup in a 9-billion-row table goes from seconds to well under a millisecond once an index exists. Explain the mechanism, then tell me what that speed cost you on the write side — and what line in an EXPLAIN plan tells you an index is missing.",
+      "expected_points": [
+        "a B-tree page holds hundreds of sorted keys, so fan-out makes the tree only 3-4 levels deep even at billions of rows; a lookup is a handful of page reads instead of a full scan",
+        "leaves are sorted and chained, so range scans walk the chain and rows come out already ordered — an index can satisfy ORDER BY and delete a sort step",
+        "cost: every insert writes the table and every index on it (write amplification), page splits and random I/O, plus roughly 30-50% extra space",
+        "so the rule is index the access paths you committed to, and be able to state the write bill at your peak write rate",
+        "in a plan: Seq Scan plus a huge 'Rows Removed by Filter' — the ratio of rows touched to rows returned is the cost of the missing index; a Sort node means no index supplied the order"
+      ]
+    },
+    {
+      "id": "replication-and-lag",
+      "difficulty": "core",
+      "prompt": "Contrast leader-follower with multi-leader replication, then walk me through what replication lag does to support after they issue a refund — and how you fix it.",
+      "expected_points": [
+        "leader-follower: one node takes writes and ships a log; followers apply it in order and serve reads — sync/semi-sync waits for a follower (durable, slower), async acks immediately (fast, followers lag and acked writes can be lost)",
+        "multi-leader: several nodes accept writes, usually one per region; buys local write latency and regional independence, signs you up for write conflicts and a resolution policy (last-write-wins silently discards a write)",
+        "lag is the follower's distance behind the leader — normally milliseconds, seconds to minutes under load",
+        "read-your-writes failure: refund goes to the leader, the dashboard reads a lagging replica, the refund is missing, support clicks refund again",
+        "fixes: route that user's reads to the leader for a short window after their own write, or return a log position with the write and make the replica read wait until it has caught up to it",
+        "replication scales reads and availability, never writes — every replica applies every write"
+      ]
+    },
+    {
+      "id": "sharding-design",
+      "difficulty": "core",
+      "prompt": "You have decided to shard Ledgerly's transactions. Talk me through the key choice, what breaks the moment you shard, and how you add a node next year without reshuffling the world.",
+      "expected_points": [
+        "the key must spread load evenly while keeping common queries on one shard — merchant_id keeps a merchant's list, reconciliation walk, and the refund-charge invariant single-shard",
+        "range sharding keeps range scans local but a monotonic key hot-spots the last shard; hash sharding spreads evenly and destroys range locality",
+        "hot keys/whales: one merchant at 30% of writes concentrates load the scheme cannot spread — but run the number before panicking; mitigations (dedicated shard, compound key) all cost fan-out or ops",
+        "what breaks: transactions and indexes are now per-shard; any query not aligned with the key becomes scatter-gather (latency of the slowest shard, cost on every shard) and cross-shard atomicity is gone",
+        "hash mod N is the trap — changing N moves nearly every key; fix a large number of logical partitions up front and move whole partitions (or split ranges)",
+        "escalate in order: indexes, then replicas, then time-partition and archive cold data, and shard only when writes or working-set size leave no choice"
+      ]
+    },
+    {
+      "id": "failover-is-contract",
+      "difficulty": "stretch",
+      "prompt": "Your replication is async and the leader dies mid-flash-sale with 500 ms of writes unshipped. Which API promise did you just break, and what does repairing it cost?",
+      "expected_points": [
+        "the lost writes include acknowledged charges and their idempotency keys, so the merchant's retry finds no key and re-executes — 'a charge is never executed twice' is broken by a storage setting",
+        "durability configuration is API contract in disguise; the promise chain runs from the API surface down to the replication mode",
+        "repair: semi-sync on the commit path — ack only after at least one follower has the write, with two or more followers so one can be down",
+        "the price is stated, not hidden: roughly a datacenter round trip (~0.5 ms) per commit, plus a failover-availability edge if followers stall"
+      ]
+    },
+    {
+      "id": "index-used-still-wrong",
+      "difficulty": "stretch",
+      "prompt": "A plan shows an Index Scan — and the query still takes 1.4 seconds. How is that possible, and what would you change?",
+      "expected_points": [
+        "an index can be used and still answer the wrong question: Index Cond narrows to a broad set (merchant + 7 days) and a Filter line discards nearly all of it — 'Rows Removed by Filter' after an Index Cond is the tell",
+        "a composite index only serves its leftmost prefix, so (merchant_id, created_at, id) cannot filter on a column it does not contain",
+        "fix (a): a composite index including the filtered column, e.g. (merchant_id, status, created_at) — exact, but a whole extra index maintained on every insert",
+        "fix (b): a partial index WHERE status = 'declined' — tiny and near-free for other rows, but serves only this query shape",
+        "either is defensible if the write-side cost is named; the choice follows from how selective the predicate is"
+      ]
+    }
+  ]
+}

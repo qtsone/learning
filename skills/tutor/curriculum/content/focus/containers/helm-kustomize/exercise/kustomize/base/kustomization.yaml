@@ -1,0 +1,15 @@
+# The base: the deployable truth about timesvc, with nothing environment-shaped
+# in it. Overlays are the only things allowed to know that dev and prod exist.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# TODO: namespace — the one this base builds into unless an overlay says
+#       otherwise. Note that neither manifest carries a namespace of its own.
+
+# TODO: resources — every manifest in this directory. A file kustomize is not
+#       told about is a file kustomize does not build, and nothing warns you.
+
+# TODO: configMapGenerator — generate timesvc-config from literals (PORT,
+#       LOG_LEVEL, SHUTDOWN_TIMEOUT) instead of checking in a ConfigMap
+#       manifest. Read what the lesson says about the name suffix before you
+#       reach for generatorOptions.

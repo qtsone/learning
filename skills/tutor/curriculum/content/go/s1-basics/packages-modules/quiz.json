@@ -1,0 +1,64 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "gomod-records",
+      "difficulty": "core",
+      "prompt": "You run `go mod init github.com/you/weather` in an empty folder. What does the go.mod it creates say, and what gets added to it later as the project grows?",
+      "expected_points": [
+        "go mod init creates go.mod with the module path and the Go version",
+        "the module path is the module's globally unique name and the root of all its import paths",
+        "require lines are added later, recording each dependency and its exact version"
+      ]
+    },
+    {
+      "id": "export-rule",
+      "difficulty": "core",
+      "prompt": "How does Go decide which names in a package are usable from other packages? Why would you deliberately keep a function unexported?",
+      "expected_points": [
+        "capitalized first letter = exported, lowercase = unexported; there is no public/private keyword",
+        "the compiler rejects references to unexported names from outside the package",
+        "unexported helpers stay free to change; every export is a commitment to callers"
+      ]
+    },
+    {
+      "id": "import-paths",
+      "difficulty": "core",
+      "prompt": "Your module is `tutor.local/packages-modules` and you add a folder `report/`. What import line does main.go need, and what prefix do you use to call its functions?",
+      "expected_points": [
+        "import path = module path + folder path: tutor.local/packages-modules/report",
+        "after importing you use the package name, the last segment: report.Line(...)",
+        "one folder = one package; all its files share the package name"
+      ]
+    },
+    {
+      "id": "tidy",
+      "difficulty": "core",
+      "prompt": "You import an external package like `rsc.io/quote` and `go run .` refuses. What does running `go mod tidy` do to fix it, and what does it change on disk?",
+      "expected_points": [
+        "tidy scans source imports, downloads missing modules, and rewrites go.mod to match",
+        "it adds require lines for used dependencies and removes lines for unused ones",
+        "go.sum gains checksums so everyone builds with identical dependency code"
+      ]
+    },
+    {
+      "id": "external-test-pkg",
+      "difficulty": "stretch",
+      "prompt": "The exercise tests declare `package temperature_test` instead of `package temperature`. What difference does that make to what the tests can touch?",
+      "expected_points": [
+        "an external test package can only use exported names",
+        "so the tests exercise exactly the surface real importers see"
+      ]
+    },
+    {
+      "id": "module-naming",
+      "difficulty": "stretch",
+      "prompt": "Why do real-world module paths look like URLs (`github.com/you/project`) instead of short names like `project`?",
+      "expected_points": [
+        "the path must be globally unique so imports are unambiguous",
+        "it doubles as the location the toolchain fetches the module from",
+        "local-only modules like tutor.local/... work because they are never fetched"
+      ]
+    }
+  ]
+}

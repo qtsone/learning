@@ -1,0 +1,68 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "why-structs",
+      "difficulty": "core",
+      "prompt": "You're modeling a contact with a name, an age, and an email. Why is a struct the right tool rather than a map or three parallel slices?",
+      "expected_points": [
+        "a struct groups values of different types into one value with named fields",
+        "map values all share one type, so mixed data doesn't fit",
+        "parallel slices drift apart; a struct keeps one thing's parts together"
+      ]
+    },
+    {
+      "id": "literals",
+      "difficulty": "core",
+      "prompt": "Show the two ways to write a Contact literal. Why do we insist on the field-named form?",
+      "expected_points": [
+        "field-named: Contact{Name: ..., Age: ...}; positional: Contact{...} with values in field order",
+        "positional literals silently swap same-typed fields if the struct is reordered",
+        "adding a field breaks every positional literal; named ones keep compiling",
+        "named fields document the code; omitted fields get zero values"
+      ]
+    },
+    {
+      "id": "embedding",
+      "difficulty": "core",
+      "prompt": "Contact embeds Person. What does 'promotion' let you write, and how would it differ if Person were a named field like `P Person`?",
+      "expected_points": [
+        "embedding: field access shortens to c.Name, which is the same field as c.Person.Name",
+        "a named field requires the full path (c.P.Name); nothing is promoted",
+        "there is still a real field named Person, and literals must nest Person: Person{...}",
+        "it is composition, not inheritance"
+      ]
+    },
+    {
+      "id": "comparison",
+      "difficulty": "core",
+      "prompt": "When does `==` work on two struct values, and when does it refuse to compile? What did that mean for Contact vs Group in the exercise?",
+      "expected_points": [
+        "== compares field by field and needs every field to be comparable",
+        "slices and maps are not comparable, so one such field makes struct == a compile error",
+        "Contact (strings, int) compared with one ==; Group's []string forced a manual field-by-field comparison",
+        "the failure is at compile time, not runtime"
+      ]
+    },
+    {
+      "id": "value-semantics",
+      "difficulty": "stretch",
+      "prompt": "Rename assigns to c.Name and returns c. Why doesn't the caller's contact change, and why must Rename return the contact?",
+      "expected_points": [
+        "structs are values: the parameter is a copy of the caller's struct",
+        "mutating the copy is invisible to the caller",
+        "returning the changed copy hands the new value back; the caller keeps it by assignment"
+      ]
+    },
+    {
+      "id": "map-keys",
+      "difficulty": "stretch",
+      "prompt": "Could you build a map[Person]string? A map[Group]string? Connect your answer to struct comparison.",
+      "expected_points": [
+        "map keys must be comparable",
+        "Person has only comparable fields, so it can be a key",
+        "Group contains a slice, so it is not comparable and cannot be a key"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+# A strategic-merge patch: the fields named here change, and the containers
+# and env lists merge by name rather than being replaced, so the probes, the
+# preStop hook and every other env var in the base survive untouched.
+#
+# GOMAXPROCS is deliberately absent — the base reads it from limits.cpu
+# through the downward API, so raising the CPU limit raises it too. GOMEMLIMIT
+# is a literal and follows nothing, so it has to move with the memory limit by
+# hand: at 512Mi with the base's 110MiB the GC would collect far more often
+# than it needs to and burn CPU it was just given.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timesvc
+spec:
+  template:
+    spec:
+      containers:
+        - name: timesvc
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          env:
+            # ~86% of the limit: headroom for the binary's own mappings and
+            # everything else GOMEMLIMIT does not count.
+            - name: GOMEMLIMIT
+              value: "440MiB"

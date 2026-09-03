@@ -1,0 +1,71 @@
+version: 2
+
+project_name: digest
+
+# No `before: hooks: - go mod tidy`. A release must build exactly what the
+# committed go.mod/go.sum pin; a tidy at release time can reach the module
+# proxy and change the inputs of a build you are about to tag.
+
+builds:
+  - id: digest
+    main: .
+    binary: digest
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X tutor.local/digest/internal/buildinfo.version={{ .Version }}
+      - -X tutor.local/digest/internal/buildinfo.commit={{ .FullCommit }}
+      - -X tutor.local/digest/internal/buildinfo.date={{ .CommitDate }}
+    # .CommitDate, not .Date: the build clock would change the binary on every
+    # run and cost us reproducibility.
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - id: digest
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - README*
+      - LICENSE*
+    # Windows users expect a .zip. The key for per-OS archive formats was
+    # renamed between goreleaser versions (format -> formats), so read the docs
+    # for the version you installed before adding a format_overrides block.
+
+checksum:
+  name_template: checksums.txt
+  algorithm: sha256
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+
+# Publishes a formula to github.com/your-github-user/homebrew-tap, which users
+# install with `brew install your-github-user/tap/digest`.
+#
+# Shown in the `brews:` form because that is what you will meet in most
+# existing projects. goreleaser v2 deprecates it in favour of
+# `homebrew_casks:` for prebuilt binaries, following Homebrew's own shift:
+# if `goreleaser check` warns on this block, rename the key and re-run it —
+# the fields are near-identical, and `goreleaser check` is the authority for
+# the version you installed.
+brews:
+  - name: digest
+    repository:
+      owner: your-github-user
+      name: homebrew-tap
+    homepage: https://github.com/your-github-user/digest
+    description: Print the SHA-256 of files
+    license: MIT

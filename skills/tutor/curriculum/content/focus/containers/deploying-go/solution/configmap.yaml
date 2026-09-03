@@ -1,0 +1,16 @@
+# Reference solution. Same configuration as before, plus the one value the
+# shutdown path needs — kept here rather than hard-coded so the drain budget
+# and the grace period can be read, and changed, side by side.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: timesvc-config
+  namespace: timesvc
+  labels:
+    app: timesvc
+data:
+  PORT: "8080"
+  LOG_LEVEL: "info"
+  # A Go duration: the process parses it with time.ParseDuration and refuses to
+  # start on anything else. Bounded well under the grace period.
+  SHUTDOWN_TIMEOUT: "20s"

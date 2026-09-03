@@ -1,0 +1,11 @@
+# Provided, complete — do not change it.
+#
+# A namespace is a name scope inside one cluster. Everything this lesson
+# creates lives here, so `kubectl delete namespace timesvc` is the whole
+# cleanup. It is not a network or security boundary on its own.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: timesvc
+  labels:
+    app.kubernetes.io/part-of: tutor

@@ -1,0 +1,75 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "requirements-split",
+      "difficulty": "core",
+      "prompt": "A sponsor says 'build photo sharing'. What two kinds of requirements do you extract before designing anything, and why do you explicitly mark some functional requirements as nice-to-have instead of just dropping them?",
+      "expected_points": [
+        "functional (what the system does) vs non-functional (how well: scale, latency, availability, durability, cost)",
+        "must-have vs nice-to-have is scoping, and out-of-scope is a recorded decision, not a dismissal",
+        "non-functional requirements are what actually shape the architecture"
+      ]
+    },
+    {
+      "id": "estimation-method",
+      "difficulty": "core",
+      "prompt": "Walk me through estimating write QPS and yearly storage for an app with 10M registered users where people upload photos. What habits make the estimate trustworthy?",
+      "expected_points": [
+        "state assumptions out loud: DAU share of registered, uploads per active user per day, bytes per upload",
+        "arithmetic chain: per-day totals divided by ~10^5 seconds/day, then a stated peak factor on top of average",
+        "round aggressively to powers of ten and sanity-check against an anchor or known system"
+      ]
+    },
+    {
+      "id": "why-estimate-first",
+      "difficulty": "core",
+      "prompt": "Why do the numbers come before the boxes? What does a five-minute envelope actually buy you?",
+      "expected_points": [
+        "it reveals the dominant axis (read QPS, write QPS, storage, or bandwidth)",
+        "the dominant axis chooses where design effort and deep dives go",
+        "without numbers, architecture choices are vibes and can't be challenged or defended"
+      ]
+    },
+    {
+      "id": "tradeoff-framing",
+      "difficulty": "core",
+      "prompt": "I claim storing images in object storage is simply best practice. Frame that properly as a trade-off for me.",
+      "expected_points": [
+        "name at least two alternatives (e.g. blobs in the database vs object storage plus a metadata row)",
+        "attach costs to both sides, including the picked one (two systems can disagree; orphaned rows/objects)",
+        "tie the pick to a requirement or estimate, and state what would flip it (e.g. tiny low-volume images)"
+      ]
+    },
+    {
+      "id": "discussion-structure",
+      "difficulty": "core",
+      "prompt": "You get 60 minutes to present a design. What are the five phases, in order, and which two habits keep the structure honest?",
+      "expected_points": [
+        "requirements & scope, estimation, high-level architecture, deep dives, bottlenecks & evolution",
+        "drive with the numbers: estimation picks the deep dives",
+        "loop back when a deep dive uncovers a requirement question — the phases are a checklist, not one-way"
+      ]
+    },
+    {
+      "id": "flip-condition",
+      "difficulty": "stretch",
+      "prompt": "Why is 'nothing would change my decision' a red flag in a design review?",
+      "expected_points": [
+        "designs fit requirements; if no requirement change flips the choice, it's dogma not analysis",
+        "the flip condition proves the alternatives were honestly costed",
+        "reviewers probe exactly there: when does the other option win?"
+      ]
+    },
+    {
+      "id": "same-spec-different-systems",
+      "difficulty": "stretch",
+      "prompt": "Two teams implement the identical feature list and produce wildly different architectures, both correctly. How?",
+      "expected_points": [
+        "different non-functional requirements: scale, latency, availability, consistency, or cost targets",
+        "100 users vs 100 million turns the same functional spec into different problems",
+        "evaluating a design requires knowing its targets, not just its features"
+      ]
+    }
+  ]
+}

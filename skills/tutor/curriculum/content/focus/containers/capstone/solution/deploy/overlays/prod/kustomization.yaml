@@ -1,0 +1,34 @@
+# The prod overlay. Same shape as dev, different numbers — and nothing else,
+# which is the whole point: every line here is a difference, so a reviewer can
+# read the difference instead of diffing two copies of a Deployment.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Its own namespace, so applying the wrong overlay cannot quietly land on the
+# other environment. Wrong namespace is a failed apply, not a silent outage.
+namespace: timesvc-prod
+
+# The directory, not the files in it: kustomize reads the base's own
+# kustomization.yaml, generators included. Listing ../../base/deployment.yaml
+# instead would give prod a second description of the same object.
+resources:
+  - ../../base
+
+# Four replicas, so maxUnavailable: 0 has something to surge over and a node
+# going away costs a quarter of capacity rather than half.
+replicas:
+  - name: timesvc
+    count: 4
+
+# The bootstrap value: the artifact a clean install lands on. The pipeline
+# rewrites this line with `kustomize edit set image` on the runner before it
+# applies, so the cluster runs this run's digest — this file only stays a
+# record of production if a step commits the edit back. A digest or a sha-
+# tag, never "latest": a moving tag makes every revision of this Deployment
+# point at the same string, and `kubectl rollout undo` then changes nothing.
+images:
+  - name: ghcr.io/ada/timesvc
+    newTag: sha-1a2b3c4
+
+patches:
+  - path: resources-patch.yaml

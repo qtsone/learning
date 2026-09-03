@@ -1,0 +1,75 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "modeling",
+      "difficulty": "core",
+      "prompt": "Model each as a graph — what are the nodes and edges, is it directed or undirected, weighted or unweighted? (a) a road map for computing driving distances, (b) 'follows' on a social network, (c) mutual friendship.",
+      "expected_points": [
+        "road map: intersections/cities as nodes, roads as edges, weighted by distance; usually undirected (or directed for one-way streets)",
+        "follows: people as nodes, directed unweighted edges — A following B says nothing about B following A",
+        "friendship: undirected because the relation is symmetric, which in an implementation means storing both directed edges"
+      ]
+    },
+    {
+      "id": "representations",
+      "difficulty": "core",
+      "prompt": "For a sparse graph — say a million nodes, a handful of edges each — compare the adjacency list and the adjacency matrix: memory, 'is there an edge u→v?', and iterating u's neighbors. When does the matrix win?",
+      "expected_points": [
+        "list: O(V + E) memory, edge test O(deg(u)), neighbor iteration O(deg(u)); matrix: O(V^2) memory, edge test O(1), neighbor iteration O(V)",
+        "sparse means E is far below V^2, so the matrix wastes almost all its cells — a million nodes means 10^12 cells",
+        "the matrix wins only for small or dense graphs, or when O(1) edge tests dominate everything else"
+      ]
+    },
+    {
+      "id": "visited-cycles",
+      "difficulty": "core",
+      "prompt": "Tree traversals in the previous lessons had no visited set, yet your BFS and DFS require one. Why the difference, and what exactly goes wrong without it?",
+      "expected_points": [
+        "trees guarantee one parent and no cycles, so no node can be reached twice; graphs revoke both guarantees",
+        "without visited tracking, a node reachable by two routes is visited more than once",
+        "on a cycle the traversal never terminates — BFS's queue never drains, DFS recurses until the stack overflows — so the visited set is what makes traversal terminate, not an optimization"
+      ]
+    },
+    {
+      "id": "bfs-shortest",
+      "difficulty": "core",
+      "prompt": "Why does BFS find shortest paths in an unweighted graph, while DFS does not? And why does the argument break down once edges have weights?",
+      "expected_points": [
+        "the queue makes BFS explore in distance order — all nodes at distance d are discovered before any at d+1 — so the first time a node is reached is via the fewest edges",
+        "DFS commits to one branch and reports whatever route it stumbles into first, which may be far longer than the shortest",
+        "with weights, fewest edges no longer means cheapest path (two cost-1 hops beat one cost-10 hop), which is where an algorithm like Dijkstra's takes over"
+      ]
+    },
+    {
+      "id": "reachability",
+      "difficulty": "core",
+      "prompt": "A deploy tool must answer 'does service A transitively depend on service B?' over a directed dependency graph. How do you answer it with what you built, and what does one query cost?",
+      "expected_points": [
+        "traverse from A — BFS or DFS equally, since only the reachable set matters, not the order — and check whether B is visited",
+        "cost is O(V + E) with an adjacency list: each node enqueued once, each edge examined once",
+        "direction matters: A reaching B says nothing about B reaching A"
+      ]
+    },
+    {
+      "id": "traversal-trace",
+      "difficulty": "stretch",
+      "prompt": "For edges added in order 1→2, 1→3, 2→4, 3→5, 4→6: predict the exact BFS and DFS orders from 1, without running the code.",
+      "expected_points": [
+        "BFS: 1 2 3 4 5 6 — whole levels at a time",
+        "DFS: 1 2 4 6 3 5 — down the first-neighbor spine, then backtrack to 3",
+        "same six nodes either way; only the order differs"
+      ]
+    },
+    {
+      "id": "distance-recording",
+      "difficulty": "stretch",
+      "prompt": "Your ShortestPathLen records dist[neighbor] = dist[node] + 1 at discovery time and never updates it. Why is never updating safe in BFS, when in general a later route could be shorter?",
+      "expected_points": [
+        "BFS discovers nodes in nondecreasing distance order, so at discovery time the recorded distance is already minimal",
+        "any later route to the same node comes from a node discovered no earlier, so it can only be as long or longer",
+        "this is exactly the property that fails under edge weights, forcing weighted algorithms to revise tentative distances"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "comma-ok-vs-panic",
+      "difficulty": "core",
+      "prompt": "`f := r.(*os.File)` versus `f, ok := r.(*os.File)` — what happens in each when `r` does not hold a `*os.File`, and when is the first form acceptable?",
+      "expected_points": [
+        "the single-value form panics on mismatch",
+        "the comma-ok form sets ok to false and f to the zero value, never panicking",
+        "single-value is only right when the dynamic type is a guaranteed invariant, so being wrong should crash loudly"
+      ]
+    },
+    {
+      "id": "type-switch",
+      "difficulty": "core",
+      "prompt": "Sketch a type switch over `v any` that handles string and int differently. What type does `v` have inside each case, and does `case int` match an `int64`?",
+      "expected_points": [
+        "switch v := v.(type) with one case per type plus default",
+        "inside each case v has that case's concrete type",
+        "matching is exact — int64 does not match case int; it falls to default"
+      ]
+    },
+    {
+      "id": "is-vs-as",
+      "difficulty": "core",
+      "prompt": "Your caller needs to know (a) whether a lookup failed with ErrNotFound, and (b) which field a *ValidationError complained about. Which of errors.Is / errors.As fits each, and why?",
+      "expected_points": [
+        "errors.Is for (a): identity check against a sentinel value, yes/no answer",
+        "errors.As for (b): matches by type and copies the match out so its fields are readable",
+        "Is takes a value to compare, As takes a pointer to a variable of the error type (e.g. &ve)"
+      ]
+    },
+    {
+      "id": "wrap-chain",
+      "difficulty": "core",
+      "prompt": "Why does `errors.Is(err, ErrNotFound)` still work after the error was wrapped twice with fmt.Errorf — and what would change if one layer had used %v instead of %w?",
+      "expected_points": [
+        "%w makes the returned error carry an Unwrap() error method pointing at the wrapped error",
+        "repeated wrapping forms a chain; Is and As walk it by calling Unwrap until a match or the end",
+        "%v produces the same message but no Unwrap link — the chain is severed and Is/As stop finding the cause"
+      ]
+    },
+    {
+      "id": "switch-smell",
+      "difficulty": "core",
+      "prompt": "A codebase type-switches over Circle/Rect in five different files to compute areas. Why is that a design smell, and what is the idiomatic fix?",
+      "expected_points": [
+        "adding a new type means finding and extending every switch; missing one fails silently",
+        "the behavior belongs on the types: add an Area() method to the interface and let each type implement it",
+        "type switches are fine at boundaries over types you don't control (fmt-style formatting, decoding, error inspection)"
+      ]
+    },
+    {
+      "id": "assert-to-interface",
+      "difficulty": "stretch",
+      "prompt": "You can assert to an interface type too: `s, ok := v.(fmt.Stringer)`. What question does that ask, and where does the standard library use this trick?",
+      "expected_points": [
+        "it asks whether the dynamic type implements the interface, not whether it equals a specific type",
+        "behavior discovery for optional abilities",
+        "e.g. fmt checks for Stringer; io.Copy checks for WriterTo/ReaderFrom to take a fast path"
+      ]
+    },
+    {
+      "id": "sentinel-vs-type",
+      "difficulty": "stretch",
+      "prompt": "Designing a new package: when do you export a sentinel error and when a custom error type? What does each commit you to?",
+      "expected_points": [
+        "sentinel when callers only need yes/no on a specific failure",
+        "error type when the failure carries data callers must read",
+        "an exported type's fields become API surface — a bigger long-term commitment than a sentinel"
+      ]
+    }
+  ]
+}

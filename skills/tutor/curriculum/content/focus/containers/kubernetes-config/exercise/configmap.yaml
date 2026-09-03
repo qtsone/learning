@@ -1,0 +1,21 @@
+# Non-secret configuration for timesvc.
+#
+# Two shapes live here on purpose, because they reach the container by two
+# different routes: flat KEY: value pairs that become environment variables,
+# and one key whose name looks like a filename, which becomes a file when the
+# ConfigMap is mounted as a volume.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: timesvc-config
+  namespace: timesvc
+  labels:
+    app: timesvc
+data:
+  # TODO: LOG_LEVEL and NOW_CACHE_TTL — the settings main.go reads from the
+  # environment. Values are strings; quote anything that YAML would otherwise
+  # read as a number or a boolean.
+  #
+  # TODO: features.yaml — a file-shaped key holding a few lines of YAML, using
+  # a block scalar (features.yaml: | and then an indented body). main.go
+  # re-reads this file on every request.

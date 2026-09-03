@@ -1,0 +1,75 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "terminology-invariant",
+      "difficulty": "core",
+      "prompt": "Sketch (or describe) a small binary tree and point out its root, a leaf, a subtree, one node's depth, and the tree's height. Then: what extra rule turns a binary tree into a BST?",
+      "expected_points": [
+        "root has no parent, leaf has no children, any node plus everything below it is a subtree",
+        "depth counts edges from the root down; height counts edges on the longest path down to a leaf",
+        "BST rule: at every node, ALL keys in the left subtree are smaller and ALL keys in the right subtree are larger — whole subtrees, not just direct children"
+      ]
+    },
+    {
+      "id": "insert-search-walk",
+      "difficulty": "core",
+      "prompt": "Walk me through how your Insert finds where a new key belongs, and why the BST invariant still holds afterwards. What happens when the key is already in the tree?",
+      "expected_points": [
+        "compare at each node and go left if smaller, right if larger — the same walk as search",
+        "the new node attaches at the empty spot where the walk falls off, so it lands on the correct side of every ancestor",
+        "returning the subtree root and re-attaching it (root.Left = Insert(...)) handles the empty case; an equal key changes nothing"
+      ]
+    },
+    {
+      "id": "traversals",
+      "difficulty": "core",
+      "prompt": "For the tree built from 5, 3, 8, 1, 4, 7, 9: what do in-order, pre-order, and post-order produce, and what is each ordering good for?",
+      "expected_points": [
+        "in-order: 1 3 4 5 7 8 9 — sorted, because left < node < right at every node",
+        "pre-order: 5 3 1 4 8 7 9 — root first; replaying it through insert rebuilds the same tree (copy/serialize)",
+        "post-order: 1 4 3 7 9 8 5 — children before parent; for tear-down or bottom-up computations"
+      ]
+    },
+    {
+      "id": "balance-degradation",
+      "difficulty": "core",
+      "prompt": "Your BST holds the same 1023 keys in both runs of the height test, yet one tree has height 9 and the other 1022. Explain what happened and what it does to search cost.",
+      "expected_points": [
+        "search and insert cost O(h), the height, because each step descends one level",
+        "sorted insertion always attaches to the right, producing a chain with h = n-1, so operations are O(n)",
+        "a balanced insertion order keeps levels full so h is about log2 n, giving O(log n); self-balancing BSTs enforce this regardless of input order"
+      ]
+    },
+    {
+      "id": "bst-vs-hash",
+      "difficulty": "core",
+      "prompt": "One service only checks whether a session token exists; another lists events between two timestamps. For each: BST or hash table, and why?",
+      "expected_points": [
+        "token existence: hash table — O(1) average exact lookup and ordering buys nothing",
+        "time-range listing: BST — keys stay ordered, so a range query is O(log n + matches) and results come out sorted",
+        "a hash table cannot do ranges without scanning all n keys, because hashing scatters the ordering"
+      ]
+    },
+    {
+      "id": "inorder-proof",
+      "difficulty": "stretch",
+      "prompt": "Convince me that in-order traversal of ANY valid BST is sorted — not just for the tree in the exercise.",
+      "expected_points": [
+        "at each node the invariant guarantees everything emitted before it (left subtree) is smaller and everything after (right subtree) is larger",
+        "the same argument applies recursively inside each subtree, so the whole output is ascending",
+        "corollary: an unsorted in-order output proves the invariant is broken somewhere"
+      ]
+    },
+    {
+      "id": "height-convention",
+      "difficulty": "stretch",
+      "prompt": "Why does Height return -1 for the empty tree instead of 0? What breaks in the recursive definition if you pick 0?",
+      "expected_points": [
+        "height is defined as 1 + max(height of children); a single node's children are empty trees",
+        "with empty = -1, a single node computes 1 + (-1) = 0 edges, which matches the definition",
+        "with empty = 0, a single node would claim height 1 and every height would be off by one (counting nodes, not edges)"
+      ]
+    }
+  ]
+}

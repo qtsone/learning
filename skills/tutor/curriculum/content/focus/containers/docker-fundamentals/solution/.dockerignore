@@ -1,0 +1,10 @@
+# Everything left here is uploaded to the daemon as the build context and can
+# end up inside a layer. Keep it small, and keep secrets out of it entirely.
+.git
+.gitignore
+local.env
+*.env
+scratch/
+NOTES.md
+Dockerfile
+.dockerignore

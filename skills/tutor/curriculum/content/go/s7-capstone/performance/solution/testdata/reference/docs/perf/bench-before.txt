@@ -1,0 +1,36 @@
+$ go test -bench='BenchmarkList' -run='^$' -count=10 ./internal/store
+
+goos: darwin
+goarch: arm64
+pkg: tutor.local/capstone-reference/internal/store
+cpu: Apple M1 Pro
+BenchmarkListByTag/n=100-10         	  433485	      2794 ns/op	    8192 B/op	       1 allocs/op
+BenchmarkListByTag/n=100-10         	  411568	      2823 ns/op	    8192 B/op	       1 allocs/op
+BenchmarkListByTag/n=100-10         	  415768	      2818 ns/op	    8192 B/op	       1 allocs/op
+BenchmarkListByTag/n=100-10         	  418794	      2774 ns/op	    8192 B/op	       1 allocs/op
+BenchmarkListByTag/n=100-10         	  419178	      2763 ns/op	    8192 B/op	       1 allocs/op
+BenchmarkListByTag/n=100-10         	  435276	      2762 ns/op	    8192 B/op	       1 allocs/op
+BenchmarkListByTag/n=100-10         	  439089	      2865 ns/op	    8192 B/op	       1 allocs/op
+BenchmarkListByTag/n=100-10         	  430568	      2824 ns/op	    8192 B/op	       1 allocs/op
+BenchmarkListByTag/n=100-10         	  415336	      2829 ns/op	    8192 B/op	       1 allocs/op
+BenchmarkListByTag/n=100-10         	  425262	      2917 ns/op	    8192 B/op	       1 allocs/op
+BenchmarkListByTag/n=10000-10       	    2766	    378585 ns/op	  802818 B/op	       1 allocs/op
+BenchmarkListByTag/n=10000-10       	    3296	    348945 ns/op	  802816 B/op	       1 allocs/op
+BenchmarkListByTag/n=10000-10       	    3480	    360747 ns/op	  802816 B/op	       1 allocs/op
+BenchmarkListByTag/n=10000-10       	    3504	    352965 ns/op	  802816 B/op	       1 allocs/op
+BenchmarkListByTag/n=10000-10       	    3534	    357961 ns/op	  802816 B/op	       1 allocs/op
+BenchmarkListByTag/n=10000-10       	    3158	    352309 ns/op	  802816 B/op	       1 allocs/op
+BenchmarkListByTag/n=10000-10       	    3453	    346555 ns/op	  802816 B/op	       1 allocs/op
+BenchmarkListByTag/n=10000-10       	    3434	    363476 ns/op	  802816 B/op	       1 allocs/op
+BenchmarkListByTag/n=10000-10       	    3382	    343380 ns/op	  802816 B/op	       1 allocs/op
+BenchmarkListByTag/n=10000-10       	    3502	    345963 ns/op	  802816 B/op	       1 allocs/op
+BenchmarkListAll-10                 	    4334	    283668 ns/op	  802820 B/op	       1 allocs/op
+BenchmarkListAll-10                 	    4353	    278640 ns/op	  802821 B/op	       1 allocs/op
+BenchmarkListAll-10                 	    4201	    279522 ns/op	  802821 B/op	       1 allocs/op
+BenchmarkListAll-10                 	    4239	    296057 ns/op	  802821 B/op	       1 allocs/op
+BenchmarkListAll-10                 	    4291	    275738 ns/op	  802822 B/op	       1 allocs/op
+BenchmarkListAll-10                 	    4227	    282111 ns/op	  802822 B/op	       1 allocs/op
+BenchmarkListAll-10                 	    4279	    275448 ns/op	  802822 B/op	       1 allocs/op
+BenchmarkListAll-10                 	    4345	    278788 ns/op	  802821 B/op	       1 allocs/op
+BenchmarkListAll-10                 	    4154	    276687 ns/op	  802821 B/op	       1 allocs/op
+BenchmarkListAll-10                 	    4227	    277646 ns/op	  802823 B/op	       1 allocs/op

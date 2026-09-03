@@ -1,0 +1,65 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "test-convention",
+      "difficulty": "core",
+      "prompt": "You add a function to a package and want `go test` to run it as a test. What three things does the convention require, and what happens if you name it `Testlongest`?",
+      "expected_points": [
+        "it must live in a file ending in _test.go, in the same package",
+        "the name must be Test followed by a non-lowercase letter, and it takes exactly one parameter, t *testing.T",
+        "Testlongest is silently skipped — go test still reports ok, so go test -v is how you confirm a test actually ran"
+      ]
+    },
+    {
+      "id": "table-driven",
+      "difficulty": "core",
+      "prompt": "What is a table-driven test, and why does Go favor the pattern over writing one test function per input?",
+      "expected_points": [
+        "cases live as data in a slice of (often anonymous) structs; one loop holds the checking logic",
+        "adding a case costs one line of data, so edge cases actually get added",
+        "the checking logic and failure message exist once, and the table reads as a specification"
+      ]
+    },
+    {
+      "id": "subtests",
+      "difficulty": "core",
+      "prompt": "What does wrapping each table case in t.Run buy you over a bare loop, and how do you run just the case named \"empty slice\" in TestAverage?",
+      "expected_points": [
+        "failures name the exact case (TestAverage/empty_slice) instead of pointing at the whole loop",
+        "cases are isolated — t.Fatalf stops only that subtest, the loop continues",
+        "go test -run 'TestAverage/empty_slice' — slash separates function pattern from subtest pattern, spaces become underscores"
+      ]
+    },
+    {
+      "id": "coverage-limits",
+      "difficulty": "core",
+      "prompt": "Your package shows 100% coverage from `go test -cover`. What does that number guarantee, and what does it not?",
+      "expected_points": [
+        "guarantees every statement was executed by some test",
+        "does not guarantee outputs were checked or cases were well chosen — executed is not verified",
+        "the exercise proved it: the buggy Average line was fully covered by an evenly-dividing case and still wrong"
+      ]
+    },
+    {
+      "id": "error-vs-fatal",
+      "difficulty": "stretch",
+      "prompt": "When do you reach for t.Fatalf instead of t.Errorf? Use your TestAverage as the example.",
+      "expected_points": [
+        "Errorf marks failure and continues, letting one run report several mismatches",
+        "Fatalf stops the (sub)test immediately — right when continuing is meaningless, like getting an error where a value was needed",
+        "inside t.Run a Fatalf only kills that case, so the rest of the table still runs"
+      ]
+    },
+    {
+      "id": "case-selection",
+      "difficulty": "stretch",
+      "prompt": "Why did Average([]int{2, 4}) hide the bug that Average([]int{1, 2}) exposed, and what general lesson about choosing test inputs follows?",
+      "expected_points": [
+        "the bug was integer division truncating before the float64 conversion, invisible when the sum divides evenly",
+        "6/2 gives the right answer even when truncated; 3/2 does not",
+        "pick inputs where correct and plausibly-wrong implementations disagree — empty inputs, ties, uneven divisions, error paths"
+      ]
+    }
+  ]
+}

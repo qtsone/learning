@@ -1,0 +1,13 @@
+# Reference solution. The same three keys the base's generator produces, from
+# the same values the Deployment reads — and under a name derived from the
+# release, so two releases in one namespace do not fight over one ConfigMap.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "timesvc.fullname" . }}-config
+  labels:
+    {{- include "timesvc.labels" . | nindent 4 }}
+data:
+  PORT: {{ .Values.config.port | quote }}
+  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  SHUTDOWN_TIMEOUT: {{ .Values.config.shutdownTimeout | quote }}

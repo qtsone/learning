@@ -1,0 +1,90 @@
+# Carried forward from deploying-go, with two edits: the namespace is gone
+# (the overlays set it, one per environment) and the image now names a
+# registry repository instead of a local build.
+#
+# Everything else is the contract you earned in that lesson and must not lose
+# here — the budget below especially:
+#   preStop 10s + SHUTDOWN_TIMEOUT 20s + margin  <=  terminationGracePeriodSeconds 45s
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timesvc
+  labels:
+    app: timesvc
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: timesvc
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  revisionHistoryLimit: 10
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: timesvc
+    spec:
+      terminationGracePeriodSeconds: 45
+      containers:
+        - name: timesvc
+          # A bootstrap value: the last revision anyone deployed by hand. The
+          # pipeline overwrites it per environment at deploy time — never
+          # "latest", which would make every revision of this Deployment point
+          # at the same moving target and every rollback a no-op.
+          image: ghcr.io/ada/timesvc:sha-0000000
+          ports:
+            - name: http
+              containerPort: 8080
+          # envFrom, not per-key configMapKeyRef as in kubernetes-config: that
+          # lesson's objection was a ConfigMap carrying features.yaml, which
+          # has no sane environment-variable form. This one holds nothing but
+          # scalar settings, so importing all of it is honest and stays right
+          # when a key is added.
+          envFrom:
+            - configMapRef:
+                name: timesvc-config
+          env:
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+                  divisor: "1"
+            # A literal, and therefore the one number an overlay has to keep in
+            # step by hand when it changes the memory limit.
+            - name: GOMEMLIMIT
+              value: "110MiB"
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+            failureThreshold: 12
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 128Mi

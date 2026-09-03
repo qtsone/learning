@@ -1,0 +1,76 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "hash-to-bucket",
+      "difficulty": "core",
+      "prompt": "How does a key like \"alice\" end up in a specific bucket? And what three properties make a hash function good for table use?",
+      "expected_points": [
+        "the hash function turns the key's bytes into a fixed-size integer",
+        "the bucket index is hash mod the number of buckets",
+        "good means deterministic, uniformly spread, and fast — not cryptographic"
+      ]
+    },
+    {
+      "id": "collision-strategies",
+      "difficulty": "core",
+      "prompt": "Two different keys land in the same bucket. Compare how separate chaining and open addressing each handle this, and name one advantage of each.",
+      "expected_points": [
+        "chaining keeps a linked list per bucket and walks it",
+        "open addressing probes other slots in the same array (e.g. linear probing)",
+        "chaining tolerates high load and has easy deletion; open addressing is cache-friendly with no per-entry pointers",
+        "collisions are inevitable (pigeonhole) — the strategy is part of the table's definition"
+      ]
+    },
+    {
+      "id": "load-factor-resize",
+      "difficulty": "core",
+      "prompt": "What is the load factor, why does your table resize when it passes 0.75, and what does the resize actually cost?",
+      "expected_points": [
+        "load factor = entries / buckets; chains lengthen as it grows",
+        "resizing doubles the buckets and re-inserts (rehashes) every entry because index = hash mod bucket count changes",
+        "a single resize is O(n), but doubling makes it amortized O(1) per insert — same argument as slice append"
+      ]
+    },
+    {
+      "id": "put-walkthrough",
+      "difficulty": "core",
+      "prompt": "Walk me through what your Put does, step by step, when called with a key whose bucket already holds two other entries.",
+      "expected_points": [
+        "hash the key and fold it into a bucket index",
+        "walk the chain comparing keys; replace the value in place on a match",
+        "no match: check the load factor (resize if needed), then link a new entry into the chain and grow size"
+      ]
+    },
+    {
+      "id": "average-vs-worst",
+      "difficulty": "core",
+      "prompt": "Hash tables are advertised as O(1) but their worst case is O(n). Explain both claims and what pushes a real table toward the worst case.",
+      "expected_points": [
+        "average: uniform hash + bounded load factor keeps chains at a small constant length",
+        "worst: all keys in one bucket degenerates into a linked-list scan",
+        "drivers: a bad hash function, never resizing, or adversarial keys crafted to collide (hash flooding)"
+      ]
+    },
+    {
+      "id": "tombstones",
+      "difficulty": "stretch",
+      "prompt": "Deleting from your chaining table was just unlinking a node. Why is deletion trickier in open addressing?",
+      "expected_points": [
+        "lookups follow the probe sequence until the key or an empty slot",
+        "emptying a slot punches a hole that ends other keys' probe sequences early",
+        "so deletions leave a tombstone marker meaning keep probing"
+      ]
+    },
+    {
+      "id": "go-map-connection",
+      "difficulty": "stretch",
+      "prompt": "Connect this lesson to the Go map you have used since S1: what are comma-ok and delete under the hood, and why is iteration order randomized?",
+      "expected_points": [
+        "the built-in map is a hash table; comma-ok is Get, the delete builtin is Delete",
+        "bucket order is a meaningless artifact of hashing, so Go randomizes iteration to stop code depending on it",
+        "a per-process random hash seed also makes crafted-collision attacks harder"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+level  count  sources
+debug      1  api
+info       5  api, worker
+warn       2  api, db
+error      2  db, worker
+
+total: 10 events, 0 skipped

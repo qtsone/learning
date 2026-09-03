@@ -1,0 +1,82 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words, with reference to their own code; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "layers",
+      "difficulty": "core",
+      "prompt": "Walk me through `SCOUT_TOP=5 scout scan --top 10`. Which value wins, and how does your code know the user typed the flag at all?",
+      "expected_points": [
+        "precedence is defaults < config file < environment < flags",
+        "the flag wins even though 10 is also the default value",
+        "cobra's Changed field distinguishes 'typed' from 'sitting at the default'; the same question is answered by pointer fields in the config file and by a non-empty environment value",
+        "every source collapses into one Settings struct before any handler works"
+      ]
+    },
+    {
+      "id": "processes-and-signals",
+      "difficulty": "core",
+      "prompt": "Someone presses Ctrl-C while `scout authors` is running. Trace what happens from the signal to the exit code.",
+      "expected_points": [
+        "signal.NotifyContext in main turns SIGINT into a cancelled context instead of killing the process",
+        "the context reaches the handler through ExecuteContext and cmd.Context()",
+        "exec.CommandContext kills the child — or refuses to start it if the context is already cancelled",
+        "ctx.Err() is checked before classifying the failure, because a killed child looks like an ordinary non-zero exit",
+        "Execute maps context.Canceled to 130 and prints one line on stderr; stop() restores the default handler so a second Ctrl-C still works"
+      ]
+    },
+    {
+      "id": "exit-codes",
+      "difficulty": "core",
+      "prompt": "Your tool exits 2 for a bad flag and 1 for an unreadable directory. Why is that distinction worth the code it costs?",
+      "expected_points": [
+        "exit codes are the contract with scripts and CI: 2 means the invocation is broken and will stay broken, 1 means the work failed and a retry might not",
+        "implemented as an ErrUsage sentinel wrapped into parse and validation failures, classified once by exitCode with errors.Is",
+        "no handler knows about exit codes and no error carries one around",
+        "honest about the gap: cobra's unknown-command error is not classifiable without matching on message text"
+      ]
+    },
+    {
+      "id": "injection",
+      "difficulty": "core",
+      "prompt": "Your tests run the whole program without a subprocess, a terminal, or a real environment variable. What makes that possible, and what did you have to give up to get it?",
+      "expected_points": [
+        "App carries Getenv, ConfigDir, Git and StdoutIsTerminal; main is the only code that touches the real ones",
+        "handlers write to cmd.OutOrStdout()/cmd.ErrOrStderr() and return errors rather than calling os.Exit",
+        "NewRootCmd is a constructor, so each run gets a tree with no leftover flag state",
+        "the cost is a little plumbing: values that could have been read anywhere now have to be passed in — and that is exactly what makes them substitutable"
+      ]
+    },
+    {
+      "id": "release",
+      "difficulty": "core",
+      "prompt": "You are cutting v1.0.0 of scout. How does the tag end up inside the binary, and what does `--version` print for a build made from a dirty working tree?",
+      "expected_points": [
+        "go build -ldflags \"-X main.version=… -X main.commit=… -X main.date=…\" patches package-level string vars at link time (consts cannot be patched)",
+        "an unpatched build honestly reports the defaults dev/none/unknown rather than faking a version",
+        "cross-compilation is GOOS/GOARCH with CGO_ENABLED=0; the same source produces every artifact",
+        "the version report is one struct so text and --json say the same thing"
+      ]
+    },
+    {
+      "id": "json-contract",
+      "difficulty": "stretch",
+      "prompt": "Which parts of scout's output are you allowed to change in a patch release, and which are not?",
+      "expected_points": [
+        "the human table is presentation: columns, colour and wording can change",
+        "the JSON documents are an API other people's scripts parse and change like one",
+        "documents rather than bare arrays so fields can be added; empty slices encode as [] not null; never any escape sequences in JSON",
+        "flag names and exit codes are also published interface"
+      ]
+    },
+    {
+      "id": "helper-process",
+      "difficulty": "stretch",
+      "prompt": "The tests make the test binary re-execute itself as a fake `git`. Why not just require git to be installed, or commit a small fixture binary?",
+      "expected_points": [
+        "determinism: canned output, canned exit code, canned stderr, identical everywhere",
+        "no external dependency, no network, no build step, works on every platform the tests run on",
+        "the sentinel environment variable is inherited by the child; the helper does nothing during an ordinary run and ends with os.Exit so the testing framework's own output never pollutes the parent's stdout"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words, with the exercise's own numbers cited where the question asks for evidence; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "tricolor-concurrent",
+      "difficulty": "core",
+      "prompt": "Explain tri-color marking in your own words, then tell me what goes wrong if the collector marks concurrently with no write barrier. What does Go trade away to keep pauses short?",
+      "expected_points": [
+        "white = unproven, grey = reachable but unscanned (work queue), black = scanned; roots are stacks/globals/registers; whatever is still white at the end is swept",
+        "concurrent mutation can hide a white object behind an already-black object, so it gets swept while live — a use-after-free",
+        "the write barrier hooks pointer writes during a cycle so no black-to-white edge goes unnoticed",
+        "the price is throughput: write barriers, mark assists, ~25% of GOMAXPROCS on background marking — spent to keep stop-the-world phases sub-millisecond",
+        "the STW phases are only mark setup (turning the write barrier on) and mark termination, not the whole mark — even stack scanning happens concurrently, one goroutine at a time"
+      ]
+    },
+    {
+      "id": "gogc-tradeoff",
+      "difficulty": "core",
+      "prompt": "What exactly does GOGC control? Using your own gcdemo numbers, predict what happens to GC cycle count and peak memory if you go from GOGC=100 to GOGC=400, and say which resource you are spending.",
+      "expected_points": [
+        "heap goal = live heap after last cycle x (1 + GOGC/100); default 100 means collect at twice the live set",
+        "raising GOGC means rarer cycles: less CPU spent collecting, more memory held (their numbers should show roughly 19 cycles -> 5 and the goal moving to ~5x live)",
+        "lowering it is the mirror image: more CPU, less memory",
+        "GOGC changes only the slack above the live set, not the live set itself",
+        "same control in code via debug.SetGCPercent"
+      ]
+    },
+    {
+      "id": "gomemlimit",
+      "difficulty": "core",
+      "prompt": "When would you set GOMEMLIMIT, and what does it do that GOGC cannot? Why did your GOGC=off run still collect — and collect more often than the default?",
+      "expected_points": [
+        "GOGC is relative to the live set, so a growing live set walks the heap goal past a container limit",
+        "GOMEMLIMIT is an absolute soft limit on total runtime-managed memory (heap + stacks + runtime metadata), engaged as the total approaches it",
+        "typical use: keep GOGC=100 and set GOMEMLIMIT just under the container limit as a backstop, leaving headroom for non-Go memory",
+        "with GOGC=off the limit becomes the only pacing signal, so the runtime collects near the ceiling — in gcdemo that ceiling (100MiB) is tighter than the default 2x goal, hence more cycles",
+        "it is soft on purpose: an overshoot degrades (GC capped at 50% CPU) instead of OOM-killing; it is not a leak fix"
+      ]
+    },
+    {
+      "id": "measure-allocs",
+      "difficulty": "core",
+      "prompt": "How did you measure the effect of each fix, and what did the numbers do? Why does this lesson gate on allocs/op rather than ns/op?",
+      "expected_points": [
+        "go test -bench=. -benchmem -run='^$' reports allocs/op and B/op; run it without -race",
+        "cites their own before/after: ~2054 -> 1 for FormatEvents, ~13 -> 1 for EventIDs, ~2060 -> ~0 for WriteEvents",
+        "testing.AllocsPerRun gives a deterministic allocation count the automated tests can assert on",
+        "times vary with machine load and are distorted several-fold by the race detector; allocation counts are stable and point at a specific mistake"
+      ]
+    },
+    {
+      "id": "three-fixes",
+      "difficulty": "core",
+      "prompt": "Walk me through the three fixes: what was each function doing wrong, and why did the change help? Include why WriteEvents needed a sync.Pool rather than one package-level buffer.",
+      "expected_points": [
+        "FormatEvents: s += x allocates a new string per iteration and copies everything so far; strings.Builder plus Grow (after summing lengths) makes it one allocation",
+        "EventIDs: append to a nil slice re-grows and re-copies about log2(n) times; make([]int64, 0, len(events)) is one allocation",
+        "WriteEvents: a temporary line string per event plus a scratch buffer built and discarded per call; write the pieces straight into a pooled buffer",
+        "sync.Pool is per-P and safe for concurrent use; one shared buffer would be a data race and would interleave output — TestWriteEventsConcurrent under -race catches it",
+        "pool contract: Reset before use, defer Put, New must be able to rebuild, contents can vanish at any GC"
+      ]
+    },
+    {
+      "id": "pointer-cost",
+      "difficulty": "core",
+      "prompt": "Why does the mark phase care more about pointers than about bytes? Give a concrete representation change that reduces mark cost without storing less data.",
+      "expected_points": [
+        "marking follows pointer slots in live objects; a pointer-free object lives in a noscan span and its contents are skipped entirely",
+        "a 1 MB []byte is one pointer to scan; a million-node pointer structure is a million objects to visit, in cache-hostile order",
+        "concrete: []Item instead of []*Item, indices into a value slice instead of pointers, one backing array instead of many small nodes",
+        "hidden pointers: strings, slices, maps, interfaces, funcs, and types like time.Time (*Location) make a struct scannable"
+      ]
+    },
+    {
+      "id": "zero-vs-one",
+      "difficulty": "stretch",
+      "prompt": "WriteEvents can reach zero allocations per call, but FormatEvents bottoms out at one. Why — and what would you have to change to get FormatEvents to zero?",
+      "expected_points": [
+        "FormatEvents returns a fresh string the caller keeps, so the result must be heap-allocated — the allocation is part of the API",
+        "WriteEvents only needs scratch space nobody retains, which is exactly what a pool recycles",
+        "to reach zero you must change the signature: write to a caller-supplied io.Writer or append into a caller-supplied buffer",
+        "shows the general rule: allocation is often a design decision, not an implementation detail"
+      ]
+    },
+    {
+      "id": "production-triage",
+      "difficulty": "stretch",
+      "prompt": "A service is being OOM-killed in a 512 MiB container. What do you look at before touching any knob, and what would make you reach for GOMEMLIMIT versus a code change?",
+      "expected_points": [
+        "measure first: is the live set genuinely large (mark cost, possibly a leak) or is it high allocation rate with a small live set?",
+        "gctrace or runtime metrics show live-after-sweep versus goal; a heap profile shows which call sites hold the bytes",
+        "GOMEMLIMIT below the container limit is the right backstop against the kill, and buys time — it does not fix a leak, it turns a crash into a CPU-burning slowdown",
+        "a growing live set needs a code or retention fix; high churn over a small live set is a pooling/preallocation problem"
+      ]
+    }
+  ]
+}

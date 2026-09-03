@@ -1,0 +1,76 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "cap-precise",
+      "difficulty": "core",
+      "prompt": "State the CAP theorem precisely — what do C, A, and P actually mean in it — and explain what is wrong with the popular 'pick any two of three' phrasing.",
+      "expected_points": [
+        "C is linearizability, A is every request to a non-failed node getting a non-error response, P is continuing to operate when the network splits",
+        "partitions are a fact of networks, so P is not a menu item — the real choice is C versus A, and only while a partition is happening",
+        "the choice is per operation, not per system, and CAP says nothing about normal (partition-free) operation"
+      ]
+    },
+    {
+      "id": "consistency-ladder",
+      "difficulty": "core",
+      "prompt": "Rank linearizable, sequential, causal, and eventual consistency from strongest to weakest, and for 'a buyer must see their own order immediately after checkout' name the weakest guarantee that suffices and the anomaly one step weaker allows.",
+      "expected_points": [
+        "linearizable > sequential > causal > eventual, with stronger models costing more coordination, latency, or availability",
+        "read-your-writes (a session guarantee in the causal family) suffices — global linearizability is overshoot for a single user's view",
+        "one step weaker (plain eventual): the buyer pays and their order list shows nothing — the design skill is picking the weakest model per feature and naming the anomaly"
+      ]
+    },
+    {
+      "id": "consensus-intuition",
+      "difficulty": "core",
+      "prompt": "Without implementation detail: how does a Raft-style cluster keep agreeing on a replicated log while nodes crash, and why do majorities make a second simultaneous leader impossible?",
+      "expected_points": [
+        "numbered terms with heartbeat-triggered elections; a candidate needs a majority of votes and each node votes once per term",
+        "log entries are committed once a majority hold them; any two majorities intersect, so committed entries survive leader changes and two leaders cannot win the same term",
+        "2f+1 nodes tolerate f failures; a minority partition can neither elect nor commit — it stalls instead of diverging"
+      ]
+    },
+    {
+      "id": "failure-modes",
+      "difficulty": "core",
+      "prompt": "Enumerate the four headline distributed failure modes from the lesson and give one concrete defense for each.",
+      "expected_points": [
+        "partial failure (slow vs dead indistinguishable) — timeouts plus retries paired with idempotency",
+        "network partition — per-operation C-vs-A decisions made in advance, majority quorums for single-valued facts",
+        "clock skew — never order cross-node events by wall clock; use a leader's sequence, terms/epochs, or logical clocks",
+        "split brain — majority election plus epoch/term or fencing numbers so a stale leader's writes are rejected"
+      ]
+    },
+    {
+      "id": "fallacies-bugs",
+      "difficulty": "core",
+      "prompt": "Take 'the network is reliable' and one other fallacy of your choice, and turn each into a specific production bug it causes.",
+      "expected_points": [
+        "reliable network: a lost reply is indistinguishable from a lost request, so a correct retry duplicates the effect (double charge) unless the operation is idempotent",
+        "zero latency (or another fallacy): e.g. a chatty in-datacenter call pattern moved cross-region multiplies ~100 ms per round trip into seconds",
+        "the pattern: an assumption that holds on one machine or in a demo silently fails at scale, so designs must state their network assumptions"
+      ]
+    },
+    {
+      "id": "pacelc",
+      "difficulty": "stretch",
+      "prompt": "CAP is silent most of the time. What trade-off does PACELC add for partition-free operation, and how does it show up in a two-region replication decision?",
+      "expected_points": [
+        "else-case: with no partition the trade is latency versus consistency",
+        "synchronous cross-region replication charges every write the inter-region round trip; asynchronous is fast but opens a lag window",
+        "systems that choose latency in the else-case usually choose availability under partition — the choices tend to pair"
+      ]
+    },
+    {
+      "id": "wall-clocks",
+      "difficulty": "stretch",
+      "prompt": "Why is 'keep the write with the latest timestamp' dangerous across nodes, and what does Go's monotonic clock reading protect — and not protect?",
+      "expected_points": [
+        "wall clocks skew, so a later write can carry an earlier timestamp and last-write-wins silently discards data with no error",
+        "cross-node ordering must come from system logic: a single leader's sequence numbers, terms/epochs, or version vectors",
+        "Go's time.Now embeds a monotonic reading so single-machine durations survive clock steps, but it does not survive serialization — it cannot order events between machines"
+      ]
+    }
+  ]
+}

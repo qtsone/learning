@@ -1,0 +1,83 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "layers-and-direction",
+      "difficulty": "core",
+      "prompt": "Draw the three packages in your notes service and the arrows between them. Which package declares the `Store` interface, and why that one rather than `memstore`?",
+      "expected_points": [
+        "api imports note; memstore imports note; nothing imports api or memstore except main",
+        "the domain sits at the center and depends on nobody — no net/http import in note",
+        "the interface is declared by the consumer (note), so storage implements the domain's vocabulary",
+        "swapping storage (e.g. SQLite later) touches one new implementation plus the wiring in main, not note or api"
+      ]
+    },
+    {
+      "id": "decode-and-validate",
+      "difficulty": "core",
+      "prompt": "A client posts `{\"title\":\"   \"}`. Walk through what happens from the request body to the response body, and say what the client sees.",
+      "expected_points": [
+        "decode into a Draft; a decode failure would itself be a 400 (invalid JSON), never a panic",
+        "trim before validating, so a whitespace-only title fails the required check",
+        "validation produces data — a field name to message map — not prose",
+        "the response is 400 with a fields map like {\"title\": \"required\"} the client can act on",
+        "limits count runes (utf8.RuneCountInString), not bytes"
+      ]
+    },
+    {
+      "id": "one-mapping-place",
+      "difficulty": "core",
+      "prompt": "Product wants duplicate titles rejected with 409 Conflict. What do you add, and where? Then explain what stops that answer from being 'edit every handler'.",
+      "expected_points": [
+        "a sentinel like note.ErrConflict defined in the domain next to ErrNotFound",
+        "one new case in respondError — the single function where an error meets a status code",
+        "errors.Is for sentinels, errors.As for typed errors like ValidationError",
+        "handlers only ever hand the error to respondError, so translation cannot drift between them"
+      ]
+    },
+    {
+      "id": "envelopes-and-codes",
+      "difficulty": "core",
+      "prompt": "Give the status code and body shape your service returns for POST /notes (valid), GET /notes (empty), and DELETE /notes/{id} (existing). Why is each one what it is?",
+      "expected_points": [
+        "201 Created with {\"data\": {…}} including the server-assigned id",
+        "200 with exactly {\"data\":[]} — an empty list must encode as [], never null, so return a non-nil slice",
+        "204 No Content with no body at all",
+        "Content-Type: application/json set before writing; success under data, failure under error, so clients branch on which key exists"
+      ]
+    },
+    {
+      "id": "thin-handlers",
+      "difficulty": "core",
+      "prompt": "`note/service_test.go` imports no httptest at all. What made that possible, and what would you lose if the trimming and validation rules lived in the handler instead?",
+      "expected_points": [
+        "the rules never needed HTTP, so they live below the edge and are testable as plain function calls",
+        "a handler's job is only decode, delegate, encode — past ~10 lines it is doing a lower layer's job",
+        "rules in handlers would be reachable only through requests: slower, noisier tests that point at a status code instead of the broken rule",
+        "the rules would also be unreachable from any other entry point (CLI, queue consumer, gRPC)"
+      ]
+    },
+    {
+      "id": "opaque-500",
+      "difficulty": "stretch",
+      "prompt": "Your store fails with `dial tcp 10.0.0.7:5432: connection refused`. What does the client get, what does the operator get, and why the difference?",
+      "expected_points": [
+        "the client gets 500 with exactly {\"error\": {\"message\": \"internal error\"}}",
+        "the real error goes to slog on the server, structured, so operators can debug",
+        "raw error text leaks topology and internals to an attacker and confuses users who cannot act on it",
+        "the client cannot fix a 500 anyway — that is what separates it from the 400 family"
+      ]
+    },
+    {
+      "id": "typed-nil-trap",
+      "difficulty": "stretch",
+      "prompt": "You build a `ValidationError{}`, find no problems, and return it. Every valid request now 400s. Explain the bug.",
+      "expected_points": [
+        "an error interface holding a non-nil concrete value is non-nil even when the map is empty",
+        "the caller's err != nil is true, so the handler renders a validation failure",
+        "the fix is to check len() and return a literal nil when there is nothing wrong",
+        "same typed-nil trap as returning a nil *T as an error interface"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words, answered about their own codebase with concrete examples; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "milestone-discipline",
+      "difficulty": "core",
+      "prompt": "Walk me through your milestones. What does 'this milestone is done' mean, and what did you do when one turned out to be too big?",
+      "expected_points": [
+        "every milestone leaves the project runnable and green (go test -race ./... passes), not just green at the end",
+        "done means the milestone's acceptance criterion holds and the behaviour can be run, not 'as good as I can make it'",
+        "an oversized milestone gets split, with the already-working part shipped and ticked",
+        "the walking skeleton came first: thinnest end-to-end slice, to retire integration risk and get feedback loops working on day one"
+      ]
+    },
+    {
+      "id": "layout",
+      "difficulty": "core",
+      "prompt": "Draw your import graph. Which package may import which, and what would it take to swap your storage for a different implementation?",
+      "expected_points": [
+        "dependencies point inward: the domain package imports none of their other packages; storage and transport import it",
+        "main is a composition root — wiring only, no rules, because it is the code tests cannot reach",
+        "the seam is a small interface declared by the consumer, so swapping storage is a new package plus one line in main",
+        "internal/ marks what is not promised to outside callers; no util/common/helpers packages"
+      ]
+    },
+    {
+      "id": "coverage-floor",
+      "difficulty": "core",
+      "prompt": "The harness requires 60% statement coverage. Why is that a floor and not a goal, and how would you tell an honest suite from one written to hit the number?",
+      "expected_points": [
+        "below the floor whole packages are unexercised and 'the tests pass' means little",
+        "above it the number stops carrying information — high coverage of trivia with low coverage of decision logic is a worse suite",
+        "chasing the number turns a measure into a target (assert-nothing tests, testing getters)",
+        "honest tests pin named behaviour at package boundaries; each one would catch something real breaking"
+      ]
+    },
+    {
+      "id": "idiomatic-go",
+      "difficulty": "core",
+      "prompt": "Show me one wrapped error and one context in your code. Why is the error wrapped that way, and where does cancellation actually stop work?",
+      "expected_points": [
+        "wrap with %w plus what was being attempted, so callers keep errors.Is/As matching",
+        "sentinel errors at package boundaries give callers something to match on",
+        "handle or return, never both; main turns errors into exit codes or responses",
+        "context is the first parameter, passed down to anything that can block, never stored in a struct",
+        "they can name the call that observes cancellation, or explain honestly that the work is not cancellable"
+      ]
+    },
+    {
+      "id": "adrs-revisited",
+      "difficulty": "core",
+      "prompt": "Which of your ADRs held up under the build, which did you revise, and what did reality tell you that you didn't know when you wrote it?",
+      "expected_points": [
+        "a specific decision that held, with the evidence that it held",
+        "a specific decision that changed, superseded by a new ADR rather than edited in place",
+        "the old ADR's status is updated to point at the one that replaced it",
+        "revising a decision under evidence is the point of the format, not a failure of planning"
+      ]
+    },
+    {
+      "id": "stop-gold-plating",
+      "difficulty": "stretch",
+      "prompt": "Point at something you deliberately did not build or did not abstract. How did you decide?",
+      "expected_points": [
+        "the milestone's acceptance criteria are the definition of done",
+        "non-goals from the PRD win by default; breaking one takes an ADR",
+        "rule of three — abstract on the third occurrence, not the first; one implementation and no test double means indirection, not flexibility",
+        "hard-code configuration until a second caller exists"
+      ]
+    },
+    {
+      "id": "concurrency-cost",
+      "difficulty": "stretch",
+      "prompt": "For every goroutine in your project: what does it own, who waits for it, and how does it stop? If there are none, why not?",
+      "expected_points": [
+        "each goroutine has a clear owner, a waiter (WaitGroup, channel, errgroup-style join) and a stop signal",
+        "no goroutine outlives the thing that started it without a documented reason",
+        "'sequential is fast enough at the sizes in my PRD' is a strong answer when backed by the expected workload",
+        "the race detector is part of the normal test command, not a pre-review ceremony"
+      ]
+    }
+  ]
+}

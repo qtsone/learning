@@ -1,0 +1,10 @@
+info|api|listening on :8080
+debug|api|route table built
+info|worker|queue drained
+warn|db|slow query: SELECT * FROM events WHERE level = \|error\|
+error|db|connection reset
+info|api|GET /events 200
+error|worker|job 41 failed: c:\\jobs\\41
+info|worker|job 42 done
+warn|api|deprecated header X-Token
+info|api|shutting down

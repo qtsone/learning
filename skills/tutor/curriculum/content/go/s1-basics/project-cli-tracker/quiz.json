@@ -1,0 +1,73 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "design-walkthrough",
+      "difficulty": "core",
+      "prompt": "Walk me through your Tracker type: what state does it hold, why did you pick that representation, and how do structs, slices, maps, and methods each show up in your design?",
+      "expected_points": [
+        "Task is a struct grouping id, title, done; Tracker holds tasks in a slice to keep insertion order",
+        "methods on *Tracker (pointer receiver) so Add/Complete mutate the real state, not a copy",
+        "a map appears in Summary (and possibly elsewhere); learner can say why the main store is a slice, not a map (order)"
+      ]
+    },
+    {
+      "id": "persistence-errors",
+      "difficulty": "core",
+      "prompt": "Your program starts by loading tracker.txt. What happens when the file is missing, and what happens when a line is garbage? How does errors.Is still recognize your corrupt-file error after you wrapped it?",
+      "expected_points": [
+        "missing file is not an error: detected with errors.Is(err, os.ErrNotExist), Load returns an empty tracker",
+        "a bad line fails with an error wrapping the ErrCorrupt sentinel and naming the line number",
+        "fmt.Errorf with %w keeps the sentinel in the error chain, and errors.Is walks that chain"
+      ]
+    },
+    {
+      "id": "cli-path",
+      "difficulty": "core",
+      "prompt": "Trace `go run . complete 2` from the shell to the updated file: where do the words 'complete' and '2' come from, and which functions run in what order?",
+      "expected_points": [
+        "os.Args carries the arguments; os.Args[0] is the program name, the rest go to dispatch",
+        "dispatch switches on the subcommand and converts \"2\" with strconv.Atoi",
+        "main sequences it: Load, dispatch (which calls Complete), Save, print — errors go to stderr with exit 1"
+      ]
+    },
+    {
+      "id": "table-tests",
+      "difficulty": "core",
+      "prompt": "You added your own table-driven test. What did you test, and what does the table style buy you over writing a separate test function per case?",
+      "expected_points": [
+        "learner can describe their own test and why the cases differ meaningfully",
+        "one assertion body, many cases: adding a case is one struct literal, not copy-pasted logic",
+        "t.Run gives each case a name so failures point at the exact input"
+      ]
+    },
+    {
+      "id": "package-split",
+      "difficulty": "core",
+      "prompt": "Why does the tracker logic live in its own package instead of package main? What rule decided which identifiers got capital letters?",
+      "expected_points": [
+        "tracker never prints or reads os.Args, so its logic is testable and reusable; main stays a thin shell",
+        "exported (capitalized) names are the package's public API — Task, Add, ErrNotFound; internals stay lowercase",
+        "echoes hello-world's Greeting-vs-main split at project scale"
+      ]
+    },
+    {
+      "id": "list-copy",
+      "difficulty": "stretch",
+      "prompt": "List returns a copy of the task slice. What could go wrong if it returned the internal slice directly?",
+      "expected_points": [
+        "slices share their backing array, so the caller could mutate the tracker's own data without calling any method",
+        "the copy keeps every state change flowing through Add/Complete, where the invariants live"
+      ]
+    },
+    {
+      "id": "concurrent-runs",
+      "difficulty": "stretch",
+      "prompt": "Two terminals run your tracker at the same moment. What can happen to tracker.txt, and why can't your current code prevent it?",
+      "expected_points": [
+        "both load the same state, both save, last write wins — one terminal's change is silently lost",
+        "the program has no coordination between processes; recognizing the gap is enough — solutions come in later stages"
+      ]
+    }
+  ]
+}

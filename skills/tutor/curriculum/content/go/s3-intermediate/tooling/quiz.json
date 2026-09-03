@@ -1,0 +1,81 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "compiler-blind-spots",
+      "difficulty": "core",
+      "prompt": "Name three bugs from the exercise that compiled cleanly but were caught by go vet or staticcheck. For each: why couldn't the compiler catch it?",
+      "expected_points": [
+        "printf verb mismatch: variadic ...any type-checks any argument against any verb",
+        "copied mutex via value receiver: copying a struct is legal semantics, but the copy's lock guards nothing",
+        "discarded context cancel: the language never requires a returned function to be called",
+        "malformed struct tag, deprecated API, or dead code as further examples — all legal strings/calls/declarations",
+        "vet and staticcheck check facts about meaning and usage, not language legality"
+      ]
+    },
+    {
+      "id": "golangci-config",
+      "difficulty": "core",
+      "prompt": "Walk me through the .golangci.yml you wrote: what does each part do, and how do you read a finding line from `golangci-lint run`?",
+      "expected_points": [
+        "one binary running many linters in parallel with caching, configured at the repo root",
+        "default: none plus an explicit enable list means every linter is a deliberate choice, keeping findings signal",
+        "a finding reads file:line:col, message, then the producing linter in parentheses — the linter name is where to look up docs",
+        "errcheck caught unchecked error returns that neither vet nor staticcheck reported"
+      ]
+    },
+    {
+      "id": "mvs-and-gosum",
+      "difficulty": "core",
+      "prompt": "Your module requires sampler v1.3.1, a dependency requires v1.3.0, and v1.9.0 is the newest release. Which version builds, and why? And what does go.sum guarantee about it?",
+      "expected_points": [
+        "v1.3.1 — minimal version selection takes the maximum of the required minimums",
+        "never v1.9.0: Go does not silently take the newest; upgrades happen only via explicit go get",
+        "deterministic and reproducible from go.mod alone, no dependency solver",
+        "go.sum stores content hashes: a later download with different bits fails the build — integrity and tamper evidence, not version selection"
+      ]
+    },
+    {
+      "id": "pprof-profiles",
+      "difficulty": "core",
+      "prompt": "What is the difference between a CPU profile and a heap profile, and what symptom would send you to each?",
+      "expected_points": [
+        "CPU profile: sampled call stacks showing where execution time goes — reach for it when the program is slow",
+        "heap profile: sampled allocation sites showing where memory comes from — reach for it when memory grows or GC pressure dominates",
+        "obtained via go test -cpuprofile/-memprofile (or net/http/pprof on servers) and read with go tool pprof",
+        "profile before optimizing — guesses about hot spots are unreliable"
+      ]
+    },
+    {
+      "id": "maintenance-commands",
+      "difficulty": "core",
+      "prompt": "Pick the right command and justify it: (a) go.mod lists a dependency nothing imports anymore; (b) your app should build against a local checkout of your library; (c) you need the exact version of a dependency in use; (d) generated code is stale after its source changed.",
+      "expected_points": [
+        "a: go mod tidy — syncs go.mod/go.sum with actual imports",
+        "b: go work — a workspace overrides module resolution locally without editing go.mod",
+        "c: go list -m <module> or go list -m all — asks the build itself",
+        "d: go generate ./... — reruns //go:generate directives"
+      ]
+    },
+    {
+      "id": "flat-vs-cum",
+      "difficulty": "stretch",
+      "prompt": "In `go tool pprof -top`, what do the flat and cum columns mean, and what does it tell you when a function has large cum but tiny flat?",
+      "expected_points": [
+        "flat: time spent in the function's own code; cum: including everything it called",
+        "large cum with tiny flat means the function delegates — the work happens in its callees",
+        "in the exercise, JoinNaive's time shows up as runtime allocation/copy work attributed up to it through cum"
+      ]
+    },
+    {
+      "id": "nolint-discipline",
+      "difficulty": "stretch",
+      "prompt": "A linter finding is a false alarm in context. What is the disciplined way to suppress it, and what does a bare `//nolint` cost the team?",
+      "expected_points": [
+        "target the specific linter and state a reason: //nolint:errcheck // why",
+        "a bare //nolint suppresses every linter on that line indefinitely and explains nothing",
+        "each suppression is a reviewable decision; unexplained ones hide future real findings"
+      ]
+    }
+  ]
+}

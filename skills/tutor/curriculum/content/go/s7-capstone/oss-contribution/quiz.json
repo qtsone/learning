@@ -1,0 +1,101 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words, answered about the actual project, issue and PR they worked on rather than in the abstract; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "project-and-issue-fit",
+      "difficulty": "core",
+      "prompt": "Why this project and this issue? Give me the signals you checked, with dates, and the triage answers that made the issue safe to start.",
+      "expected_points": [
+        "health signals with evidence rather than adjectives: commit recency, maintainer reply latency, merged PRs from non-maintainers, unassigned recent good-first-issue labels, a CONTRIBUTING.md that describes the real process, CI on PRs",
+        "merged PRs from outsiders is the strongest single signal — labels without outside merges are labels, not a pipeline",
+        "triage: reproduced on the current default branch, nobody else already on it, a maintainer wants it, it is in scope, and the size estimate includes test, docs and review rounds",
+        "prefers a project they use and a subsystem they can read, over prestige or star count",
+        "names the weakest signal on the chosen project and what they would do if it bit them"
+      ]
+    },
+    {
+      "id": "subsystem-orientation",
+      "difficulty": "core",
+      "prompt": "Explain how the subsystem you patched works, as if I maintain it. How did you find the code path, and what could your change break?",
+      "expected_points": [
+        "describes the code as it was before the change, not just the diff",
+        "names the technique that actually worked: grepping the exact error or output string, starting from a failing test, following one call chain, reading types before functions",
+        "got the project building and its suite green before editing anything, so later red is theirs",
+        "used git log or blame to learn why the code is the way it is",
+        "names concrete blast radius: callers, platforms, exported API, downstream behaviour"
+      ]
+    },
+    {
+      "id": "their-conventions",
+      "difficulty": "core",
+      "prompt": "What did CONTRIBUTING.md require, and where did following their conventions mean doing something differently from how you would do it in your own capstone?",
+      "expected_points": [
+        "how to run tests as CI does, style and lint requirements, commit and PR conventions, DCO sign-off or CLA — and that the legal step is done early because it blocks a merge indefinitely",
+        "matched local test style, error vocabulary, naming and comment style rather than personal preference",
+        "gofmt clean and vet clean before pushing",
+        "no new dependency without asking, and no new exported API sneaked in",
+        "a specific example of a preference they suppressed because it was not their codebase"
+      ]
+    },
+    {
+      "id": "diff-and-description",
+      "difficulty": "core",
+      "prompt": "Walk me through your PR: why is the diff that size, what did you leave out, and what does the description tell a reviewer who has forgotten the issue?",
+      "expected_points": [
+        "one concern per PR; a second bug becomes a second issue, not more diff",
+        "no drive-by refactors or reformatting — they add review surface and wreck git blame",
+        "a regression test that fails before and passes after, stated as a claim the reviewer can check",
+        "description carries what changed, why this approach and what was rejected, how it was tested, and what was deliberately left out",
+        "smaller PRs get reviewed sooner; making the maintainer's yes cheap is the actual leverage"
+      ]
+    },
+    {
+      "id": "review-response",
+      "difficulty": "core",
+      "prompt": "Take the review comment you liked least. What did you do with it — and where does disagreeing stop?",
+      "expected_points": [
+        "three legitimate responses: agree and fix, ask a narrow question with a proposal, or disagree once with evidence",
+        "assumes the maintainer has context not visible in the code — a downstream consumer, an old bug, a platform difference",
+        "replies on every thread rather than silently pushing, and re-requests review once when done",
+        "implementing something they disagree with is a normal outcome, stated plainly and moved past",
+        "repeating an argument after a decision, or taking it to another channel, is how a mergeable PR dies"
+      ]
+    },
+    {
+      "id": "reflection",
+      "difficulty": "core",
+      "prompt": "What was different about working in someone else's codebase, and what will you do differently on the next contribution?",
+      "expected_points": [
+        "concrete differences: settled conventions, invisible history, no authority to change the design, a reviewer who owes them nothing",
+        "something the maintainer knew that could not be read off the code",
+        "a specific misjudgement — diff size, a claim posted before reproducing, an assumption about the subsystem that was wrong",
+        "three specific changes for next time rather than general resolutions",
+        "what it changed about their own project's front door: README, contribution docs, tests a stranger can run"
+      ]
+    },
+    {
+      "id": "claiming-and-waiting",
+      "difficulty": "stretch",
+      "prompt": "What makes a claim comment worth replying to, and what do you do during three weeks of silence?",
+      "expected_points": [
+        "a claim shows evidence of reproduction, the code path found, a proposed approach small enough to argue with, one or two narrow questions, and a rough timeline",
+        "read CONTRIBUTING first and follow it over any general advice; claim one issue at a time and say so publicly if you drop it",
+        "silence is the default state of open source; one polite ping after two full weeks, and no more",
+        "keep the branch rebased and CI-green; spend the wait on a second small issue, a review of someone else's PR, or docs",
+        "on a small clearly-scoped bug, sending the patch after a week of silence is reasonable; on anything larger, silence means do not build it yet"
+      ]
+    },
+    {
+      "id": "rejection",
+      "difficulty": "stretch",
+      "prompt": "Your PR gets closed. What are the likely reasons, what do you say, and why is that not a failed lesson?",
+      "expected_points": [
+        "scope, project direction, maintenance burden, timing, or someone got there first — usually not code quality",
+        "reply once, thank them, and ask what would have made it acceptable; that answer is the most valuable output",
+        "do not argue, reopen, or repost elsewhere",
+        "the merge was never theirs to control — the process and the review conversation are what is graded",
+        "an unrequested feature is the most commonly rejected contribution, which is why maintainer agreement comes before code"
+      ]
+    }
+  ]
+}

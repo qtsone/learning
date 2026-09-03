@@ -1,0 +1,80 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "branch-model",
+      "difficulty": "core",
+      "prompt": "In your own words: what *is* a git branch, and why do teams work on branches instead of committing straight to main?",
+      "expected_points": [
+        "a branch is a movable name pointing at a commit — not a copy of the project",
+        "creating one is nearly free; committing moves the branch you are on",
+        "main stays the always-working version while experiments live safely elsewhere",
+        "parallel lines of work can exist and dead ends are cheap to discard"
+      ]
+    },
+    {
+      "id": "merge-mechanics",
+      "difficulty": "core",
+      "prompt": "Walk me through taking a change from a branch into main: the commands, and when git fast-forwards versus creates a merge commit.",
+      "expected_points": [
+        "git switch -c to create/switch, commit there, git switch main, git merge <branch>",
+        "fast-forward: main did not move since branching, so the tag just slides forward — no new commit",
+        "merge commit: both sides gained commits, so git makes a commit with two parents"
+      ]
+    },
+    {
+      "id": "conflict",
+      "difficulty": "core",
+      "prompt": "What is a merge conflict, and what exactly do you do when git reports one?",
+      "expected_points": [
+        "both branches changed the same lines, so git cannot choose and pauses the merge",
+        "git writes both versions into the file fenced by <<<<<<< / ======= / >>>>>>> markers",
+        "edit the file to the final text, remove the markers, git add, then git commit to finish",
+        "git merge --abort backs out; a conflict is a question, not breakage"
+      ]
+    },
+    {
+      "id": "remotes-sync",
+      "difficulty": "core",
+      "prompt": "What is a remote, and what do push and pull actually move?",
+      "expected_points": [
+        "a remote is another full copy of the repository known by a nickname, origin by convention",
+        "it can be GitHub or even a plain folder — the commands are identical",
+        "push uploads commits to the remote branch; uncommitted edits never leave your machine",
+        "pull is fetch (download new commits, update origin/main) plus merge into your branch"
+      ]
+    },
+    {
+      "id": "three-mains",
+      "difficulty": "core",
+      "prompt": "People say 'main' about three different things: your main, the server's main, and origin/main. Untangle them.",
+      "expected_points": [
+        "local branch main lives in your repo and moves when you commit",
+        "the remote branch main lives in origin's repo and moves when anyone pushes",
+        "origin/main is a remote-tracking branch: your read-only bookmark of the server's main from the last time you talked to it",
+        "origin/main can be stale — it only updates on push, pull, or fetch"
+      ]
+    },
+    {
+      "id": "pr-flow",
+      "difficulty": "core",
+      "prompt": "Walk through the pull-request flow from starting a change to it landing on main. Which parts are git and which are GitHub?",
+      "expected_points": [
+        "branch, commit, and push the branch — all git",
+        "opening the PR, review discussion, and the merge button happen on GitHub",
+        "pushing more commits to the same branch updates the open PR",
+        "after the server-side merge, everyone git pulls main; the point is review and a written record"
+      ]
+    },
+    {
+      "id": "stale-tracking",
+      "difficulty": "stretch",
+      "prompt": "A teammate pushed to main an hour ago; you have run no git commands since. Where does your origin/main point right now, and what two things happen when you run git pull?",
+      "expected_points": [
+        "origin/main still points at the old commit — nothing updates it until you contact the remote",
+        "pull first fetches, moving origin/main to the teammate's commit",
+        "then it merges origin/main into your local main"
+      ]
+    }
+  ]
+}

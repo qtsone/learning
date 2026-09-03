@@ -1,0 +1,65 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "what-is-a-method",
+      "difficulty": "core",
+      "prompt": "In your own words: what is a method in Go, and how does it differ from a plain function? Where does the receiver go in the declaration?",
+      "expected_points": [
+        "a method is a function with a receiver parameter written between func and the name",
+        "called with the dot syntax on a value of the receiver type",
+        "otherwise an ordinary function — no hidden behavior; it groups behavior with the type and namespaces the name per type"
+      ]
+    },
+    {
+      "id": "receiver-choice",
+      "difficulty": "core",
+      "prompt": "You are adding a method to a type. How do you decide between `func (t T)` and `func (t *T)`? Give your rules.",
+      "expected_points": [
+        "mutation of the receiver requires a pointer receiver",
+        "large structs called often favor a pointer to avoid copying every field",
+        "otherwise prefer a value receiver — it promises the call cannot change the caller's data",
+        "consistency convention: if any method needs a pointer receiver, give the type pointer receivers throughout"
+      ]
+    },
+    {
+      "id": "copy-trap",
+      "difficulty": "core",
+      "prompt": "A teammate writes `func (a Account) Deposit(amount int) { a.Balance += amount }` and the balance never changes. Explain to them exactly why.",
+      "expected_points": [
+        "the receiver is passed by value like every argument, so a is a field-by-field copy",
+        "the method mutates the copy, which is discarded when it returns",
+        "a pointer receiver makes the receiver refer to the caller's Account, so the write lands in the shared value"
+      ]
+    },
+    {
+      "id": "method-sets",
+      "difficulty": "core",
+      "prompt": "What is in the method set of `T`, what is in the method set of `*T`, and why does `*T` get more?",
+      "expected_points": [
+        "method set of T: the value-receiver methods",
+        "method set of *T: value-receiver and pointer-receiver methods — everything",
+        "a pointer can always reach its value by dereferencing, but a value does not always have an address to offer a pointer method"
+      ]
+    },
+    {
+      "id": "call-site-sugar",
+      "difficulty": "stretch",
+      "prompt": "`acc` is a variable of type `Account` and `Withdraw` has receiver `*Account`. Why does `acc.Withdraw(10)` compile, and when would that same call shape fail?",
+      "expected_points": [
+        "the compiler rewrites it to (&acc).Withdraw(10) because acc is addressable",
+        "it fails on non-addressable values, e.g. Account{...}.Withdraw(10) on a literal or m[key].Withdraw(10) on a map element"
+      ]
+    },
+    {
+      "id": "named-types",
+      "difficulty": "stretch",
+      "prompt": "Why did the exercise define `type Cents int` instead of hanging `Dollars` directly on `int`?",
+      "expected_points": [
+        "methods can only be declared on named types defined in the same package",
+        "you cannot add methods to built-ins or to types another package owns",
+        "the named type also documents meaning and requires explicit conversion like Cents(1234)"
+      ]
+    }
+  ]
+}

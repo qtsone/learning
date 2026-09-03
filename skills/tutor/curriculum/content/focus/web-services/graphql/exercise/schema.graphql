@@ -1,0 +1,35 @@
+# The schema is the contract. Everything in schema.go is a hand-written
+# transcription of this file; a production server generates that code from this
+# file with gqlgen instead. Read this first — it is the whole API surface.
+
+type Query {
+  # first bounds the page. Without it the server assumes its default page size,
+  # which is what the complexity analyser charges for.
+  posts(first: Int): [Post!]!
+  post(id: ID!): Post
+}
+
+type Mutation {
+  createPost(authorId: ID!, title: String!): Post!
+}
+
+type Post {
+  id: ID!
+  title: String!
+  author: Author!
+  comments(first: Int): [Comment!]!
+}
+
+type Comment {
+  id: ID!
+  body: String!
+  author: Author!
+}
+
+type Author {
+  id: ID!
+  name: String!
+  # Author.posts closes a cycle: Post.author.posts.author.posts … is a legal
+  # query of unbounded depth. This is why depth limiting exists.
+  posts(first: Int): [Post!]!
+}

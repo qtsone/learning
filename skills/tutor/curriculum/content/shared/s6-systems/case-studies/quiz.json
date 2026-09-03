@@ -1,0 +1,73 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words, with numbers and named trade-offs rather than component lists; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "shortener-end-to-end",
+      "difficulty": "core",
+      "prompt": "Walk me through a URL shortener end to end — key generation, storage, the redirect path, and analytics — and defend one choice in each of those four areas.",
+      "expected_points": [
+        "key generation: random plus conditional insert with retry, or a counter handed out in ranges, with the collision or coordination cost named",
+        "storage: a single-key lookup, hash-partitioned by key, with read replicas or a KV store — chosen by access pattern and operations, not fashion",
+        "redirect path: cache the hot set, expect a high hit rate, negative-cache misses, and consider edge locations for cross-ocean latency",
+        "analytics: emit an event to a queue and aggregate asynchronously; never write click rows on the redirect path",
+        "each defended by a requirement, with the alternative and its cost named"
+      ]
+    },
+    {
+      "id": "chat-mechanics",
+      "difficulty": "core",
+      "prompt": "For a chat system, explain how you handle connections, message fan-out, per-conversation ordering, and delivery to someone who was offline.",
+      "expected_points": [
+        "long-lived connections on a thin gateway tier plus a session registry; polling is ruled out by arithmetic",
+        "the durable log is the commit point and delivery is best-effort; fan-out on write for small conversations, read from the shared log for very large ones",
+        "ordering from a per-conversation sequence number assigned by one owner — partition by conversation, never sort by timestamps",
+        "offline delivery as sync from a per-device cursor, with client-generated message ids for deduplication and bounded catch-up"
+      ]
+    },
+    {
+      "id": "structure",
+      "difficulty": "core",
+      "prompt": "A prompt lands: 'design a system that shortens links'. What do you do first, second, third — and how do you decide what to go deep on?",
+      "expected_points": [
+        "requirements and scope first, functional split must/nice plus non-functional targets and an out-of-scope list",
+        "estimation second, ending in a named dominant axis",
+        "high-level design third, walking one or two flows end to end, every box tied to a requirement",
+        "deep dives chosen by the estimate — the dominant axis picks them, not taste",
+        "bottlenecks and evolution last; loop back and amend earlier phases when a deep dive changes them"
+      ]
+    },
+    {
+      "id": "ten-x",
+      "difficulty": "core",
+      "prompt": "Take either design you built and answer as if I were interviewing you: what breaks first at 10x the load, and what do you do about it?",
+      "expected_points": [
+        "checks the drill: singleton, hot key or partition, unbounded growth, synchronous fan-out, coordination point",
+        "names one specific component of their own design, not a generic layer",
+        "names the first symptom they would see on a dashboard",
+        "names the next evolution step and what that step costs — complexity, money, staleness, or operational load"
+      ]
+    },
+    {
+      "id": "mutable-links",
+      "difficulty": "stretch",
+      "prompt": "Links become editable and a takedown must take effect globally within 60 seconds. Which parts of the immutable-link design stop working, and what replaces them?",
+      "expected_points": [
+        "the invalidation-free cache is gone: entries can now be stale, so TTLs and purges become load-bearing",
+        "301 becomes unusable because browsers and proxies cache it beyond your reach; 302 or 307 plus no-store headers",
+        "a purge is best-effort, so a TTL ceiling is needed as the backstop that bounds worst-case staleness",
+        "the tighter the propagation rule, the shorter the TTL and the higher the origin load — that is the trade-off to state"
+      ]
+    },
+    {
+      "id": "same-spec-different-system",
+      "difficulty": "stretch",
+      "prompt": "Two chat products have nearly identical feature lists but very different architectures. Give me the non-functional requirements most likely to explain that, with the design consequence of each.",
+      "expected_points": [
+        "concurrent connection count decides whether the gateway tier is a handful of boxes or hundreds",
+        "retention and searchability decide storage tiering and cost, and attachments can dominate text by orders of magnitude",
+        "residency or compliance rules force regional partitioning of content and constrain what may be global",
+        "latency and ordering guarantees decide the partitioning key and whether coordination is needed at all"
+      ]
+    }
+  ]
+}

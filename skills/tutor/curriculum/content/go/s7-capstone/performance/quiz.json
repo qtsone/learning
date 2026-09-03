@@ -1,0 +1,100 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words, answered about their own capstone with concrete numbers and committed evidence; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "measurable-goal",
+      "difficulty": "core",
+      "prompt": "State your performance goal as you wrote it before you touched any code: which operation, which input, what it cost, what you wanted.",
+      "expected_points": [
+        "names an operation someone waits for, not an internal function that was convenient to benchmark",
+        "input size and shape taken from the PRD's non-functional requirements",
+        "a before number and a target number, both with units",
+        "one axis — latency, throughput or memory — because a goal with three has none",
+        "the target came from somewhere real: a perception threshold, a timeout, a memory limit, an SLO"
+      ]
+    },
+    {
+      "id": "diagnosis",
+      "difficulty": "core",
+      "prompt": "Walk me through how you found the bottleneck. What did you expect the profile to say, and what did it actually say?",
+      "expected_points": [
+        "top-down: time the whole operation, then profile the layer that owns the time",
+        "chose the profile by symptom — CPU profile for busy, heap alloc_space for garbage, execution trace or block/mutex profile when the clock is long but the CPU is idle",
+        "reads flat versus cum correctly and used -list to get to specific lines",
+        "checked the share before the function: a 3% cost cannot pay back more than 3% (Amdahl)",
+        "can say where their intuition was wrong, which is the point of measuring first"
+      ]
+    },
+    {
+      "id": "proving-the-win",
+      "difficulty": "core",
+      "prompt": "How do I know your optimization actually worked? Show me the numbers and tell me how you produced them.",
+      "expected_points": [
+        "same benchmark, same inputs, same -count, same machine, before and after; both outputs committed",
+        "repeated runs (benchstat, or medians and ranges) — a single run each side is a coin flip",
+        "no -race while benchmarking; instrumentation distorts the ratios",
+        "benchstat's ~ means no detectable difference no matter what the means say",
+        "allocs/op and B/op quoted next to ns/op, because allocation counts survive other people's hardware"
+      ]
+    },
+    {
+      "id": "win-classification",
+      "difficulty": "core",
+      "prompt": "Was your win algorithmic or constant-factor, and how does your data show it? Under what conditions is your headline number true?",
+      "expected_points": [
+        "the size sweep answers it: parallel curves mean a constant-factor win, a collapsed ratio means the growth term changed",
+        "says which variable the cost tracks now (store size, matches, output length), not just 'it is faster'",
+        "a constant-factor win applied to the wrong algorithm gets thrown away when the algorithm is fixed",
+        "the claim carries its conditions: input size, selectivity or data shape, hardware, Go version"
+      ]
+    },
+    {
+      "id": "trade-off",
+      "difficulty": "core",
+      "prompt": "What did this optimization cost, and why is that price acceptable here? What would make you undo it?",
+      "expected_points": [
+        "a specific cost: readability, extra memory, an invariant now maintained in two places, a cache that can go stale, a new dependency",
+        "'no trade-off' is not an answer — at minimum the code is harder to read than the obvious version",
+        "the price is justified against the sizes in their PRD, not in the abstract",
+        "a concrete flip condition: the workload change or new feature that would make them revert"
+      ]
+    },
+    {
+      "id": "correctness-unchanged",
+      "difficulty": "core",
+      "prompt": "How do you know behaviour did not change? Which test would fail if it had?",
+      "expected_points": [
+        "names the tests, and they are the ones listed in PERF.md and run by the harness",
+        "existing tests were written against the code that was replaced, so passing them proves less than it feels like",
+        "a differential test keeps the old implementation as an oracle and compares over generated input",
+        "covers the corners optimizations break: empty input, duplicates, values needing normalisation, no match, concurrent access",
+        "fuzzing old against new, or golden files, where the input or output space is wide"
+      ]
+    },
+    {
+      "id": "when-not-to",
+      "difficulty": "stretch",
+      "prompt": "Name something in your project you deliberately did not optimize. Make the case with a number.",
+      "expected_points": [
+        "a share from the profile, or a latency already inside the SLO",
+        "the win would sit inside measurement noise",
+        "the speed would be bought with correctness risk — cache staleness, a new race, an invariant split in two",
+        "the real fix is at a different layer: cache, batch, queue, or delete the work (S6 vocabulary)",
+        "the bottleneck is I/O or round trips, where a tuned Go loop changes nothing"
+      ]
+    },
+    {
+      "id": "graduation",
+      "difficulty": "core",
+      "prompt": "Talk about your capstone the way you would to a senior engineer joining the team: what it does, where the boundaries are, what breaks first, and what is wrong with it.",
+      "expected_points": [
+        "what it does and who for, without describing the implementation",
+        "package boundaries and dependency direction, with the seam they would swap",
+        "numbers instead of adjectives for size, latency and memory, and how they know them",
+        "failure modes: what breaks first under load, what happens when a dependency is down, what the operator does",
+        "at least three known weaknesses, a decision they reversed with the evidence, and what they would cut under time pressure",
+        "the next bottleneck and how they would confirm it"
+      ]
+    }
+  ]
+}

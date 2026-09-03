@@ -1,0 +1,89 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "proto-workflow",
+      "difficulty": "core",
+      "prompt": "A teammate asks for a new RPC that returns a task's history. Sketch the `.proto` changes you would write, then tell me what you run, which files change, and which of those you commit — and why.",
+      "expected_points": [
+        "an `rpc` line inside `service TaskService` plus the request/response messages it needs, field numbers starting at 1, any enum's zero value named `..._UNSPECIFIED`",
+        "picks streaming or a repeated field for the history and can justify it (unbounded history streams, a short bounded one does not need to)",
+        "runs the generator — `buf generate` (or protoc with the protoc-gen-go and protoc-gen-go-grpc plugins) — never hand-edits the `.pb.go` files",
+        "`taskboard.pb.go` and `taskboard_grpc.pb.go` are regenerated; both are committed next to the `.proto` so a fresh clone builds and tests with no protoc installed",
+        "the server keeps compiling because it embeds `UnimplementedTaskServiceServer` — the new method returns `Unimplemented` until they write it"
+      ]
+    },
+    {
+      "id": "field-numbers",
+      "difficulty": "core",
+      "prompt": "In a .proto message, what do the field numbers (`string id = 1;`) actually do, and which of these is safe against deployed old clients: renaming a field, adding a new field, reusing a deleted field's number?",
+      "expected_points": [
+        "the wire format identifies fields by number, not name — names never leave source code",
+        "renaming is safe; adding a field with a fresh number is safe both directions (unknown fields are skipped, missing fields read as zero values)",
+        "reusing or changing a number silently decodes old data into the wrong field — deleted numbers should be marked reserved"
+      ]
+    },
+    {
+      "id": "status-and-deadlines",
+      "difficulty": "core",
+      "prompt": "Why must a gRPC handler return `status.Error(codes.NotFound, ...)` instead of a plain `errors.New`, and what happens to a client's context deadline when it makes a call?",
+      "expected_points": [
+        "errors cross a process boundary; anything that is not a status error collapses to codes.Unknown on the client",
+        "codes are the cross-language error vocabulary, like HTTP status codes were for their REST service",
+        "the deadline travels with the call — the server handler's ctx carries (approximately) the same deadline, so the whole chain shares one time budget",
+        "clients recover the code with status.Code / status.FromError"
+      ]
+    },
+    {
+      "id": "streaming-vs-unary",
+      "difficulty": "core",
+      "prompt": "ListTasks is a server-streaming RPC. When does streaming beat N unary calls or one big unary response — and when is it not worth it?",
+      "expected_points": [
+        "large or unbounded result sets: items are processed as they arrive, memory stays flat on both sides",
+        "one call means one deadline, one auth pass, one cancellation for the whole transfer",
+        "for small bounded results a repeated field in a unary response is simpler — streaming earns its complexity with volume"
+      ]
+    },
+    {
+      "id": "interceptor-vs-middleware",
+      "difficulty": "core",
+      "prompt": "Compare your AuthUnaryInterceptor to the HTTP auth middleware you wrote earlier in this stage. What plays the role of `next.ServeHTTP`, where do the credentials live, and what does a unary interceptor NOT cover?",
+      "expected_points": [
+        "calling handler(ctx, req) proceeds; returning an error short-circuits — same shape as middleware wrapping a handler",
+        "credentials ride in metadata (read with metadata.FromIncomingContext, attached with AppendToOutgoingContext), the analog of HTTP headers",
+        "registered once on the server and sees every method, rather than being attached per route",
+        "it only runs for unary RPCs — streaming RPCs need a separate stream interceptor"
+      ]
+    },
+    {
+      "id": "grpc-or-rest",
+      "difficulty": "core",
+      "prompt": "You are designing two boundaries: a public API for third-party developers, and high-volume calls between two internal services owned by different teams. Which protocol for each, and on what grounds?",
+      "expected_points": [
+        "public API: REST/JSON — self-describing, curl- and browser-friendly, no generated client or proxy required",
+        "internal high-volume: gRPC — generated contract prevents drift between teams, binary encoding and HTTP/2 multiplexing cut latency and bytes",
+        "justifies along contract, performance, and client ecosystem rather than a blanket preference; the common answer is both, split by boundary"
+      ]
+    },
+    {
+      "id": "client-boundary",
+      "difficulty": "stretch",
+      "prompt": "Your FetchTask wrapper translates codes.NotFound into ErrNotFound and only applies its default timeout when the caller set no deadline. Why are both of these the wrapper's job and not the caller's?",
+      "expected_points": [
+        "callers should stay transport-agnostic — errors.Is(err, ErrNotFound) works without importing grpc, same boundary translation as mapping database errors in S4",
+        "WithTimeout can only shorten a deadline, so wrapping unconditionally would silently override a caller's larger budget",
+        "centralizing auth metadata, deadlines, and error mapping keeps every call site consistent"
+      ]
+    },
+    {
+      "id": "bufconn",
+      "difficulty": "stretch",
+      "prompt": "The tests never open a port. How does the bufconn harness work, and what is it the moral equivalent of from your REST testing?",
+      "expected_points": [
+        "bufconn is an in-memory net.Listener; the real grpc.Server serves on it and the client dials it through a custom dialer",
+        "the full client/server stack runs — serialization, interceptors, deadlines — with no network, deterministic under -race",
+        "it plays the role httptest played for their HTTP services"
+      ]
+    }
+  ]
+}

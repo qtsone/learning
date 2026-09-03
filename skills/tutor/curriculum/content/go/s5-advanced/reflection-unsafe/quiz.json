@@ -1,0 +1,88 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words, with the exercise's own numbers cited where a question asks for evidence; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "reflect-walk",
+      "difficulty": "core",
+      "prompt": "Walk me through how your `Decode` gets from `dst any` to writing a string into a struct field. Why does it need a pointer, and what does it do if it doesn't get one?",
+      "expected_points": [
+        "an interface value is a (type, value) pair; reflect.ValueOf/TypeOf open that pair",
+        "reflect.ValueOf(dst) holds a copy unless dst is a pointer; Elem() dereferences it to something addressable, and only addressable values are settable",
+        "iterate Type().NumField(), read Tag via StructField.Tag.Lookup, switch on Value.Kind(), call SetString/SetBool/SetInt",
+        "unexported fields can be read but not set — skip them with IsExported",
+        "a non-pointer, nil, or pointer-to-non-struct target returns ErrNotStructPointer; a library validates instead of letting reflect panic at its caller"
+      ]
+    },
+    {
+      "id": "reflection-costs",
+      "difficulty": "core",
+      "prompt": "Quote your own benchmark numbers for the two decoders. The reflect one is several times slower with the same (zero) allocations — explain where its time goes, then give me two costs of reflection that have nothing to do with speed.",
+      "expected_points": [
+        "runtime kind switches, per-call tag parsing, indexed field lookups, and nothing inlines or specializes — the compiler cannot see through reflect.Value",
+        "reflection does not inherently allocate; it allocates when you box (Interface(), reflect.New, any) — the folk belief 'reflection = allocations' is wrong here and they have the number to prove it",
+        "compile-time safety is lost: struct tags are unchecked strings, so a typo or a renamed field fails at runtime, only for inputs that exercise it",
+        "tooling blindness: rename/find-usages don't follow tags, dead-code elimination can't prove reflected fields unused",
+        "readability and debuggability: reflect stack traces and code are opaque to the next reader"
+      ]
+    },
+    {
+      "id": "when-justified",
+      "difficulty": "core",
+      "prompt": "Name two places where reflection is the right answer and two where it isn't, and give me the rule you used to sort them.",
+      "expected_points": [
+        "justified where types are genuinely unknown until runtime and the boundary is real: encoding/json, database/sql Scan, fmt, text/template — decoding into types the library author cannot see",
+        "justified in test/tool code (DeepEqual, diffing, fixtures) and in once-at-startup work, where cost is amortized to nothing",
+        "not justified in a hot path of your own service where the set of types is known and finite",
+        "not justified as a substitute for generics when the caller knows the type",
+        "the rule: how many types are there really, when must the decision be made, and who pays for a mistake"
+      ]
+    },
+    {
+      "id": "unsafe-rules",
+      "difficulty": "core",
+      "prompt": "What guarantee does `UnsafeString(b)` break, what must its caller promise, and why is `uintptr` a worse thing to hold than `unsafe.Pointer`?",
+      "expected_points": [
+        "it returns a string aliasing b's array — Go's guarantee that strings are immutable is now the caller's responsibility",
+        "the caller must never modify b while the string is reachable, and must not let the string outlive that guarantee; violations are silent wrong answers (map hashing, cached keys), not crashes",
+        "unsafe.Pointer is a pointer the GC understands: it keeps the object alive, and — for the one case where Go does relocate memory, a goroutine stack that grows — the runtime rewrites it. Heap objects never move. A uintptr gets neither treatment.",
+        "pointer arithmetic must therefore stay inside a single expression; unsafe is outside the Go 1 compatibility promise; go vet's unsafeptr and the race detector's checkptr are the available checks",
+        "UnsafeBytes is worse still: string data may be read-only or shared, so writing through it can fault or corrupt"
+      ]
+    },
+    {
+      "id": "codegen-tradeoff",
+      "difficulty": "core",
+      "prompt": "Your generator uses reflection to write code that avoids reflection. Explain why that isn't a contradiction, what `//go:generate` actually does, and what the generated file bought you besides speed.",
+      "expected_points": [
+        "reflection at generate time runs once on a developer's machine; the cost that matters is per-request, not per-release",
+        "//go:generate is only a comment: go build/test ignore it, `go generate ./...` is a separate human- or CI-run step with no caching or ordering",
+        "the output is committed, so a clone builds with no generator, no protoc, no network — as with the gRPC lesson's .pb.go files",
+        "unsupported types are rejected at generate time for every field, instead of at runtime only when someone sets that key",
+        "generated code is ordinary Go: inlinable, profilable under its own name, readable in review; the header `// Code generated ... DO NOT EDIT.` is the convention tools rely on",
+        "costs: an extra build step, generated files in diffs, drift unless CI regenerates and diffs, and a generator to maintain"
+      ]
+    },
+    {
+      "id": "choose-the-tool",
+      "difficulty": "stretch",
+      "prompt": "Sort these three: a `Max[T cmp.Ordered]` helper, a library decoding arbitrary JSON into user structs, and adding `String()` to 30 enum constants. Generics, reflection, or codegen — and what changes your answer?",
+      "expected_points": [
+        "Max is generics: the caller knows the type, the compiler can specialize, zero runtime cost",
+        "the JSON library is reflection: user types are unknowable at library build time and there is no build step you can impose on your users",
+        "the enum String() methods are codegen (stringer): finite, mechanical, drift-prone by hand, and free at runtime",
+        "what changes it: whether the type set is finite and known, whether you control the build, how hot the path is, and how a mistake surfaces"
+      ]
+    },
+    {
+      "id": "cargo-cult-unsafe",
+      "difficulty": "stretch",
+      "prompt": "A colleague adds `UnsafeString` in three places to 'avoid copies': a map lookup `m[string(b)]`, a comparison `string(b) == key`, and scanning a 16 KiB request body. What do you say in review?",
+      "expected_points": [
+        "the map lookup and the comparison already allocate nothing — the compiler special-cases them, so the unsafe versions add risk for zero gain",
+        "short conversions that don't escape land in a stack buffer anyway",
+        "the large read-only scan is the case that can genuinely pay — their Lookup benchmark showed the same allocation count but 16 KiB vs 64 B",
+        "even then it needs a benchmark, a comment stating the aliasing invariant, and confidence nothing retains the string"
+      ]
+    }
+  ]
+}

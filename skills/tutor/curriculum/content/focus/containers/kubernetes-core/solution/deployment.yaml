@@ -1,0 +1,37 @@
+# Reference solution. A Deployment is a wish, not a command: it says what the
+# world should look like, and controllers keep closing the gap.
+
+apiVersion: apps/v1 # Deployments live in the apps group; Services do not
+kind: Deployment
+metadata:
+  name: timesvc
+  namespace: timesvc
+  labels:
+    app: timesvc
+spec:
+  replicas: 3
+  # Immutable after creation, and validated against the template labels below
+  # by the API server. Keep it minimal — anything that changes per release
+  # (a version, a build id) belongs in the template labels only.
+  selector:
+    matchLabels:
+      app: timesvc
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0 # never fewer than 3 ready pods, mid-rollout included
+      maxSurge: 1 # so a 4th pod is created first, then an old one goes
+  revisionHistoryLimit: 5 # how far back `kubectl rollout undo` can reach
+  template:
+    metadata:
+      labels:
+        app: timesvc # the stamp both selectors above and the Service match
+    spec:
+      containers:
+        - name: timesvc
+          # Pinned. A rollout only happens when this template changes, and
+          # :latest never changes — so a new build would never be deployed.
+          image: timesvc:1.0.0
+          ports:
+            - name: http
+              containerPort: 8080 # non-root cannot bind below 1024

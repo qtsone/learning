@@ -1,0 +1,66 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "two-pointer-proof",
+      "difficulty": "core",
+      "prompt": "In PairSum, the moment nums[lo]+nums[hi] > target you decrement hi and never look at nums[hi] again. Convince me nothing was skipped — and say which property of the input the argument depends on.",
+      "expected_points": [
+        "nums[lo] is the smallest remaining element, so if nums[hi] overshoots with it, it overshoots with every remaining partner",
+        "each step permanently discards one element, so the loop is O(n) with O(1) space",
+        "the argument depends entirely on the array being sorted; unsorted input breaks the discard logic"
+      ]
+    },
+    {
+      "id": "window-amortized",
+      "difficulty": "core",
+      "prompt": "MaxWindowSum and LongestUniqueRun are both O(n). For a fixed window that is obvious. For the variable window the left edge moves too — why is it not O(n^2)?",
+      "expected_points": [
+        "fixed window: constant work per step — add the entering element, subtract the leaving one",
+        "variable window: left only ever moves right, so each index enters the window once and is passed by left at most once",
+        "total work across all iterations is about 2n — an amortized argument, like append's array doubling"
+      ]
+    },
+    {
+      "id": "pattern-match",
+      "difficulty": "core",
+      "prompt": "Name the pattern and give a one-line justification for each: (a) fewest moves from maze entrance to exit, (b) does any word appear twice in this document, (c) longest stretch of days with no repeated visitor, (d) how many distinct ways to climb n steps taking 1 or 2 at a time.",
+      "expected_points": [
+        "a: BFS — it explores in layers, so the first time you reach the exit is the fewest moves",
+        "b: hash set — one pass asking 'seen before?' in O(1) average per word",
+        "c: variable sliding window with a hash map — 'stretch' means contiguous, 'no repeated' is the window invariant",
+        "d: dynamic programming — ways(n) = ways(n-1) + ways(n-2), overlapping subproblems solved once"
+      ]
+    },
+    {
+      "id": "capstone-choice",
+      "difficulty": "core",
+      "prompt": "Pick one function from capstone.go. Which pattern did you choose, what invariant does your state maintain, and what complexity bound did the tests enforce — and how did they enforce it?",
+      "expected_points": [
+        "names the pattern correctly (stack for brackets, BFS/DFS flood fill for islands, DP take-or-skip for the non-adjacent sum)",
+        "states the invariant (stack top = innermost open bracket; visited land is sunk so no island counts twice; incl/excl carry the best sums for the prefix)",
+        "states the bound and the enforcement: large timed inputs catch wrong time growth, AllocsPerRun catches wrong space"
+      ]
+    },
+    {
+      "id": "unsorted-pair",
+      "difficulty": "stretch",
+      "prompt": "PairSum demanded sorted input. If the input arrived unsorted, compare sort-then-two-pointers with a one-pass hash map: time, space, and when each wins.",
+      "expected_points": [
+        "sort first costs O(n log n) time but then O(1) extra space for the scan",
+        "hash map is O(n) time but O(n) extra space",
+        "hash wins for a one-shot query on unsorted data; two pointers win when the data is already sorted, memory is tight, or one sort amortizes over many queries"
+      ]
+    },
+    {
+      "id": "counter-vs-stack",
+      "difficulty": "stretch",
+      "prompt": "A colleague balances brackets with three counters, one per kind, incrementing on open and decrementing on close. Their check accepts \"([)]\". Why does a stack get this right when counters cannot?",
+      "expected_points": [
+        "counters only track how many of each kind are open, not the order they were opened in",
+        "correct nesting requires closing the most recently opened bracket first — a LIFO property",
+        "the stack's top is exactly 'the innermost still-open bracket', which is the information counters throw away"
+      ]
+    }
+  ]
+}

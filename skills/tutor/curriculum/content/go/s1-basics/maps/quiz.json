@@ -1,0 +1,71 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "make-vs-nil",
+      "difficulty": "core",
+      "prompt": "What's the difference between `scores := make(map[string]int)` and `var scores map[string]int`? What can go wrong with the second?",
+      "expected_points": [
+        "make returns an empty map ready for reads and writes; a literal is the other way to initialize",
+        "var gives a nil map",
+        "reading a nil map yields zero values, but writing to it panics at runtime"
+      ]
+    },
+    {
+      "id": "crud",
+      "difficulty": "core",
+      "prompt": "Walk me through what `counts[w]++` does the first time a word `w` appears. And how do you remove an entry entirely — what does setting it to 0 do instead?",
+      "expected_points": [
+        "reading a missing key returns the value type's zero value, so ++ stores 1 with no existence check",
+        "delete(m, k) removes the entry",
+        "setting the value to 0 keeps the key present — comma-ok still reports true"
+      ]
+    },
+    {
+      "id": "comma-ok",
+      "difficulty": "core",
+      "prompt": "`pantry[\"eggs\"]` gives you 0. What are the two situations that could produce that, and how do you tell them apart?",
+      "expected_points": [
+        "either the key is missing (zero value returned) or the stored value really is 0",
+        "v, ok := m[k] — ok reports whether the key exists, independent of the value"
+      ]
+    },
+    {
+      "id": "iteration-order",
+      "difficulty": "core",
+      "prompt": "You range over a map and print its entries; two runs print different orders. Is that a bug? What does Go promise, and how do you get stable output?",
+      "expected_points": [
+        "not a bug — iteration order is deliberately randomized so programs can't come to depend on it",
+        "collect the keys into a slice, sort it (slices.Sort), then range over the sorted slice"
+      ]
+    },
+    {
+      "id": "sets",
+      "difficulty": "core",
+      "prompt": "How do you build a set in Go, and why `map[string]struct{}` rather than `map[string]bool`?",
+      "expected_points": [
+        "keys are the members; membership is a comma-ok lookup",
+        "struct{} has no fields and takes zero bytes — the value carries no information",
+        "bool invites a misleading false-but-present third state"
+      ]
+    },
+    {
+      "id": "shared-storage",
+      "difficulty": "stretch",
+      "prompt": "`Take` modifies the pantry but never returns it — why does the caller still see the change?",
+      "expected_points": [
+        "a map value is a small handle to shared underlying storage",
+        "the function receives a copy of the handle, not of the entries, so mutations are visible to the caller"
+      ]
+    },
+    {
+      "id": "key-types",
+      "difficulty": "stretch",
+      "prompt": "Why can't you use a slice as a map key?",
+      "expected_points": [
+        "map keys must be comparable with ==",
+        "slices have no == comparison; strings, numbers, and booleans do"
+      ]
+    }
+  ]
+}

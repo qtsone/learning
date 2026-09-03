@@ -1,0 +1,75 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "insertion-vs-merge-complexity",
+      "difficulty": "core",
+      "prompt": "Compare insertion sort and merge sort: time complexity (best and worst case), extra space, and one input where each is the better choice.",
+      "expected_points": [
+        "insertion sort: O(n^2) worst/average, O(n) on (nearly) sorted input, O(1) extra space",
+        "merge sort: O(n log n) in every case, O(n) extra space for merging",
+        "insertion wins on tiny or nearly-sorted input; merge wins when a guaranteed bound on arbitrary input matters"
+      ]
+    },
+    {
+      "id": "quicksort-partition-worst-case",
+      "difficulty": "core",
+      "prompt": "Explain what quicksort's partition step does, and why quicksort can degrade to O(n^2) even though its average is O(n log n).",
+      "expected_points": [
+        "partition picks a pivot and rearranges so smaller elements are left of it, larger right, placing the pivot in its final position",
+        "recursion depth depends on where pivots land: balanced splits give log n levels",
+        "consistently bad pivots (min or max, e.g. first element of sorted input) shrink the problem by only one per level: n levels of O(n) partitions = O(n^2)",
+        "random or median-of-three pivots make the worst case unlikely but not impossible"
+      ]
+    },
+    {
+      "id": "stability",
+      "difficulty": "core",
+      "prompt": "What does it mean for a sort to be stable, and can you give a concrete example where an unstable sort produces a wrong-looking result?",
+      "expected_points": [
+        "stable = elements that compare equal keep their original relative order",
+        "example shape: records pre-ordered by one field, re-sorted by another — e.g. tickets in arrival order sorted by customer; unstable shuffles each customer's tickets out of arrival order",
+        "fixes: use a stable sort, or break ties explicitly in the comparison"
+      ]
+    },
+    {
+      "id": "stdlib-multi-key",
+      "difficulty": "core",
+      "prompt": "In your exercise, how did you sort players by score descending with ties broken by name? What does the comparison function's return value mean, and when would you reach for the stable variant instead?",
+      "expected_points": [
+        "slices.SortFunc with a comparison returning negative/zero/positive (cmp.Compare); compare the first key, fall through to the next on a tie",
+        "descending order comes from comparing b's score against a's (or negating)",
+        "slices.SortStableFunc when equal elements must keep input order — needed in SortByScore because score alone leaves ties"
+      ]
+    },
+    {
+      "id": "choosing-a-sort",
+      "difficulty": "core",
+      "prompt": "For each scenario, pick a sort and justify it: (a) 20 elements inside a hot loop, (b) a huge log file already 99% sorted where ties must keep arrival order, (c) everyday sorting in application code.",
+      "expected_points": [
+        "(a) insertion sort — tiny n, lowest constants, in-place",
+        "(b) something adaptive and stable — insertion sort or a stable merge-based sort; plain quicksort is wrong twice (unstable, and naive pivots hate sorted input)",
+        "(c) the standard library's sort — tuned hybrid, you only supply the comparison and the stability decision"
+      ]
+    },
+    {
+      "id": "merge-tie-direction",
+      "difficulty": "stretch",
+      "prompt": "Your Merge takes from the left slice on ties (<= not <). All the integer tests would pass either way — so what property does that one character protect?",
+      "expected_points": [
+        "stability of merge sort: on ties the left (earlier) element must come out first",
+        "with plain ints the difference is invisible; with records it decides whether equal keys keep input order"
+      ]
+    },
+    {
+      "id": "hybrid-sorts",
+      "difficulty": "stretch",
+      "prompt": "Standard libraries don't ship textbook quicksort or merge sort — they ship hybrids. Based on this lesson's trade-offs, what would you combine and why?",
+      "expected_points": [
+        "insertion sort for small ranges (low constants, adaptive)",
+        "an O(n log n) algorithm for large ranges, with a defense against quicksort's quadratic worst case (pivot randomization/sampling or falling back to a guaranteed algorithm)",
+        "a stable variant offered separately because stability costs something"
+      ]
+    }
+  ]
+}

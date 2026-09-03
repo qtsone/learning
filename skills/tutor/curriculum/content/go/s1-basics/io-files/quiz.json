@@ -1,0 +1,76 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "whole-file-api",
+      "difficulty": "core",
+      "prompt": "You want to read all of `notes.txt` into memory and later write it back. Which `os` functions do you reach for, what types do they work with, and what must you do after every call?",
+      "expected_points": [
+        "os.ReadFile returns ([]byte, error); os.WriteFile takes []byte plus permission bits like 0o644",
+        "convert between []byte and string as needed",
+        "check the error after every call — files fail for reasons the code cannot prevent",
+        "os.WriteFile replaces the whole file, it does not append"
+      ]
+    },
+    {
+      "id": "defer-guarantee",
+      "difficulty": "core",
+      "prompt": "What exactly does Go guarantee about a deferred call? If a function defers three `Close` calls, in what order do they run — and why is that order sensible?",
+      "expected_points": [
+        "deferred calls run when the surrounding function returns, on every path: normal return, early return, even a panic",
+        "multiple defers run LIFO — last deferred, first executed",
+        "later-acquired resources may depend on earlier ones, so cleanup unwinds in reverse order of setup"
+      ]
+    },
+    {
+      "id": "scanner-loop",
+      "difficulty": "core",
+      "prompt": "Sketch (in words or code) the loop that processes a file line by line, and name the step people most often forget.",
+      "expected_points": [
+        "os.Open, check the error, defer f.Close()",
+        "bufio.NewScanner(f), then for scanner.Scan() { use scanner.Text() }",
+        "after the loop check scanner.Err() — Scan returns false for both EOF and a read failure, and only Err distinguishes them"
+      ]
+    },
+    {
+      "id": "why-buffering",
+      "difficulty": "core",
+      "prompt": "The package is called bufio — buffered I/O. What is being buffered, and why does it matter for speed?",
+      "expected_points": [
+        "every read from a file is a system call to the OS, far slower than touching memory",
+        "bufio reads a large chunk per system call into a memory buffer and serves lines/bytes from it",
+        "without buffering, line-by-line or byte-by-byte reading would mean a huge number of system calls"
+      ]
+    },
+    {
+      "id": "read-vs-stream",
+      "difficulty": "core",
+      "prompt": "Your tracker's data file versus a multi-gigabyte server log: for each, whole-file read or streaming, and what is the reasoning?",
+      "expected_points": [
+        "small file needed in full → os.ReadFile: simpler code, memory cost is fine",
+        "huge or unbounded file, sequential processing, or early exit → stream with bufio.Scanner: constant memory",
+        "the trade-off axis is memory footprint versus simplicity"
+      ]
+    },
+    {
+      "id": "close-on-write",
+      "difficulty": "stretch",
+      "prompt": "`defer f.Close()` ignoring the error is accepted when reading a file but frowned upon when writing one. Why the difference?",
+      "expected_points": [
+        "on a write path the OS may only flush data at close time, so a failing Close can mean the data never reached disk",
+        "ignoring it loses data silently; check Close's error explicitly when writing",
+        "after a read there is nothing left to lose, so the deferred, unchecked Close is harmless"
+      ]
+    },
+    {
+      "id": "errors-is-sentinel",
+      "difficulty": "stretch",
+      "prompt": "Why must a missing file be detected with `errors.Is(err, os.ErrNotExist)` rather than `err == os.ErrNotExist`?",
+      "expected_points": [
+        "os functions return a *PathError that wraps the sentinel, not the sentinel itself",
+        "errors.Is walks the wrap chain; == only compares the outermost value and fails",
+        "wrapping with %w keeps this inspection working while adding context"
+      ]
+    }
+  ]
+}

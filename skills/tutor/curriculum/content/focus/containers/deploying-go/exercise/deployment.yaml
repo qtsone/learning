@@ -1,0 +1,81 @@
+# Where you left this file at the end of the Kubernetes Configuration lesson,
+# now deploying release 1.1.0. It schedules, it serves, it passes its probes —
+# and it drops requests every single time a pod moves. Every TODO below is one
+# of the ways it does that.
+#
+# Formatting: check.sh carries its own small YAML reader (PyYAML is not
+# guaranteed on your machine), so stay in the subset it understands — spaces
+# only, never a tab; two spaces per level; a space after every colon and after
+# every "- "; no anchors (&), aliases (*) or merge keys (<<:).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timesvc
+  namespace: timesvc
+  labels:
+    app: timesvc
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: timesvc
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  revisionHistoryLimit: 5
+  template:
+    metadata:
+      labels:
+        app: timesvc
+    spec:
+      # TODO: nothing here says how long this pod may take to stop, and nothing
+      # delays SIGTERM long enough for the dataplane to stop sending it traffic.
+      containers:
+        - name: timesvc
+          image: timesvc:1.1.0
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: timesvc-config
+                  key: PORT
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: timesvc-config
+                  key: LOG_LEVEL
+            # TODO: the process needs its drain budget, and the Go runtime is
+            # about to size itself from the node instead of from this
+            # container's share of it — twice, once for CPU and once for memory.
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+            failureThreshold: 12
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 128Mi

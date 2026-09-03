@@ -1,0 +1,73 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "phases",
+      "difficulty": "core",
+      "prompt": "Walk me through one red-green-refactor cycle. What is each phase for, and what does skipping each one cost?",
+      "expected_points": [
+        "red: write one small failing test — an executable spec; skipping it risks tests that never failed and may verify nothing",
+        "green: simplest change that passes, nothing speculative; skipping the discipline leaves untested branches in 'tested' code",
+        "refactor: improve design while tests stay green as a safety net; skipping it piles up design debt under a passing suite"
+      ]
+    },
+    {
+      "id": "watch-it-fail",
+      "difficulty": "core",
+      "prompt": "You are certain your new test will fail — why run it and watch the red anyway?",
+      "expected_points": [
+        "the red run is the only time the test itself is tested — it can be vacuous, miswired, or asserting the wrong thing",
+        "you also check the failure message is the one you expected and would be useful when it fires later",
+        "same rule for bugs: reproduce with a failing test before fixing, or the test never proves it would have caught the bug"
+      ]
+    },
+    {
+      "id": "doubles",
+      "difficulty": "core",
+      "prompt": "Your code depends on a payment gateway. For 'an expired card is declined' versus 'each order is charged exactly once', which double fits each test — fake, stub, or mock/spy — and why?",
+      "expected_points": [
+        "expired-card: a stub returning a canned decline — assert on your code's resulting state, not the interaction",
+        "charged-exactly-once: a mock/spy recording calls — the charge call itself is the behavior, there is no state to read back",
+        "a fake is a working lightweight implementation (e.g. in-memory store) for broader flows; prefer state-based doubles because interaction tests couple to implementation and break under refactor"
+      ]
+    },
+    {
+      "id": "testability",
+      "difficulty": "core",
+      "prompt": "A function calls time.Now() and prints its result to the terminal. Why can't you test it properly, and what is the redesign?",
+      "expected_points": [
+        "time.Now() is a hidden input — the outcome depends on when the test runs; printing is a hidden output the test cannot observe",
+        "inject the dependencies: a clock interface or func field for now, and a writer/notifier for output — tests substitute a stub clock and a buffer or spy",
+        "this mirrors the exercise: LegacySendOverdue versus Reminder with Clock and Notifier fields"
+      ]
+    },
+    {
+      "id": "design-pressure",
+      "difficulty": "core",
+      "prompt": "How does writing the test first change the shape of an API? Give a concrete example where the interface came out different.",
+      "expected_points": [
+        "the test makes you the first consumer: construction, calls, and result-checking get exercised before implementation hardens",
+        "a hard-to-write test is a design smell surfacing early — hidden dependencies and missing return values hurt the test immediately",
+        "example: sendOverdue test-first grew injected clock/notifier and a count return instead of reaching for the global clock and printing"
+      ]
+    },
+    {
+      "id": "mock-overuse",
+      "difficulty": "stretch",
+      "prompt": "A team mocks every collaborator and their tests break on every refactor even when behavior is unchanged. What is the diagnosis and the fix?",
+      "expected_points": [
+        "over-specified interaction tests assert how the code works instead of what it does, coupling tests to the implementation",
+        "fix: state-based tests with fakes/stubs for anything with observable results; keep mocks/spies only at boundaries where the call is the behavior"
+      ]
+    },
+    {
+      "id": "when-not",
+      "difficulty": "stretch",
+      "prompt": "Is code you don't TDD ever acceptable? Where does the loop fit badly, and what do you do instead?",
+      "expected_points": [
+        "exploratory spikes where the shape is unknown: write throwaway code to learn, then delete it and TDD the keeper",
+        "the discipline targets code you intend to keep; the non-negotiable core is never shipping production changes without a test that once failed"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "package-boundaries",
+      "difficulty": "core",
+      "prompt": "You're laying out a small project as several packages. How do you decide what belongs in each one, and what does a name like `utils` or `common` tell you about a boundary?",
+      "expected_points": [
+        "each package should have a single nameable reason to change (cohesion)",
+        "name a package for the job it provides, not the shape of what it contains",
+        "utils/common are grab-bags that attract code and make everything depend on them",
+        "keep the exported surface small; exported names are commitments"
+      ]
+    },
+    {
+      "id": "dependency-direction",
+      "difficulty": "core",
+      "prompt": "What is dependency direction, and why must a stable low-level package never import a volatile high-level one?",
+      "expected_points": [
+        "imports should point from volatile (policy, presentation, wiring) toward stable (core types, rules)",
+        "an import inherits the imported package's churn: if the core imports presentation, every format change shakes the module everything depends on",
+        "the low-level package also becomes impossible to use or test without dragging the high-level one along"
+      ]
+    },
+    {
+      "id": "cycles",
+      "difficulty": "core",
+      "prompt": "What is an import cycle, why is it a problem even in languages that allow it, and what are two ways to break one?",
+      "expected_points": [
+        "A imports B and B imports A, directly or through a chain",
+        "the two units can't be built, understood, or tested separately — one module wearing two names; languages that allow it get init-order bugs",
+        "break it by moving the shared piece down into a lower package, passing plain data instead of importing, or inverting with an interface defined by the low side",
+        "in Go the compiler rejects cycles outright: 'import cycle not allowed'"
+      ]
+    },
+    {
+      "id": "flat-vs-split",
+      "difficulty": "core",
+      "prompt": "When is one flat package the right choice over several small ones? What does each split cost, and what signals that it's time to split?",
+      "expected_points": [
+        "start flat for small programs or when the seams aren't clear yet",
+        "splits cost reader hops, frozen exported surfaces, and early boundary guesses that are breaking changes to undo",
+        "split when a cluster has its own reason to change, to hide a decision, or to let the compiler enforce a dependency rule"
+      ]
+    },
+    {
+      "id": "safe-refactor",
+      "difficulty": "core",
+      "prompt": "Walk me through how you moved the tangled main.go into three packages without breaking behavior. What made that safe?",
+      "expected_points": [
+        "small moves, compiling and running tests after each",
+        "bottom-up order: expense (imports nothing) first, then ledger, then report, then main as wiring",
+        "green tests plus identical program output are the proof behavior didn't change",
+        "move code without changing its logic at the same time"
+      ]
+    },
+    {
+      "id": "upward-call",
+      "difficulty": "stretch",
+      "prompt": "A low-level storage package needs to notify the UI when data changes, but imports must point down. How does the call get up?",
+      "expected_points": [
+        "the low package defines an interface for what it needs; the high package implements it and injects itself",
+        "the call goes up at runtime while the import still points down",
+        "io.Writer is this pattern: fmt calls your type without importing your package"
+      ]
+    },
+    {
+      "id": "summary-signature",
+      "difficulty": "stretch",
+      "prompt": "report.Summary takes a map[string]int rather than a *ledger.Ledger. What did that choice buy, and what would the alternative have cost?",
+      "expected_points": [
+        "report needs numbers, not the ledger — passing data removes the report→ledger import edge entirely",
+        "report becomes testable with a literal map and reusable for any source of totals",
+        "taking the Ledger would couple presentation to storage and add an arrow that must be policed"
+      ]
+    }
+  ]
+}

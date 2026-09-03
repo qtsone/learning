@@ -1,0 +1,14 @@
+# A patch is not a manifest. It carries exactly the fields that differ, plus
+# enough identity — apiVersion, kind, metadata.name, and the name of the
+# container inside the list — for kustomize to know what it is merging into.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timesvc
+spec:
+  template:
+    spec:
+      containers:
+        - name: timesvc
+          # TODO: dev's requests and limits. Small: this pod shares a node with
+          #       every other developer's copy of everything.

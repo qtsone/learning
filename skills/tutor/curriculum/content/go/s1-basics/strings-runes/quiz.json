@@ -1,0 +1,67 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "len-bytes",
+      "difficulty": "core",
+      "prompt": "`len(\"héllo\")` is 6, but the string has five characters. Explain where the sixth byte comes from.",
+      "expected_points": [
+        "a string stores UTF-8 bytes, and len counts bytes",
+        "UTF-8 is variable-width: a code point takes 1-4 bytes, ASCII takes 1",
+        "é encodes as two bytes, so 5 characters occupy 6 bytes"
+      ]
+    },
+    {
+      "id": "index-vs-range",
+      "difficulty": "core",
+      "prompt": "What is the difference between `s[1]` and the values you get from `for i, r := range s`? Use `s := \"héllo\"` as your example.",
+      "expected_points": [
+        "indexing returns a single byte — for \"héllo\" s[1] is 195, half of é's encoding",
+        "range decodes UTF-8 and yields one rune per step",
+        "range's index is the byte offset where the rune starts, so it can jump (0, 1, 3, 4, 5)"
+      ]
+    },
+    {
+      "id": "strings-pkg",
+      "difficulty": "core",
+      "prompt": "You get input like `\" a , b ,, c \"` and need the clean list a, b, c. Which strings-package functions do you combine, and what does each contribute?",
+      "expected_points": [
+        "strings.Split(s, \",\") cuts at every comma, keeping empty pieces",
+        "strings.TrimSpace removes surrounding whitespace from each piece",
+        "keep only pieces that are non-empty after trimming",
+        "these functions return new strings — the input is never mutated"
+      ]
+    },
+    {
+      "id": "builder",
+      "difficulty": "core",
+      "prompt": "Why is growing a string with `+=` inside a loop wasteful, and what do you use instead?",
+      "expected_points": [
+        "strings are immutable, so each += allocates a new string and copies everything accumulated so far",
+        "over n pieces the copying cost grows quadratically",
+        "strings.Builder appends into a growing buffer; call String() once at the end",
+        "strings.Join is the alternative when the pieces are already a slice"
+      ]
+    },
+    {
+      "id": "rune-conversion",
+      "difficulty": "stretch",
+      "prompt": "What does `[]rune(s)` give you, when do you need it, and what does it cost?",
+      "expected_points": [
+        "a slice with one rune (code point) per element, safe to index and rearrange by character",
+        "needed for character-positional work like reversing or taking the first character",
+        "it decodes and copies the whole string, so use it deliberately, not by reflex"
+      ]
+    },
+    {
+      "id": "immutability",
+      "difficulty": "stretch",
+      "prompt": "Why doesn't `s[0] = 'H'` compile, and how does that explain the shape of the strings package?",
+      "expected_points": [
+        "strings are immutable — read-only byte sequences",
+        "so every strings function returns a new string instead of modifying its input",
+        "calling strings.ToLower(s) without using the result therefore does nothing"
+      ]
+    }
+  ]
+}

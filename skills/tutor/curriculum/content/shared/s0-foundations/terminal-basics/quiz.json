@@ -1,0 +1,75 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "shell-vs-terminal",
+      "difficulty": "core",
+      "prompt": "What's the difference between the terminal and the shell? Which one actually ran the commands in the exercise?",
+      "expected_points": [
+        "the terminal is the window/program that draws text and forwards keystrokes",
+        "the shell (zsh/bash) reads the command line, runs it, and prints results — it did the work",
+        "they are separate programs; the terminal hosts the shell"
+      ]
+    },
+    {
+      "id": "paths",
+      "difficulty": "core",
+      "prompt": "You're standing in /Users/ada. Give one absolute and one relative path to the file /Users/ada/trip/notes/draft.txt, and explain what `cd ..` would do from there.",
+      "expected_points": [
+        "absolute paths start at the root /, valid from anywhere",
+        "relative paths (e.g. trip/notes/draft.txt) are resolved against the working directory",
+        ".. names the parent directory, so cd .. moves up to /Users",
+        "pwd tells you what relative paths currently mean"
+      ]
+    },
+    {
+      "id": "file-ops",
+      "difficulty": "core",
+      "prompt": "In the exercise you moved the photos but copied the draft backup. What's the difference between mv and cp — and after rm, can you get a file back?",
+      "expected_points": [
+        "cp duplicates: the original stays where it was",
+        "mv relocates (or renames): the original location ends up empty",
+        "rm deletes permanently — no Trash, no undo",
+        "rmdir only removes empty directories, which is a safety net"
+      ]
+    },
+    {
+      "id": "path-variable",
+      "difficulty": "core",
+      "prompt": "You type a command and the shell says 'command not found'. What is the shell actually telling you, and what's your diagnosis checklist?",
+      "expected_points": [
+        "the shell searched the directories listed in PATH and no executable with that name matched",
+        "checklist: typo in the name; program not installed; installed somewhere PATH doesn't list",
+        "echo $PATH shows the search list; which <cmd> shows what a command resolves to"
+      ]
+    },
+    {
+      "id": "man-help",
+      "difficulty": "core",
+      "prompt": "You need ls to show hidden entries but forgot the flag. How do you find out without the internet — and how do you get back out of what opens?",
+      "expected_points": [
+        "man ls opens the manual page; /word searches, q quits",
+        "many commands also print usage with --help",
+        "look flags up instead of guessing; the local man page matches your system"
+      ]
+    },
+    {
+      "id": "bsd-vs-gnu",
+      "difficulty": "stretch",
+      "prompt": "A flag from a Linux tutorial errors on macOS. Why can the 'same' command differ between machines, and which documentation wins?",
+      "expected_points": [
+        "macOS ships BSD versions of the core tools, Linux ships GNU versions — flags differ",
+        "the man page on your own machine describes the version you actually run"
+      ]
+    },
+    {
+      "id": "redirection",
+      "difficulty": "stretch",
+      "prompt": "In `pwd > location.txt`, what does the `>` do, and what's the danger when the file already exists?",
+      "expected_points": [
+        "> redirects the command's output into a file instead of the screen",
+        "it creates the file if missing and overwrites (truncates) it if present, without asking"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+# Reference solution. Everything true about timesvc everywhere, and nothing
+# else. There is no dev or prod word in this directory.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: timesvc
+
+resources:
+  - deployment.yaml
+  - service.yaml
+
+# Generated, not checked in: kustomize appends a hash of the content to the
+# name (timesvc-config-8k2b6c7fmd) and rewrites every reference to it. Change a
+# literal and the name changes; the Deployment that points at it changes with
+# it, so the pod template changes and the pods roll. Setting
+# generatorOptions.disableNameSuffixHash: true buys a stable name and gives up
+# exactly that: the config would change under running pods that never re-read
+# it, and the fix would be a manual restart nobody remembers to do.
+configMapGenerator:
+  - name: timesvc-config
+    literals:
+      - PORT=8080
+      - LOG_LEVEL=info
+      - SHUTDOWN_TIMEOUT=20s

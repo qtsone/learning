@@ -1,0 +1,100 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "two-streams",
+      "difficulty": "core",
+      "prompt": "I run your tool as `tool | jq .` and as `tool > out.txt`. What goes to stdout, what goes to stderr, and how do you decide which is which?",
+      "expected_points": [
+        "stdout carries the data the user asked for — what flows down a pipeline",
+        "stderr carries diagnostics: progress, prompts, warnings, verbose logs",
+        "the test is 'would a script parse this?', not 'is it bad news?'",
+        "progress or prompts on stdout corrupt piped data; results on stderr starve the pipeline",
+        "the exit code is the third channel"
+      ]
+    },
+    {
+      "id": "tty-detection",
+      "difficulty": "core",
+      "prompt": "How does your program know whether it is talking to a terminal, and what changes when it isn't? Where in the program does that question get asked?",
+      "expected_points": [
+        "stat the file and test os.ModeCharDevice, or golang.org/x/term.IsTerminal for the accurate answer",
+        "caveat: /dev/null is a character device too; Windows consoles need extra setup",
+        "when it isn't a terminal: no colour, no cursor redraws, no prompting — the information survives, the decoration doesn't",
+        "detection happens once at the edge and is passed down as a bool, which is what makes everything below testable",
+        "stdin, stdout and stderr can each be redirected independently"
+      ]
+    },
+    {
+      "id": "color-precedence",
+      "difficulty": "core",
+      "prompt": "State your colour decision chain from the top. What does NO_COLOR do, and what happens when NO_COLOR=1 and --color=always are both present?",
+      "expected_points": [
+        "an ordered, written-down chain: never / always / NO_COLOR / TERM=dumb / is-a-terminal",
+        "NO_COLOR is a cross-tool convention: set and non-empty means no colour, whatever the value",
+        "NO_COLOR set to the empty string is not a veto",
+        "the explicit per-invocation flag beats the environment default here — and the learner can defend that ordering",
+        "the chain is a pure function of (mode, isTerminal, env), so it is testable without a terminal",
+        "--no-color is a shorthand folding into the same chain as --color=never, not a second mechanism: users expect the boolean, the three-valued --color is what makes 'auto' expressible, and both must land on one decision function"
+      ]
+    },
+    {
+      "id": "progress-degradation",
+      "difficulty": "core",
+      "prompt": "Describe what your progress indicator writes on a terminal and what it writes when stderr is a CI log file. Why that stream, and why is it driven by Update calls rather than a timer?",
+      "expected_points": [
+        "on a terminal: \\r, the status, and \\x1b[K to erase the tail of a longer previous line, redrawn in place",
+        "off a terminal: nothing during the run, one plain summary line at the end — no \\r, no escapes",
+        "it goes to stderr so redirected or piped stdout stays clean data",
+        "explicit updates keep the output deterministic and testable; a timer means a goroutine, wall-clock flakiness, and races",
+        "real tools throttle redraws, but that belongs outside the tested piece"
+      ]
+    },
+    {
+      "id": "prompt-contract",
+      "difficulty": "core",
+      "prompt": "Walk me through your Ask: the default, validation, and what happens in a CI job with no terminal and no default.",
+      "expected_points": [
+        "the default is shown in brackets and an empty answer takes it",
+        "validation rejects with a message and re-asks, with a cap so the loop terminates",
+        "with no terminal it never reads or writes: the default, or ErrNotInteractive naming what to pass instead",
+        "a tool that blocks on a prompt in a pipeline or CI is broken; --yes exists for this",
+        "one bufio.Scanner for the session — a fresh one per question eats buffered input"
+      ]
+    },
+    {
+      "id": "tui-tradeoff",
+      "difficulty": "core",
+      "prompt": "What does a TUI framework like Bubble Tea give you that line-based output doesn't, and when is it the wrong answer?",
+      "expected_points": [
+        "the Elm-style loop: a model, Update(msg) returning a new model plus commands, View rendering the whole screen",
+        "the framework owns the event loop, alternate screen, raw input and repainting",
+        "right for long-lived interactive sessions the user stays inside",
+        "wrong for run-do-work-report tools: not pipeable, greppable or scriptable, awkward in CI, over ssh, in dumb terminals and for screen readers",
+        "and markedly harder to test than a function writing to an io.Writer"
+      ]
+    },
+    {
+      "id": "json-contract",
+      "difficulty": "stretch",
+      "prompt": "You want to realign the human output columns and rename a JSON field. Which one can you do in a patch release, and why?",
+      "expected_points": [
+        "the human format is not an API; the machine format is",
+        "JSON shape changes like an API changes — other people's scripts depend on it",
+        "JSON on stdout alone, diagnostics on stderr, never styled",
+        "emit a document like {\"results\": …} rather than a bare array so it can grow fields",
+        "encode an empty slice, not a nil one, so consumers never meet null"
+      ]
+    },
+    {
+      "id": "alignment",
+      "difficulty": "stretch",
+      "prompt": "Why does `fmt.Sprintf(\"%-4s\", painted)` break your columns when colour is on, and what did you do instead?",
+      "expected_points": [
+        "%-4s pads to the length of the string it is given, and the escape characters count toward that length even though they occupy no columns",
+        "coloured lines end up shorter on screen than plain ones",
+        "pad by the visible status word, then paint — or paint and pad separately"
+      ]
+    }
+  ]
+}

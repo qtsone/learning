@@ -1,0 +1,99 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words, citing their own NOTES.md output where the question asks for evidence; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "happens-before",
+      "difficulty": "core",
+      "prompt": "What does the Go memory model actually promise, and what is happens-before? List the operations you used in this exercise (and in S3) that create an edge — and name two things people assume create one but don't.",
+      "expected_points": [
+        "a read is guaranteed to observe a write only if the write happens-before the read; within one goroutine program order gives that for free, across goroutines it must be established",
+        "edges: go f() before f's first statement; a send before the corresponding receive completes; close before a receive that returns the zero value; mu.Unlock before a later mu.Lock; wg.Done before Wait returning; once.Do's f returning before any Do returns; an atomic Load that observes an atomic Store",
+        "non-edges: a goroutine simply exiting, time.Sleep or any amount of waiting, and 'the write is one machine word so it must be visible'",
+        "the edge carries everything done before it, not just the synchronized variable — that is why Unlock/Lock publishes the whole critical section"
+      ]
+    },
+    {
+      "id": "looks-fine-race",
+      "difficulty": "core",
+      "prompt": "Take the lesson's `ready`/`conn` lazy-init snippet, or the starter's `Store`. Show me the race, and explain why the memory model calls the program undefined rather than just 'sometimes stale'. How did you fix `Store`, and why is that fix enough?",
+      "expected_points": [
+        "two goroutines access the same location, at least one writing, with no happens-before edge between them — that is the definition, independent of timing",
+        "consequences are not limited to staleness: writes may be reordered (ready true while conn is nil), the compiler may hoist the read out of a loop and never re-read, and multi-word values like strings/slices/interfaces can tear",
+        "the memory model gives racy programs no defined behavior at all, so 'benign race' is not a category",
+        "the fix names the invariant first: Store publishes one immutable pointer, so atomic.Pointer[Config] Store/Load creates the edge (a mutex would also work; sync.Once/OnceValue is the equivalent fix for the lazy-init version)",
+        "the edge makes the pointed-to Config's fields visible too — which requires that published Configs are never mutated afterwards"
+      ]
+    },
+    {
+      "id": "invariant-scope",
+      "difficulty": "core",
+      "prompt": "Why did `Meter` need a mutex when `Store` could use an atomic? What would go wrong with `atomic.Int64` for `hits` plus `atomic.Value` for `last`?",
+      "expected_points": [
+        "Meter's two fields form one invariant: a Snapshot must describe a single moment",
+        "per-field atomics keep each field individually intact but let Snapshot pair a new count with an old event, or a positive count with an empty last — atomicity composes only over one word",
+        "Store's whole state is one pointer to an immutable value, which is exactly the single-word publication case atomics exist for",
+        "the general rule: the synchronization must span the invariant, not the variable; mutex is the default, atomics are the special case"
+      ]
+    },
+    {
+      "id": "stack-vs-heap",
+      "difficulty": "core",
+      "prompt": "Explain the difference between stack and heap allocation in Go, and why you can't choose. What makes a value escape, and does taking its address force it onto the heap?",
+      "expected_points": [
+        "stack allocation is a pointer bump freed by returning from the function and invisible to the GC; heap objects are shared, outlive frames, and cost the collector work (last lesson's bill)",
+        "Go has no allocate-on-the-heap keyword — new, &T{} and var all just create values; the compiler's escape analysis proves whether a value can outlive its frame",
+        "taking an address does not force the heap: if the value provably dies with the frame it stays on the stack",
+        "typical escape causes: returned by pointer, stored in something heap-reachable (slice/map/field/global/channel), captured by an outliving closure, boxed into an interface such as fmt's ...any, or too big/dynamically sized",
+        "escaping is a cost question, not a correctness question — sometimes the API requires it"
+      ]
+    },
+    {
+      "id": "escape-output",
+      "difficulty": "core",
+      "prompt": "Walk me through your NOTES.md 'before' output. What command produced it, why does it need `-a`, and what do `escapes to heap`, `does not escape` and `leaking param` each tell you?",
+      "expected_points": [
+        "go build -a -gcflags='-m' . 2>&1, usually filtered to drop inlining chatter; -m=2 shows the reasoning chain",
+        "-a forces a full recompile so the diagnostics are guaranteed; the build cache normally replays them anyway, but a stale cache is the first thing to suspect when -m prints nothing",
+        "'escapes to heap' / 'moved to heap' means a real allocation at that site",
+        "'does not escape' means a pointer parameter provably stays within the callee, so callers keep it on the stack",
+        "'leaking param' means the function stores or returns the pointer it was given, so the caller's value may escape because of this call",
+        "cites their own lines: &Report{} escaping because SummarizeHeap returns it by pointer, and format.go's 'value escapes to heap' from boxing into fmt's ...any"
+      ]
+    },
+    {
+      "id": "refactor-evidence",
+      "difficulty": "core",
+      "prompt": "For `AppendSample` and `Summarize`: what was the escaping value, what did you change, and what evidence proves it worked? Why does this lesson gate on allocation counts instead of timings?",
+      "expected_points": [
+        "AppendSample: every fmt argument was boxed into ...any and Sprintf built a fresh string; rebuilt with append plus strconv.AppendInt so digits go straight into the caller's buffer — zero allocations when dst has capacity",
+        "Summarize: returning *Report forced the value to outlive the frame; returning the Report by value keeps it in the caller's frame and nothing escapes",
+        "evidence is twofold: the escape-analysis lines disappear from the -m output, and testing.AllocsPerRun / -benchmem show allocs/op drop to 0 (versus 1 for SummarizeHeap)",
+        "allocation counts are deterministic and identical under -race, on a laptop or in CI; ns/op varies with the machine and is distorted several-fold by the race detector, so benchmarks here are read by hand and never asserted on",
+        "the append-into-a-caller-owned-buffer pattern is the standard library's own (strconv.AppendInt, Time.AppendFormat)"
+      ]
+    },
+    {
+      "id": "detector-semantics",
+      "difficulty": "stretch",
+      "prompt": "The race tests failed on your very first `-race` run rather than intermittently. Why? And what does a clean `-race` run NOT prove?",
+      "expected_points": [
+        "the detector tracks the happens-before graph of the execution (vector clocks), not timing coincidences — if two unsynchronized accesses to the same address both execute and at least one writes, it reports",
+        "so it does not need the two accesses to land at the same nanosecond — races on executed paths are found reliably rather than by luck, which is why -race in CI is a gate worth having",
+        "it is still not a proof of absence: it only sees accesses that execute, and its per-address history is bounded, so a race can slip past even on a path that ran",
+        "what it never does is report a race that is not there — a report is evidence, a clean run is only the absence of evidence",
+        "cost is 2-20x time and extra memory, so the schedule you observe under -race is not the production schedule — another reason never to assert wall-clock behavior"
+      ]
+    },
+    {
+      "id": "api-shapes-cost",
+      "difficulty": "stretch",
+      "prompt": "`Summarize` returns a 32-byte struct by value while `SummarizeHeap` returns an 8-byte pointer — the pointer moves fewer bytes. Why is the value version cheaper anyway, and when would returning a pointer be the right design?",
+      "expected_points": [
+        "the copy is a few stack writes; the pointer version costs an allocation now plus mark-and-sweep work later, which the last lesson quantified",
+        "bytes copied is the wrong metric — allocations and GC pressure are the metric",
+        "pointer returns earn their keep for large structs, values the caller must mutate in place, shared identity, or when nil is a meaningful result",
+        "the alternative escape hatch is the append/writer shape: let the caller own the memory (AppendSample, io.Writer) so the API stops deciding to allocate"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+# A strategic-merge patch: only the fields it names are changed, and lists of
+# containers and env vars merge by name rather than being replaced.
+#
+# Watch the pair of values. GOMAXPROCS is not here because the base reads it
+# from limits.cpu through the downward API, so it follows the CPU limit on its
+# own. GOMEMLIMIT is a literal, so lowering the memory limit without lowering
+# it too would leave the runtime aiming at 110MiB inside a 64Mi container —
+# the GC would never feel pressure and the kernel would OOM-kill the pod.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timesvc
+spec:
+  template:
+    spec:
+      containers:
+        - name: timesvc
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 250m
+              memory: 64Mi
+          env:
+            - name: GOMEMLIMIT
+              value: "56MiB"

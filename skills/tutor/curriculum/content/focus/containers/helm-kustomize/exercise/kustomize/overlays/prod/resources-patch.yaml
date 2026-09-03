@@ -1,0 +1,16 @@
+# Same shape as dev's patch, different numbers — and one extra field, because
+# raising a memory limit without telling the Go runtime is how you get the
+# OOMKill you spent the last lesson avoiding.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timesvc
+spec:
+  template:
+    spec:
+      containers:
+        - name: timesvc
+          # TODO: prod's requests and limits.
+          # TODO: GOMEMLIMIT, back under the new memory limit. Patching one
+          #       entry of a list by its name is the part worth getting right:
+          #       you are not replacing the env list, you are merging into it.

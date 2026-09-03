@@ -1,0 +1,108 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words, with the trade-off named in each; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "auth-and-gate",
+      "difficulty": "core",
+      "prompt": "Your authentication middleware rejects nobody — an unknown cookie just leaves an anonymous subject. Why is that better than a 401 right there, and where does the 401 come from instead?",
+      "expected_points": [
+        "authentication answers who; authorization answers whether — separate concerns, separate failures",
+        "every refusal comes out of one gate, so there is one place to audit and one place to log",
+        "401 for anonymous and 403 for denied are decided together, from the same decision function",
+        "a middleware that rejected would also have to know which routes are public"
+      ]
+    },
+    {
+      "id": "four-call-sites",
+      "difficulty": "core",
+      "prompt": "Name the four places your service consults the policy, and say what each can decide that the others cannot. Why is that still one enforcement point?",
+      "expected_points": [
+        "route gate: role vs action, before any handler runs",
+        "object check in the handler: ownership, because only the handler has the row",
+        "listing scope: a predicate in the query rather than a filter over loaded rows",
+        "stream filter: per event, because the hub knows nothing about who may see what",
+        "one function interprets the rules; only the invocation is distributed"
+      ]
+    },
+    {
+      "id": "scope-derived",
+      "difficulty": "core",
+      "prompt": "Why does the listing scope ask the policy a question instead of saying \"auditors and admins see everything\"?",
+      "expected_points": [
+        "a role literal is a second copy of the access-control model",
+        "narrowing the rule table would silently leave the listing wide open",
+        "deriving it means one edit reaches the gate, the object check, the listing and the stream",
+        "it is testable by swapping the rule table and watching the scope follow"
+      ]
+    },
+    {
+      "id": "outbox-and-publish",
+      "difficulty": "core",
+      "prompt": "In your create handler, which writes share a transaction and which one deliberately does not? Walk through a crash at the worst moment for each ordering.",
+      "expected_points": [
+        "task row and job row commit together — no ordering of two systems survives a crash",
+        "the event is published after the commit, because a transaction can roll back and a screen cannot",
+        "publishing first means clients see a task that never existed, with no correction coming",
+        "the accepted gap: a crash between commit and publish loses an announcement, recovered by refresh or Last-Event-ID replay"
+      ]
+    },
+    {
+      "id": "idempotent-consumer",
+      "difficulty": "core",
+      "prompt": "The queue redelivers a notify job whose work already committed. Trace what happens, and say why the dedup marker lives in the pool rather than in each handler.",
+      "expected_points": [
+        "the pool inserts the processed marker on the same transaction it hands the handler, and it reports first-vs-duplicate",
+        "a duplicate never reaches the handler: no second row, and no events for the pool to publish",
+        "guarding only the database write would still publish, so the owner is told twice",
+        "in the pool it is one rule no future job kind can forget; per handler it is a rule someone can omit invisibly",
+        "a marker written outside the transaction would turn the next retry into a silent skip",
+        "at-least-once is the contract, not a bug to fix"
+      ]
+    },
+    {
+      "id": "chain-order",
+      "difficulty": "core",
+      "prompt": "Defend your middleware order. Why is the rate limiter on the side of authentication that it is, and what does that cost you?",
+      "expected_points": [
+        "security headers outermost so 401s, 403s and 429s carry them too",
+        "limiting per account beats limiting per address (NAT, roaming clients, cheap IPv6 ranges)",
+        "keying on an account requires identity to be established first",
+        "the cost is a session lookup on a refused request — a map read, against the body read and decode it still avoids",
+        "anonymous callers fall back to the address, which is what protects the login endpoint's password hashing"
+      ]
+    },
+    {
+      "id": "caching-and-authorization",
+      "difficulty": "core",
+      "prompt": "The feed is cacheable and scoped by identity at the same time. Which headers make that safe, and what goes wrong without each?",
+      "expected_points": [
+        "Cache-Control private (not public): no shared cache may store a per-user body",
+        "Vary: Cookie, or a cache keyed on the URL alone serves one session's page to another",
+        "the ETag still earns its place: a 304 with no body after the query and the authorization ran",
+        "caching belongs after the authorization decision, never in front of it"
+      ]
+    },
+    {
+      "id": "revocation",
+      "difficulty": "stretch",
+      "prompt": "An admin demotes a user who has three tabs open. What happens to those sessions in your design, and what would have happened with a stateless token?",
+      "expected_points": [
+        "the target's sessions are destroyed, so the next request is anonymous",
+        "rotation is unavailable because a third party is applying the change",
+        "a signed token stays valid until it expires: nothing consults you when it is used",
+        "the standard mitigations (short access tokens plus a stored refresh token, denylists) rebuild the state tokens were sold as avoiding"
+      ]
+    },
+    {
+      "id": "transport-choice",
+      "difficulty": "stretch",
+      "prompt": "Justify SSE for this feature, then describe what in the product would make you switch to WebSockets and what that switch would cost in this codebase.",
+      "expected_points": [
+        "traffic is one-way, so SSE is plain HTTP: the session cookie, middleware and observability all work unchanged",
+        "reconnection with Last-Event-ID is the browser's job, and eviction of a slow client is humane because of it",
+        "switch when the client becomes a peer — typing, collaboration, anything bidirectional",
+        "the cost: a dependency, an origin check with no preflight to lean on, reader/writer goroutine discipline, proxies that must handle upgrades"
+      ]
+    }
+  ]
+}

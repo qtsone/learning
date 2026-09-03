@@ -1,0 +1,65 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "var-vs-short",
+      "difficulty": "core",
+      "prompt": "You need a new variable inside a function. When do you reach for `:=` and when for `var`? Is there anywhere `:=` simply doesn't work?",
+      "expected_points": [
+        ":= is the default inside functions when there is an initial value",
+        "var when you want an explicit type or to start from the zero value",
+        ":= is not allowed at package level — package-level declarations need var or const"
+      ]
+    },
+    {
+      "id": "zero-values",
+      "difficulty": "core",
+      "prompt": "After `var n int`, `var s string`, `var b bool` — what does each variable hold, and why does Go guarantee an answer at all?",
+      "expected_points": [
+        "0, \"\" (empty string), and false; floats start at 0 too",
+        "every declared variable starts at its type's zero value — never garbage or undefined",
+        "guaranteed starting points make forgotten assignments predictable instead of mysterious"
+      ]
+    },
+    {
+      "id": "static-conversion",
+      "difficulty": "core",
+      "prompt": "What does `7 / 2` evaluate to in Go, and how do you get 3.5? Why won't Go make that conversion for you?",
+      "expected_points": [
+        "3 — integer division truncates the fraction",
+        "convert before dividing: float64(7) / float64(2)",
+        "Go never converts types implicitly; mixing types is a compile error, so every conversion is visible and deliberate"
+      ]
+    },
+    {
+      "id": "iota",
+      "difficulty": "core",
+      "prompt": "Your weekday const block mentions `iota` exactly once, yet Monday through Sunday come out 1 to 7. Walk me through how.",
+      "expected_points": [
+        "iota counts from 0 and increases by one on each line of the const block",
+        "a line without an expression repeats the previous line's expression with the new iota",
+        "so Monday = iota + 1 gives 1, and the bare names that follow give 2 through 7"
+      ]
+    },
+    {
+      "id": "typed-untyped-const",
+      "difficulty": "stretch",
+      "prompt": "What is the difference between `const x = 3` and `const x int = 3`? When does it matter?",
+      "expected_points": [
+        "untyped constants adapt to the context — usable in both int and float64 expressions without conversion",
+        "a typed constant is locked to its type like a variable whose value cannot change",
+        "it matters the moment the constant meets a value of another type"
+      ]
+    },
+    {
+      "id": "compile-time",
+      "difficulty": "stretch",
+      "prompt": "You assign a string to an int variable by mistake. When do you find out, and why is that timing a feature?",
+      "expected_points": [
+        "at compile time, before the program runs — that is what statically typed means",
+        "the compiler checks every use of every variable against its declared type",
+        "whole classes of bugs are caught before any user can hit them, unlike dynamically typed languages surfacing them at runtime"
+      ]
+    }
+  ]
+}

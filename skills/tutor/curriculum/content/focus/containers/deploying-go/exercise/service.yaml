@@ -1,0 +1,17 @@
+# Unchanged from the Kubernetes Core lesson: one stable name in front of pods
+# whose IPs change every time they are replaced.
+apiVersion: v1
+kind: Service
+metadata:
+  name: timesvc
+  namespace: timesvc
+  labels:
+    app: timesvc
+spec:
+  type: ClusterIP
+  selector:
+    app: timesvc
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

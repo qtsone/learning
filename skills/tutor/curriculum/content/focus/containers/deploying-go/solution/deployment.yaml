@@ -1,0 +1,114 @@
+# Reference solution. The Deployment now says how this pod stops, and gives the
+# Go runtime the two numbers it cannot see from inside the container.
+#
+# The budget, which is the whole point of the three values below:
+#   preStop 10s + SHUTDOWN_TIMEOUT 20s + margin  <=  terminationGracePeriodSeconds 45s
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timesvc
+  namespace: timesvc
+  labels:
+    app: timesvc
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: timesvc
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      # Capacity is never removed before a replacement is ready — and "ready"
+      # means the readiness probe below, which is why an honest /readyz is what
+      # actually makes a rollout invisible.
+      maxUnavailable: 0
+      maxSurge: 1
+  revisionHistoryLimit: 5
+  # Ready for 5 uninterrupted seconds before a new pod counts as available, so a
+  # revision that falls over just after starting stops the rollout instead of
+  # completing it.
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: timesvc
+    spec:
+      # Big enough for the preStop hook, the drain, and room to log the outcome.
+      # The clock starts at deletion, so the hook spends this same budget.
+      terminationGracePeriodSeconds: 45
+      containers:
+        - name: timesvc
+          image: timesvc:1.1.0
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: timesvc-config
+                  key: PORT
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: timesvc-config
+                  key: LOG_LEVEL
+            - name: SHUTDOWN_TIMEOUT
+              valueFrom:
+                configMapKeyRef:
+                  name: timesvc-config
+                  key: SHUTDOWN_TIMEOUT
+            # The runtime sizes its scheduler from the container's share of the
+            # node, not from the node. The downward API keeps the two numbers
+            # from drifting apart: resourceFieldRef on limits.cpu rounds up, so
+            # a 500m limit yields 1.
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+                  divisor: "1"
+            # A soft limit the GC aims at, under the hard limit the kernel
+            # enforces. The gap covers what GOMEMLIMIT does not count: the
+            # binary's own mappings and OS-side bookkeeping.
+            - name: GOMEMLIMIT
+              value: "110MiB"
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+            failureThreshold: 12
+          # "Is this process wedged?" — nothing else. It keeps answering 200 for
+          # the whole drain; pointed at /readyz it would restart the container
+          # in the middle of every graceful shutdown.
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          # "Should I get new requests?" — 503 from the first moment of the
+          # drain, which is how this pod asks to leave the endpoints.
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+          lifecycle:
+            preStop:
+              # Endpoint removal and SIGTERM race, and nothing synchronises
+              # them. This hook lets the first one win. It runs inside the grace
+              # period, and needs nothing in the image — which matters, because
+              # the image has no shell to run "sleep 10" with.
+              sleep:
+                seconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 128Mi

@@ -1,0 +1,94 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "fuzz-corpus",
+      "difficulty": "core",
+      "prompt": "Walk me through what `go test -fuzz=FuzzParseLine -fuzztime=30s` actually does. Where do the inputs come from, what makes one worth keeping, and what happens to an input that fails?",
+      "expected_points": [
+        "starts from the seed corpus: f.Add values plus testdata/fuzz/<Target>/ files, both committed",
+        "mutates inputs and keeps the ones that reach new code paths — coverage-guided, not random",
+        "the generated corpus lives in the build cache, is machine-local, and is cleared with go clean -fuzzcache",
+        "a failing input is minimized and written to testdata/fuzz/<Target>/; committing it makes it a regression test that plain go test runs forever after",
+        "plain go test runs only the seed corpus, so -fuzz belongs in a scheduled job, not the per-PR one"
+      ]
+    },
+    {
+      "id": "fuzz-property",
+      "difficulty": "core",
+      "prompt": "A fuzz body can't say `want == got`. What did yours assert instead, and why would 'it didn't panic' have been a bad property?",
+      "expected_points": [
+        "a property is a claim true for every input: here, an accepted line has a known level and re-encoding it with Format parses back to an equal Event",
+        "round trip pins encoder and decoder to each other",
+        "returning an error is always allowed — the property only constrains accepted input",
+        "no-panic alone would pass a parser that silently returns nonsense; the test is only as strong as its property"
+      ]
+    },
+    {
+      "id": "golden",
+      "difficulty": "core",
+      "prompt": "When does a golden file beat an inline `want` string, and what makes the `-update` flag dangerous?",
+      "expected_points": [
+        "golden wins for large, structural output that changes as a unit and is reviewed as a diff",
+        "inline wins for small outputs, or when only one field matters — otherwise every unrelated change fails the test",
+        "-update rewrites the expectation, so it can bless a bug into the specification",
+        "the golden diff must be read in code review; the flag belongs in a _test.go file so the production binary never grows it"
+      ]
+    },
+    {
+      "id": "fast-slow",
+      "difficulty": "core",
+      "prompt": "How did you separate the fast tests from the integration tests, what's the alternative, and what does each choice mean for CI?",
+      "expected_points": [
+        "testing.Short() plus t.Skip, with go test -short as the local loop — everything still compiles",
+        "build tags (//go:build integration) exclude the file from compilation entirely, so tagged-out code can rot unnoticed",
+        "the pull-request job must run the full suite; the short subset is a developer convenience",
+        "a CI that only runs the fast subset has decorative integration tests"
+      ]
+    },
+    {
+      "id": "fixtures",
+      "difficulty": "core",
+      "prompt": "In your integration tests, what does `t.Cleanup` do that `defer` in the helper could not, and what is `TestMain` for? How do you know your fixtures are isolated?",
+      "expected_points": [
+        "t.Cleanup runs when the test ends, LIFO, even after t.Fatal — a defer inside newTestStore would fire when the helper returns, before the test body",
+        "TestMain wraps the whole package run for genuinely shared, expensive setup; teardown must precede os.Exit because os.Exit skips defers",
+        "t.TempDir() is the simpler default when a resource belongs to one test",
+        "isolation means a fresh database per test and passing under -count=2 -shuffle=on or when run alone"
+      ]
+    },
+    {
+      "id": "doubles",
+      "difficulty": "core",
+      "prompt": "You faked the clock but used a real SQLite database. Give me the rule that decides, and say what a fake store would have cost you.",
+      "expected_points": [
+        "double what you don't care about; keep real what you are actually testing",
+        "the clock is a stub because real time is slow and its behavior was never in question — and the fake makes the backoff sequence assertable at all",
+        "the SQL is the code under test, so a fake store would only test the fake: typos, NULL handling and engine behavior would go uncaught",
+        "cheap real things (bytes.Buffer for output, httptest for HTTP) beat doubles"
+      ]
+    },
+    {
+      "id": "coverage",
+      "difficulty": "stretch",
+      "prompt": "Your coverage report says 88%. What exactly does that number measure, and what would you do with the report?",
+      "expected_points": [
+        "statement coverage: which statements executed, not whether anything was asserted",
+        "compound conditions and unsupplied inputs hide behind a covered line",
+        "use it as a finder — read the red lines and ask whether each untested branch matters (uncovered error paths are the classic finding)",
+        "chasing a percentage produces tests that execute lines instead of checking behavior"
+      ]
+    },
+    {
+      "id": "testable-cli",
+      "difficulty": "stretch",
+      "prompt": "Why does `Run` take args and three streams and return an int, instead of reading os.Args and calling os.Exit?",
+      "expected_points": [
+        "os.Exit inside the code under test would kill the test binary",
+        "injected args/streams let a test drive the whole CLI in-process: feed stdin, capture stdout and stderr, assert the exit code",
+        "flags must be parsed into a private FlagSet — flag.CommandLine cannot be re-parsed between tests",
+        "the exit code is part of the CLI contract, which is what testscript-style tests assert"
+      ]
+    }
+  ]
+}

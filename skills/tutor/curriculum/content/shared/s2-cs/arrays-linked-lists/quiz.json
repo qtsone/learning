@@ -1,0 +1,60 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "o1-indexing",
+      "difficulty": "core",
+      "prompt": "Why is reading element 3,000,000 of an array exactly as cheap as reading element 3? And why is iterating an array faster in practice than its Big-O alone suggests?",
+      "expected_points": [
+        "elements are contiguous, so address = base + index x element size — constant arithmetic, no walking",
+        "sequential iteration is cache-friendly: fetching one element pulls its neighbors into the cache line, and the hardware prefetches ahead"
+      ]
+    },
+    {
+      "id": "cost-scorecard",
+      "difficulty": "core",
+      "prompt": "Give me the Big-O of index, search, insert-at-head, and insert-at-tail — first for a slice, then for your linked list.",
+      "expected_points": [
+        "slice: index O(1), search O(n), insert-at-head O(n) due to shifting, append amortized O(1)",
+        "list: index O(n), search O(n), insert-at-head O(1), insert-at-tail O(1) with a tail pointer (O(n) without)"
+      ]
+    },
+    {
+      "id": "node-reference-caveat",
+      "difficulty": "core",
+      "prompt": "People say linked lists have O(1) insertion. What's the fine print on that claim?",
+      "expected_points": [
+        "O(1) only when you already hold a reference to the node at the insertion point",
+        "finding that position is O(n), so search-then-insert is O(n) overall"
+      ]
+    },
+    {
+      "id": "choose-structure",
+      "difficulty": "core",
+      "prompt": "Workload A: build a lookup table once, then millions of reads by index. Workload B: a long queue-like buffer with constant removal at the front at large n. Which structure for each, and why?",
+      "expected_points": [
+        "A: slice — O(1) indexing and cache-friendly memory, no shape changes after build",
+        "B: linked list becomes defensible — O(1) front removal versus O(n) shifting per removal on a slice",
+        "mentions the practical caveat: slices often still win at moderate n because of cache behavior and per-node memory overhead"
+      ]
+    },
+    {
+      "id": "delete-needs-prev",
+      "difficulty": "core",
+      "prompt": "In your Delete you walked with both prev and cur. Why is prev unavoidable in a singly linked list, and which edge case did the tail pointer force you to handle?",
+      "expected_points": [
+        "unlinking a node means rewriting the pointer aimed at it, which lives in the previous node — a singly linked node cannot reach its predecessor",
+        "deleting the last node must move tail back to prev, or a later Append attaches to an unlinked node"
+      ]
+    },
+    {
+      "id": "amortized-append",
+      "difficulty": "stretch",
+      "prompt": "A slice append sometimes copies the whole backing array. How can appending still be called O(1)?",
+      "expected_points": [
+        "capacity roughly doubles on growth, so copies become geometrically rarer as the slice grows",
+        "total cost of n appends stays O(n), so the average per append is O(1) — that averaged accounting is what 'amortized' means"
+      ]
+    }
+  ]
+}

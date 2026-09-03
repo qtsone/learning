@@ -1,0 +1,115 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "schema-first",
+      "difficulty": "core",
+      "prompt": "Walk me through `schema.graphql`. What are `Query` and `Mutation` doing there, what does the `!` in `[Comment!]!` mean, and what does \"schema-first\" mean as a workflow rather than a file format?",
+      "expected_points": [
+        "the schema is the contract both sides agree on, written in SDL, before any code",
+        "Query is the root of every read and Mutation the root of every write; a third root, Subscription, streams events",
+        "`!` is non-null: `[Comment!]!` is a list that is always present and never contains a null, though it may be empty",
+        "non-null is operational, not decoration: a failing non-null field propagates null up to the nearest nullable parent, and with none the whole response becomes data: null",
+        "schema-first means generating Go types/interfaces from the SDL and implementing the holes, so the compiler enforces the contract; code-first derives the schema from structs and nobody reviews it"
+      ]
+    },
+    {
+      "id": "resolver-model",
+      "difficulty": "core",
+      "prompt": "A GraphQL server does not execute a query — it executes a tree of fields. Explain what that means, using the resolver signature from the exercise, and say what one resolver call does and does not know.",
+      "expected_points": [
+        "a resolver is func(ctx, parent, args) (any, error): one field, one parent object",
+        "Query.posts runs once and returns five posts; Post.title then runs five times, Post.author five times",
+        "each call knows only its parent and its own arguments — not its siblings, not how many times it is about to run, not the rest of the query",
+        "that ignorance is what makes arbitrary client queries possible and is also where every performance problem comes from"
+      ]
+    },
+    {
+      "id": "n-plus-one",
+      "difficulty": "core",
+      "prompt": "The naive `Post.author` resolver is one correct line and it is the bug. Explain the N+1 problem it causes, why you cannot fix it with a join, and how the exercise proves it is fixed.",
+      "expected_points": [
+        "one query for the list plus one per post for its author: five posts, six store calls; five hundred posts, five hundred and one",
+        "the schema shows nothing — `author: Author!` says nothing about what it costs",
+        "no place to put a join: the resolver runs per parent and never sees the sibling posts",
+        "the fix is a dataloader, and the tests count store calls: one AuthorsByIDs with three distinct ids versus five AuthorByID calls",
+        "make performance claims you can assert as a number"
+      ]
+    },
+    {
+      "id": "dataloader",
+      "difficulty": "core",
+      "prompt": "Describe your `Loader`: what `Load` does, what `Dispatch` does, and how the executor knows when to dispatch without a timer.",
+      "expected_points": [
+        "Load fetches nothing: it records the key and returns a pending *Result handle",
+        "the same key twice returns the same *Result — dedupe and per-request cache in one map",
+        "Dispatch takes the queued keys, clears the queue, calls the batch function exactly once (WHERE id IN (...)), and fills in every result",
+        "empty queue means no call at all; a batch error goes to every key; a key the batch did not return gets a per-key error wrapping ErrNotFound while its siblings resolve",
+        "the executor resolves one level at a time and dispatches at that boundary; a resolver returns a Deferred the executor forces after dispatch",
+        "production loaders use a short time window instead, which makes batching tests a race against a timer"
+      ]
+    },
+    {
+      "id": "hardening",
+      "difficulty": "core",
+      "prompt": "You already have body-size limits, rate limiting and timeouts from the hardening lesson. Why does a GraphQL endpoint still need depth and complexity limits, and why do you need both?",
+      "expected_points": [
+        "those bounds assumed the server decides what an endpoint does; here the client sends the work in a small body over one URL, and the rate limiter counts one request",
+        "depth bounds a cyclic schema — Post.author.posts.author... is legal and unbounded — and is cheap and blunt",
+        "complexity estimates cost before execution: weight times parents, with a list field multiplying the parent count for its children by `first` or by the field's default page size",
+        "neither subsumes the other: the deep cyclic query with first:1 is complexity-cheap, and `{ posts(first: 5000) { title } }` has depth 2",
+        "both run before the first resolver — a rejected query touches the store zero times, answers 400 and carries no data key",
+        "the default page size is the important half: an unbounded list field looks free to the analyser and returns the whole table at runtime"
+      ]
+    },
+    {
+      "id": "errors",
+      "difficulty": "core",
+      "prompt": "Your response has a `data` key with a null in it and an `errors` array — and the status is 200. Explain that, and say which failures are *not* 200.",
+      "expected_points": [
+        "GraphQL answers a tree, and parts of a tree fail independently: the client gets everything that resolved plus an errors array with a path naming exactly what did not",
+        "200 because the request was understood and executed — the failure is in the data, not the transport",
+        "a client that only checks resp.StatusCode renders a half-empty page and reports success; that is the most common GraphQL client bug",
+        "a request that never executed — unparseable, unknown field, over the limit — is a request error: 400 with no data key at all",
+        "resolver errors should be mapped to a safe message plus a machine-readable code in extensions, not echoed verbatim"
+      ]
+    },
+    {
+      "id": "rest-or-graphql",
+      "difficulty": "core",
+      "prompt": "Give me one API you would build with GraphQL and one you would refuse to, and defend both. What does GraphQL cost you that REST does not?",
+      "expected_points": [
+        "reach for it when many different clients need different shapes of one graph, the data really is a graph, and the organisation can govern the schema as a reviewed artifact",
+        "refuse it for a public read-heavy API where CDN and browser caching are doing real work — one URL and a POST body give a cache nothing to key on",
+        "also refuse for one client you control, a handful of endpoints, or a payload that is not a graph (uploads, streaming, bulk export)",
+        "costs: no free HTTP caching, unknown per-request cost that must be estimated and bounded, batching as a permanent obligation, clients reading two response keys, a tooling floor above curl",
+        "the practical middle: `/posts?include=author,comments` fixes under-fetching for many services",
+        "the expensive mistake is adopting GraphQL without loaders, limits and schema review — a REST API with worse caching and unbounded cost"
+      ]
+    },
+    {
+      "id": "loader-scope",
+      "difficulty": "stretch",
+      "prompt": "Someone proposes making the loaders a package-level singleton so the cache survives between requests. What do you say?",
+      "expected_points": [
+        "the loader's cache is a per-request identity map, not a cache: it promises two reads of a key inside one query agree, and nothing more",
+        "shared across requests it is a cache with no invalidation, serving stale rows",
+        "worse, in an API where authorization decides what each caller may see, a stale entry hands one user another user's row",
+        "it would also need locking, because requests are concurrent — the single-goroutine assumption is what lets the exercise's loader skip a mutex",
+        "the exercise asserts this: two identical requests must cost two batch calls"
+      ]
+    },
+    {
+      "id": "caching-and-scale",
+      "difficulty": "stretch",
+      "prompt": "You have lost HTTP caching and `IN (...)` with 5,000 ids is its own outage. What do you do about each?",
+      "expected_points": [
+        "caching moves into the application: per-request loaders, a shared object cache keyed by entity, or a CDN-friendly path via GET for queries",
+        "persisted queries: clients register queries at build time and send an id, which turns arbitrary-query risk back into a fixed endpoint list and restores cacheability",
+        "loaders take a maximum batch size, and every list field is paginated so the analyser has something to charge",
+        "complexity limits are the bound that makes a batch size predictable in the first place",
+        "field-level usage tracking plus @deprecated is how a field is retired without a /v2"
+      ]
+    }
+  ]
+}

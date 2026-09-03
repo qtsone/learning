@@ -1,0 +1,105 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "three-signals",
+      "difficulty": "core",
+      "prompt": "Logs, metrics, traces: what question is each one best at answering, and what does it cost you to lean on the wrong one?",
+      "expected_points": [
+        "metrics: how much/how often/how slow over time, cheap pre-aggregated numbers, cost is the number of time series",
+        "traces: where the time went across services/hops, cost is sampling",
+        "logs: what exactly happened in one request, highest detail, cost is volume and retention",
+        "they overlap badly: counting log lines instead of a counter is expensive and slow to query; averages cannot give you a p99"
+      ]
+    },
+    {
+      "id": "slog-handler",
+      "difficulty": "core",
+      "prompt": "Walk me through your ContextHandler: what does Handle do, why does WithAttrs have to re-wrap, and how does the level get changed while the process runs?",
+      "expected_points": [
+        "Handle reads the ids off the ctx of the logging call and adds request_id / trace_id / span_id to the record, then delegates",
+        "WithAttrs/WithGroup return a Handler; returning the embedded one strips the decorator so every derived logger loses the ids",
+        "the JSON handler is configured with a slog.Leveler — a *slog.LevelVar can be Set at runtime, no redeploy",
+        "attrs are typed key/values, not interpolated into the message"
+      ]
+    },
+    {
+      "id": "metric-types",
+      "difficulty": "core",
+      "prompt": "Pick the metric type for each of these and say why: requests served, requests currently in flight, request latency. Why does a counter panic on a negative delta in your registry?",
+      "expected_points": [
+        "counter for requests served — you read its rate, not its value",
+        "gauge for in-flight — goes up and down",
+        "histogram for latency — cumulative buckets plus sum and count, so quantiles are computable without storing every observation",
+        "rates assume monotonicity; a decrease is read as a process restart, so a decrementable counter corrupts every query built on it"
+      ]
+    },
+    {
+      "id": "cardinality",
+      "difficulty": "core",
+      "prompt": "Why is the route label `/items/{id}` rather than the actual path, and what happens if you add a user_id label instead?",
+      "expected_points": [
+        "each distinct label combination is its own time series, and combinations multiply",
+        "unbounded values (paths with ids, user ids, error strings) explode series count and can take the monitoring system down during an incident",
+        "labels must be bounded and known in advance; high-cardinality detail belongs in logs and traces",
+        "the route is only known after the mux matched, hence the route holder on the context"
+      ]
+    },
+    {
+      "id": "trace-propagation",
+      "difficulty": "core",
+      "prompt": "A request arrives with a traceparent header and your handler calls another service. Trace the ids through: what do you read, what do you create, what do you send, and what do you do with a malformed header?",
+      "expected_points": [
+        "parse traceparent: version, 32-hex trace id, 16-hex span id, flags (sampling bit)",
+        "create a new span: same trace id, new span id, parent = the incoming span id; put it on the context",
+        "outbound calls inject the current span context back into a traceparent header, which is what joins the two services' spans into one trace",
+        "a malformed header is rejected and a fresh trace starts — never let a caller's garbage corrupt yours",
+        "context.Context is the carrier so deep call sites do not need extra parameters"
+      ]
+    },
+    {
+      "id": "drill",
+      "difficulty": "core",
+      "prompt": "Your p99 latency alert fires. Which signal do you open first, and how do you get from the alert to the line of code?",
+      "expected_points": [
+        "metrics first: they are what the alert is built on; narrow by route, status, instance, and check rate vs duration vs saturation",
+        "traces next to localize which hop or dependency owns the time",
+        "logs last, filtered by the trace id of a slow request, to explain why",
+        "profiling (pprof) if the time is inside this process",
+        "correlation works because request_id and trace_id are on every log record"
+      ]
+    },
+    {
+      "id": "health-vs-ready",
+      "difficulty": "core",
+      "prompt": "What is the difference between /healthz and /readyz, and what goes wrong if a liveness check pings the database?",
+      "expected_points": [
+        "liveness answers 'is this process broken' and a failure gets it killed and restarted, so it must check nothing external",
+        "readiness answers 'should this instance get traffic now' and a failure only removes it from the load balancer",
+        "a liveness check on the database turns a blip into a fleet-wide restart storm that hammers the recovering dependency",
+        "readiness names the failing check, and failing it first is how you drain traffic before graceful shutdown"
+      ]
+    },
+    {
+      "id": "histogram-limits",
+      "difficulty": "stretch",
+      "prompt": "Your dashboard averages the p99 latency across ten instances. What is wrong with that number, and how accurate is any single p99 from your histogram?",
+      "expected_points": [
+        "percentiles do not average — you aggregate the bucket counts and then compute the quantile",
+        "a histogram quantile is interpolated within a bucket, so its precision depends on where you put the bucket boundaries",
+        "choose buckets around the latencies in your SLO"
+      ]
+    },
+    {
+      "id": "otel-and-libraries",
+      "difficulty": "core",
+      "prompt": "You wrote a registry and a tracer by hand. Name what OpenTelemetry calls each piece you built, then say what you would replace with a library at work and what you would keep.",
+      "expected_points": [
+        "the mapping: SpanContext is otel's SpanContext, Tracer.Start/Span.End are its Tracer and Span, ParseTraceparent + Inject are a propagator (propagation.TraceContext), Finished stands in for an exporter",
+        "replace the registry with prometheus/client_golang and the tracer with OpenTelemetry (API + SDK + exporter, usually a collector)",
+        "keep the handler decorator, the middleware order, the route holder, the health/readiness split — those are design, not plumbing",
+        "the exposition format, get-or-create registration, cumulative buckets and traceparent parsing are no longer magic, which is what makes the libraries' knobs legible"
+      ]
+    }
+  ]
+}

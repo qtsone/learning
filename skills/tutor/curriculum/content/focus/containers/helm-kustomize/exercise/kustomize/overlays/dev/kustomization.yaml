@@ -1,0 +1,16 @@
+# dev: one pod, small enough to share a laptop cluster with everything else,
+# and noisy logs.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# TODO: namespace — dev and prod must not be able to collide.
+
+# TODO: resources — point at the base *directory*, not at its files.
+
+# TODO: replicas — dev runs one pod.
+
+# TODO: patches — apply resources-patch.yaml.
+
+# TODO: configMapGenerator — same generator name as the base, behavior: merge,
+#       and one literal that turns the log level up. Copying the whole
+#       generator with behavior: replace would work today and drift tomorrow.

@@ -1,0 +1,15 @@
+# Reference solution — prod. Same base, four lines of difference.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: timesvc-prod
+
+resources:
+  - ../../base
+
+replicas:
+  - name: timesvc
+    count: 4
+
+patches:
+  - path: resources-patch.yaml

@@ -1,0 +1,65 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "multiple-returns",
+      "difficulty": "core",
+      "prompt": "`Split` returns `(share, remainder int, err error)` — three values. Show how you would call it and say what each returned value means.",
+      "expected_points": [
+        "one variable per result, in order: share, remainder, err := Split(...)",
+        "share and remainder are the normal results; err reports failure",
+        "every result must be assigned or explicitly discarded with _"
+      ]
+    },
+    {
+      "id": "error-convention",
+      "difficulty": "core",
+      "prompt": "What is the (result, error) convention? What does a nil error mean, and what should a caller do before using the other results?",
+      "expected_points": [
+        "a function that can fail returns its results plus a final error value",
+        "nil error means success; non-nil describes what went wrong",
+        "check if err != nil first — on failure the other results are just zero values"
+      ]
+    },
+    {
+      "id": "named-returns",
+      "difficulty": "core",
+      "prompt": "What do named return values give you, and when do they hurt readability?",
+      "expected_points": [
+        "the signature documents which result is which, e.g. two ints of the same type",
+        "the names are real variables starting at their zero values, and a bare return returns them (naked return)",
+        "naked returns hurt in longer functions — the reader must scan back to find what is returned; prefer explicit return values"
+      ]
+    },
+    {
+      "id": "variadic-spread",
+      "difficulty": "core",
+      "prompt": "What does `prices ...int` in a signature mean? You have `nums := []int{1, 2, 3}` — how do you pass it to `Sum`, and why doesn't `Sum(nums)` compile?",
+      "expected_points": [
+        "the function accepts any number of int arguments; inside, prices is a []int slice",
+        "spread it at the call site: Sum(nums...)",
+        "Sum(nums) fails because nums is a []int where int arguments are expected"
+      ]
+    },
+    {
+      "id": "decomposition",
+      "difficulty": "core",
+      "prompt": "`SplitBill` could loop over the prices and do the division itself. Why is building it from `Sum` and `Split` better?",
+      "expected_points": [
+        "each function keeps one responsibility, so failures and changes are localized",
+        "Sum and Split are already tested; SplitBill only connects them",
+        "the guard (people < 1) lives in exactly one place instead of being duplicated"
+      ]
+    },
+    {
+      "id": "discarding-results",
+      "difficulty": "stretch",
+      "prompt": "You only need the share from `Split`. How do you discard the remainder — and would you ever discard the error the same way?",
+      "expected_points": [
+        "use the blank identifier: share, _, err := Split(...)",
+        "discarding the error hides failure — almost always wrong; check it instead",
+        "the compiler forces you to make ignoring a result visible and deliberate"
+      ]
+    }
+  ]
+}

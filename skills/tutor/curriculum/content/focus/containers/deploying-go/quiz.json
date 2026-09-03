@@ -1,0 +1,105 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "termination-sequence",
+      "difficulty": "core",
+      "prompt": "Something deletes one of your pods. Walk me through what happens until the container is gone — and tell me which two things happen at the same time.",
+      "expected_points": [
+        "the API server sets a deletionTimestamp and the terminationGracePeriodSeconds clock starts",
+        "in parallel: the endpoints controller removes the pod from the Service's EndpointSlice and every kube-proxy/ingress has to catch up, while the kubelet runs preStop and then sends SIGTERM to PID 1",
+        "nothing synchronises those two chains",
+        "when the grace period expires the kubelet sends SIGKILL, which cannot be caught or handled"
+      ]
+    },
+    {
+      "id": "ordering-rule",
+      "difficulty": "core",
+      "prompt": "Which has to happen first: the pod leaving the Service's endpoints, or your server refusing new connections? What breaks in the other order, and what does the caller actually see?",
+      "expected_points": [
+        "endpoint removal first — the pod must stop being a routing target before it stops accepting",
+        "otherwise kube-proxy still forwards new connections to a closed listener",
+        "the caller gets connection refused or a reset, not an HTTP status, on a request that was never served",
+        "two levers: fail readiness immediately (for anything that polls it) and a preStop sleep to delay SIGTERM (for the deletion race)"
+      ]
+    },
+    {
+      "id": "go-drain",
+      "difficulty": "core",
+      "prompt": "Show me the shutdown path in your Go service. Why Shutdown and not Close, why the timeout, and why isn't ErrServerClosed an error?",
+      "expected_points": [
+        "signal.NotifyContext turns SIGTERM/SIGINT into a cancelled context",
+        "flip readiness to false first, then call srv.Shutdown",
+        "Close severs in-flight requests; Shutdown closes listeners and idle connections and waits for active ones",
+        "the shutdown context needs a deadline below the grace period so one stuck handler cannot burn the whole budget",
+        "Serve returns http.ErrServerClosed on a clean stop; reporting it exits non-zero and makes a normal deploy look like a crash"
+      ]
+    },
+    {
+      "id": "budget",
+      "difficulty": "core",
+      "prompt": "preStop sleeps 10s, SHUTDOWN_TIMEOUT is 20s, terminationGracePeriodSeconds is 25. What happens, and when?",
+      "expected_points": [
+        "the preStop hook runs inside the grace period, not before it — the clock starts at deletion",
+        "SIGTERM arrives at ~10s, leaving only ~15s of drain",
+        "at 25s the kubelet sends SIGKILL and cuts the drain short: dropped connections and no shutdown log",
+        "the fix is preStop + shutdown timeout + margin <= terminationGracePeriodSeconds"
+      ]
+    },
+    {
+      "id": "probes-split",
+      "difficulty": "core",
+      "prompt": "Why does your service have both /healthz and /readyz when they look identical? What must each one never check?",
+      "expected_points": [
+        "readiness answers 'should I get new requests' and is 503 for the whole drain, which is how the pod leaves the endpoints",
+        "liveness answers 'is this process wedged' and must keep returning 200 throughout the drain",
+        "a liveness probe pointed at the readiness path restarts the container mid-drain",
+        "liveness must not check dependencies: a database blip becomes a cluster-wide restart storm, and a restart cannot fix someone else's outage"
+      ]
+    },
+    {
+      "id": "gomaxprocs",
+      "difficulty": "core",
+      "prompt": "Your pod has limits.cpu: 1 on a 64-core node and no GOMAXPROCS. What does the Go runtime do, what does that cost you, and how do you fix it?",
+      "expected_points": [
+        "through Go 1.24 the runtime sizes GOMAXPROCS from the CPU affinity mask — the node's cores — and cannot see the cgroup quota",
+        "64 Ps and roughly 25% of them as GC mark workers burn the quota early, the kernel throttles the whole process, tail latency grows",
+        "Go 1.25 made the default container-aware on Linux, but it is gated on the module's go directive",
+        "fix: set GOMAXPROCS from limits.cpu (literal or downward API resourceFieldRef), or import automaxprocs"
+      ]
+    },
+    {
+      "id": "gomemlimit",
+      "difficulty": "core",
+      "prompt": "What is GOMEMLIMIT for, why must it sit below limits.memory, and what is wrong with the value \"512Mi\"?",
+      "expected_points": [
+        "the GC's default target is a ratio of the live heap and knows nothing about the cgroup limit, so the heap can grow until the kernel OOM-kills the process (exit 137, no shutdown)",
+        "GOMEMLIMIT is a soft limit the GC aims at; the cgroup limit is hard, so the soft one has to be lower",
+        "headroom covers what GOMEMLIMIT excludes: the binary's mappings and OS-side memory — 80-90% of the limit is typical",
+        "512Mi is Kubernetes syntax; Go wants B/KiB/MiB/GiB/TiB, and an unparseable value stops the runtime from starting"
+      ]
+    },
+    {
+      "id": "rolling-update",
+      "difficulty": "core",
+      "prompt": "Explain how maxSurge and maxUnavailable produce a rollout with no failed requests — and how you would prove it rather than assume it.",
+      "expected_points": [
+        "maxUnavailable: 0 means capacity is never removed before a replacement is ready; maxSurge pays for the extra pod",
+        "readiness is the gate that decides 'ready', so the rollout is only as good as the readiness probe",
+        "each old pod then goes through the same termination sequence, so drain correctness matters as much as the strategy",
+        "prove it with a request loop against the Service during the rollout and watch for anything that is not 200; maxSurge 0 with maxUnavailable 0 deadlocks"
+      ]
+    },
+    {
+      "id": "config-and-logs",
+      "difficulty": "stretch",
+      "prompt": "You change a value in the ConfigMap. What happens to the running pods, and why is that the behaviour you picked?",
+      "expected_points": [
+        "env vars from envFrom are snapshotted at container creation, so running pods keep the old values",
+        "you roll the Deployment, which produces new pods and a revision you can roll back",
+        "mounted config would update in place instead — restart-to-change is the trade-off chosen here",
+        "logs stay on stdout as structured slog lines because that is the only logging interface the platform reads"
+      ]
+    }
+  ]
+}

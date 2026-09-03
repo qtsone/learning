@@ -1,0 +1,79 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "lost-update",
+      "difficulty": "core",
+      "prompt": "Two goroutines each run `n++` 1000 times with no synchronization. What final values are possible, and what does `go test -race` say about it?",
+      "expected_points": [
+        "n++ is load, add, store — three steps that can interleave",
+        "updates get lost, so the total can be anything up to 2000, and a racy program has no defined behavior at all",
+        "the race detector reports a read and a previous write at the same address, with the goroutines and source lines",
+        "adding a mutex around the increment (or using an atomic) fixes it"
+      ]
+    },
+    {
+      "id": "rwmutex-when",
+      "difficulty": "core",
+      "prompt": "You have a config store read on every request and rewritten once a minute. Mutex or RWMutex — and what's your reasoning? When would the answer flip?",
+      "expected_points": [
+        "RWMutex: reads vastly outnumber writes, and RLock lets readers proceed in parallel",
+        "read-only methods take RLock, mutating methods take Lock; writing under RLock is a race",
+        "RWMutex costs more per operation, so with balanced read/write traffic or tiny critical sections a plain Mutex wins — default to Mutex and measure"
+      ]
+    },
+    {
+      "id": "once-and-atomic",
+      "difficulty": "core",
+      "prompt": "Two jobs: (a) lazily build one shared Config the first time any goroutine asks; (b) count requests served. Which sync tool fits each, and why not a plain `if cfg == nil` check or a plain `n++`?",
+      "expected_points": [
+        "(a) sync.Once — Do runs the function exactly once and all callers wait for it and see its effects",
+        "`if cfg == nil` is check-then-act: two goroutines can both see nil and both load, plus the unsynchronized read races the write",
+        "(b) an atomic counter (atomic.Int64 Add/Load) — indivisible, no lock needed for a single word",
+        "plain n++ is three steps and loses updates"
+      ]
+    },
+    {
+      "id": "channels-or-locks",
+      "difficulty": "core",
+      "prompt": "You wrote channel pipelines last lesson and a mutex-guarded Counter here. How do you decide which tool a new problem gets?",
+      "expected_points": [
+        "channels when data moves between goroutines — transferring ownership, distributing work, signaling",
+        "locks when state stays in one place and many goroutines access it — counters, caches, registries",
+        "atomics for single-word counters/flags; Once for one-time init; WaitGroup for waiting",
+        "either can be forced to do the other's job, but it costs code and clarity — match the tool to the shape"
+      ]
+    },
+    {
+      "id": "copied-mutex",
+      "difficulty": "core",
+      "prompt": "A teammate writes `func (c Counter) Inc(name string)` on your mutex-holding Counter. Why is this a bug, and which tool catches it?",
+      "expected_points": [
+        "a value receiver copies the struct, including the mutex — each call locks a fresh copy",
+        "the map inside is still shared, so the data is effectively unprotected",
+        "go vet's copylocks check reports 'passes lock by value'",
+        "sync types must not be copied after first use — use pointer receivers and pass pointers"
+      ]
+    },
+    {
+      "id": "atomic-invariant",
+      "difficulty": "stretch",
+      "prompt": "Hits and Misses are separate atomic.Int64s. A dashboard goroutine reads both to show a ratio. Any problem?",
+      "expected_points": [
+        "each counter is individually race-free, but the pair is not updated as one step",
+        "the reader can observe a state between the two updates, so the ratio can be momentarily wrong",
+        "an invariant spanning multiple values needs a mutex around the compound update and read"
+      ]
+    },
+    {
+      "id": "race-detector-limits",
+      "difficulty": "stretch",
+      "prompt": "Your test suite passes with -race in CI for a month. Does that prove the code is race-free? How do you treat a report vs a clean run?",
+      "expected_points": [
+        "no — the detector only sees races that occur in the interleavings actually executed",
+        "a clean run is evidence, not proof; coverage of concurrent paths matters",
+        "any report is a real bug to fix, never a flaky test to retry"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "go-and-waitgroup",
+      "difficulty": "core",
+      "prompt": "Walk me through the standard fan-out shape: a loop that starts one goroutine per item and returns only when all are done. What does each WaitGroup call do, and where exactly does each one live?",
+      "expected_points": [
+        "go f() starts f in a new goroutine and returns immediately — no result, no join handle; arguments are evaluated at the go statement",
+        "Add increments the counter before each go; Done — deferred, inside the goroutine — decrements; Wait blocks until the counter is zero",
+        "the function returns only after Wait, and deferring Done means an early return or panic in the task still counts down"
+      ]
+    },
+    {
+      "id": "cheap-and-mortal",
+      "difficulty": "core",
+      "prompt": "Why can a Go program run hundreds of thousands of goroutines when the same machine struggles with a few thousand OS threads — and what happens to all of them the moment main returns?",
+      "expected_points": [
+        "goroutines start with a tiny (~2KB) growable stack; OS threads reserve megabytes up front",
+        "the Go runtime schedules goroutines in user space onto a small pool of OS threads (GOMAXPROCS), so switching avoids kernel context-switch cost",
+        "when main returns the process exits immediately: every other goroutine is killed mid-flight, no message, no deferred calls run — nothing waits unless you make it wait"
+      ]
+    },
+    {
+      "id": "race-detector",
+      "difficulty": "core",
+      "prompt": "In the exercise you wrote Total with one shared counter first and ran go test -race. What is a data race, what did the report show you, and how did you fix the code?",
+      "expected_points": [
+        "a data race: two goroutines access the same memory concurrently, at least one a write, with nothing ordering them — total++ is read/modify/write, not one step, and racy programs have undefined behavior",
+        "the report shows the shared address and two stack traces (the conflicting access and the previous one), each with the goroutine and where it was created",
+        "the fix is ownership: each worker sums into its own cell (distinct slice elements are distinct memory) and the cells are combined only after Wait"
+      ]
+    },
+    {
+      "id": "add-before-go",
+      "difficulty": "core",
+      "prompt": "Why must wg.Add(1) happen before the go statement rather than as the first line inside the goroutine? Describe the interleaving that breaks.",
+      "expected_points": [
+        "the scheduler makes no promise about when a new goroutine first runs; it may not have executed Add when Wait checks the counter",
+        "so Wait can observe zero, return early, and the function finishes while the work is still running or has not started",
+        "Add must run in the launching goroutine, sequenced before go and hence before Wait; Add(len) up front is equally correct"
+      ]
+    },
+    {
+      "id": "leak-spotting",
+      "difficulty": "core",
+      "prompt": "A worker goroutine does `if err != nil { return }` above its wg.Done() line. What is a goroutine leak, who leaks in this code, and what habit makes the bug impossible?",
+      "expected_points": [
+        "a leak is a goroutine that can never proceed or terminate; Go cannot kill it from outside, so its stack and everything it references stay live for the life of the process",
+        "the leak is the waiter: the counter never reaches zero, so whoever called Wait blocks forever — the failed worker itself exited cleanly",
+        "defer wg.Done() as the goroutine's first statement, so every exit path counts down"
+      ]
+    },
+    {
+      "id": "happens-before",
+      "difficulty": "stretch",
+      "prompt": "In Map, goroutines write into out[i] and the caller reads the whole slice after Wait — no locks anywhere. Why is that not a data race?",
+      "expected_points": [
+        "each goroutine writes a distinct element — distinct memory locations — so the writers never conflict with each other",
+        "WaitGroup supplies the ordering: each write happens before its Done, and every Done happens before Wait returns, so the caller's reads are ordered after all writes",
+        "the same reads performed before Wait would be a race — the synchronization, not the slice, makes it safe"
+      ]
+    },
+    {
+      "id": "detector-limits",
+      "difficulty": "stretch",
+      "prompt": "Your test suite has been -race clean for a month. A colleague says that proves the code is race-free. Are they right?",
+      "expected_points": [
+        "no — the detector is dynamic: it only sees conflicting accesses that actually execute in that run, with that schedule and those inputs",
+        "a clean run raises confidence but says nothing about untaken paths; a reported race, by contrast, is always a real bug",
+        "so keep tests running under -race routinely — the 2-20x time/memory cost is affordable in tests"
+      ]
+    }
+  ]
+}

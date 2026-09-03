@@ -1,0 +1,76 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words, with concrete numbers or mechanisms rather than slogans; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "statelessness",
+      "difficulty": "core",
+      "prompt": "Why can a stateless service scale horizontally when a stateful one can't? Show me the line you deleted from `App` and tell me where that state went instead.",
+      "expected_points": [
+        "any instance can serve any request, so the balancer can route freely and a dead instance loses only in-flight work",
+        "instance-local session map meant a token from instance 1 was invisible to instance 2",
+        "state moved to a shared store (Redis/database) or to a signed client-held token — it concentrates, it does not disappear",
+        "sticky sessions only paper over it: deploys log users out, instance death loses state, load can't be rebalanced, scale-in is destructive",
+        "same reasoning bans local disk and in-process counters that later requests depend on"
+      ]
+    },
+    {
+      "id": "rate-limiting",
+      "difficulty": "core",
+      "prompt": "Explain your token bucket to me: what do `capacity` and `rate` each control, why is refill lazy, and what exactly does a rejected caller get back?",
+      "expected_points": [
+        "rate is the sustained throughput promised; capacity is the burst tolerated (real clients are bursty)",
+        "lazy refill credits elapsed x rate on each call, capped at capacity — no background timer, O(1) state, testable with an injected clock",
+        "rejection is HTTP 429 (not 403 'never allowed', not 503 'server broken') with a Retry-After the client can trust",
+        "RetryAfter rounds up so waiting it guarantees success — a header that lies trains clients to ignore it",
+        "limits come from measured capacity and headroom, not invented numbers; observe in log-only mode before enforcing"
+      ]
+    },
+    {
+      "id": "backpressure",
+      "difficulty": "core",
+      "prompt": "Your simulation ran 10 arrivals against 8 served per tick. Compare the bounded and unbounded backlogs at 100 and 1000 ticks, and tell me what those numbers mean for a user waiting on a response.",
+      "expected_points": [
+        "bounded queue reaches a steady state — same backlog at 100 and 1000 ticks — and sheds the excess",
+        "unbounded backlog grows linearly with the length of the overload (10x the backlog at 10x the ticks)",
+        "Little's Law: wait = backlog / service rate, so a growing queue converts overload into unbounded latency and eventually OOM",
+        "an unbounded queue never rejects, so it never signals the problem; bounding turns a silent failure into a fast, visible one",
+        "on full: shed with 429/503 (cheapest work first, never health checks) or block the producer to push pressure upstream; bound in-flight concurrency too"
+      ]
+    },
+    {
+      "id": "sharding",
+      "difficulty": "core",
+      "prompt": "Walk me through how your ring assigns a key to a worker, why virtual nodes are there, and what happens the moment a worker dies.",
+      "expected_points": [
+        "key and nodes hash onto a ring; the key belongs to the first node clockwise, found by binary search with a wrap to index 0",
+        "hash mod N reshuffles nearly every key when N changes; the ring moves only ~1/N and only onto the new node",
+        "virtual nodes (many positions per physical node) even out random arc sizes so each node's share converges on 1/N, and let you weight capacity",
+        "on death the dead node's arcs go to many different survivors instead of one neighbour, so the load spike is spread",
+        "the hash must be deterministic across processes and avalanche, or sequential keys clump",
+        "ownership is reassigned in milliseconds but is not durability — state that lived only in that worker needs replication"
+      ]
+    },
+    {
+      "id": "fleet-limits",
+      "difficulty": "stretch",
+      "prompt": "You deploy that limiter to ten instances, each configured at 100 requests/second per tenant. What limit does a tenant actually get, and what are your options?",
+      "expected_points": [
+        "1000/s — per-instance limiters multiply by fleet size",
+        "shared counter (Redis): correct, but a network hop per request and its availability becomes yours",
+        "divide by instance count: no hop, wrong whenever the balancer is uneven or the fleet resizes",
+        "route a tenant's traffic to one instance by consistent hash so the local counter is the global one"
+      ]
+    },
+    {
+      "id": "limits-of-hashing",
+      "difficulty": "stretch",
+      "prompt": "One tenant is 30% of your traffic and every request for them hits the same key. Does adding virtual nodes help? What does?",
+      "expected_points": [
+        "no — the ring balances keys, and the key is the indivisible unit; a hot key lands on one node however fine the arcs are",
+        "split the key itself (user42#0..#9) or replicate/cache it on every node",
+        "related blast-radius idea: shuffle sharding gives each tenant a random small subset so no two tenants share their whole subset",
+        "recognises that scaling out also has limits from serial fractions (Amdahl) and coordination cost"
+      ]
+    }
+  ]
+}

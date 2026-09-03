@@ -1,0 +1,23 @@
+# The base: one description of timesvc that every environment starts from.
+# Nothing here is environment-specific — no namespace beyond a default the
+# overlays replace, no image tag the pipeline has not chosen yet.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: timesvc
+
+resources:
+  - deployment.yaml
+  - service.yaml
+
+# The generator names the ConfigMap timesvc-config-<hash of its contents> and
+# rewrites every reference to it, so changing a value here produces a new
+# object name, which changes the pod template, which rolls the Deployment.
+# A plain ConfigMap would change in place and leave every running pod on the
+# old values until something else happened to restart them.
+configMapGenerator:
+  - name: timesvc-config
+    literals:
+      - PORT=8080
+      - LOG_LEVEL=info
+      - SHUTDOWN_TIMEOUT=20s

@@ -1,0 +1,79 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "rest-vs-grpc",
+      "difficulty": "core",
+      "prompt": "Ledgerly again: 2,000 polyglot merchants on one side, your own Go fraud service on the hot path on the other. Which protocol for each surface, and what are the two or three drivers that actually decide it?",
+      "expected_points": [
+        "decide by audience first: external polyglot consumers plus a browser dashboard favor REST+JSON (universal tooling, curl-able, no codegen tax)",
+        "internal Go-to-Go on a latency budget favors gRPC (protobuf encoding, HTTP/2 multiplexing, native streaming, codegen)",
+        "performance is rarely the decider at the public edge; audience and tooling dominate there"
+      ]
+    },
+    {
+      "id": "breaking-changes",
+      "difficulty": "core",
+      "prompt": "Give two changes to an API that are non-breaking and two that are breaking, and name the one contract rule that the 'adding a response field is safe' claim depends on.",
+      "expected_points": [
+        "non-breaking: new endpoint, optional response field, optional request param with a behavior-preserving default",
+        "breaking: remove/rename a field, change type or meaning/units, make optional required, tighten validation",
+        "adding fields is only safe if clients must ignore unknown fields (tolerant reader) — protobuf enforces it, JSON contracts must state it"
+      ]
+    },
+    {
+      "id": "versioning-mechanism",
+      "difficulty": "core",
+      "prompt": "You must ship a breaking change to Ledgerly's public API. Compare the mechanisms — version in the URI, version in a header, or additive-only schema evolution with no version at all — and say which you'd pick and what it costs you.",
+      "expected_points": [
+        "URI versioning (/v2/…) is the most visible and cache/proxy-friendly, and the easiest to route and document — the cost is duplicated surface and code paths you must keep alive per version",
+        "header versioning keeps URLs stable and one resource identity, but the version is invisible in logs, links and curl commands, and it is easy for clients to omit",
+        "additive-only evolution (never break, only add optional fields, deprecate slowly) avoids versions entirely — the cost is permanent backward-compatibility baggage and fields you can never remove",
+        "the deciding factors are who the clients are and whether you can make them migrate: unknown external clients push toward additive-only or long-lived URI versions, controlled internal clients allow faster cutovers",
+        "whatever the mechanism: publish the deprecation window and keep the old version working through it — a version is a promise, not a folder name"
+      ]
+    },
+    {
+      "id": "cursor-vs-offset",
+      "difficulty": "core",
+      "prompt": "A client is on page 3 of a newest-first offset walk while new rows are being inserted. What goes wrong, and what exactly does a cursor encode that makes it immune?",
+      "expected_points": [
+        "inserts shift every row down, so the next offset re-serves rows already seen (duplicates); deletes shift the other way and rows are skipped",
+        "an offset counts rows, and the rows moved",
+        "a cursor encodes the sort-key values of the last row seen — a position in the data ('strictly after this row'), so rows added elsewhere don't move it",
+        "bonus: deep OFFSET is O(n) scan-and-discard while a cursor is an indexed seek"
+      ]
+    },
+    {
+      "id": "idempotency",
+      "difficulty": "core",
+      "prompt": "Define idempotency, list which HTTP methods the spec requires to be idempotent, and sketch the key scheme that makes POST /charges retry-safe.",
+      "expected_points": [
+        "doing it N times leaves the same state as doing it once — same state, not necessarily same response",
+        "GET/HEAD/OPTIONS/TRACE safe and idempotent; PUT and DELETE idempotent by spec; POST neither; PATCH not guaranteed",
+        "client sends a unique per-operation key; server records it atomically (unique constraint, first writer wins) with a request fingerprint and later the response",
+        "replays return the stored response instead of re-executing; same key with a different body is rejected"
+      ]
+    },
+    {
+      "id": "timeout-ambiguity",
+      "difficulty": "stretch",
+      "prompt": "Why does a client-side timeout make idempotency a requirement rather than a nicety? What can the client not know?",
+      "expected_points": [
+        "a timeout cannot distinguish 'request never processed' from 'processed but the response was lost'",
+        "the only safe client behavior is retry, so the server must make retries harmless",
+        "hence unsafe operations need a scheme that makes repeat execution a no-op"
+      ]
+    },
+    {
+      "id": "status-enum-growth",
+      "difficulty": "stretch",
+      "prompt": "You add a new value 'disputed' to the charge status field. Purely additive — so is it safe? What decides the answer?",
+      "expected_points": [
+        "clients that exhaustively match on status hit their unknown/default path — additive in form, breaking in practice",
+        "the contract wording decides: 'new statuses may appear, treat unknown as X' makes it non-breaking; without it you broke an implicit promise",
+        "Hyrum's law: observed behavior (the closed set of values) became the contract"
+      ]
+    }
+  ]
+}

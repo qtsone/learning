@@ -1,0 +1,93 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "password-storage",
+      "difficulty": "core",
+      "prompt": "Your database leaks. Why is a salted SHA-256 of each password still a bad night, and what does bcrypt (or Argon2id) change?",
+      "expected_points": [
+        "general-purpose hashes are built to be fast — GPUs do billions of guesses per second, so common passwords fall immediately",
+        "a password KDF has a tunable work factor that makes each guess expensive, and Argon2id also makes it memory-expensive",
+        "the salt is public and per-password: it defeats precomputed tables and hides shared passwords, it does not slow anything down",
+        "cost is raised over time; a successful login is the moment to re-hash at the new cost"
+      ]
+    },
+    {
+      "id": "cookie-attributes",
+      "difficulty": "core",
+      "prompt": "Walk me through the session cookie your service sets. What does each attribute stop, and what does the server still have to do itself?",
+      "expected_points": [
+        "HttpOnly keeps JavaScript (and therefore XSS) away from the id",
+        "Secure keeps it off plain HTTP; SameSite=Lax keeps it off cross-site requests, blunting CSRF",
+        "Max-Age is only advice to the browser — the server enforces expiry on every lookup against its own clock",
+        "the id must come from crypto/rand, not math/rand/v2, and means nothing on its own: the server holds the state"
+      ]
+    },
+    {
+      "id": "rotation",
+      "difficulty": "core",
+      "prompt": "Why does login mint a brand new session id even when the request already carried one, and why does promoting a user to admin do it again?",
+      "expected_points": [
+        "session fixation: an id the attacker planted must never become an authenticated id",
+        "an id captured before a privilege change must not be usable after it",
+        "rotation destroys the old id server-side, so the old cookie stops working immediately",
+        "logout is the same idea taken further: the server deletes the session, not just the cookie"
+      ]
+    },
+    {
+      "id": "jwt-validation",
+      "difficulty": "core",
+      "prompt": "I hand your service a JWT. In what order do you check things, and what goes wrong if you read the claims first?",
+      "expected_points": [
+        "split, pin alg to exactly HS256, verify the signature, only then parse and trust claims, then check exp",
+        "alg is attacker-controlled input: alg=none and algorithm confusion (RS256 expected, HS256 supplied, public key used as the HMAC secret)",
+        "the signature is compared with hmac.Equal / crypto/subtle, never ==, so it leaks no timing",
+        "a token with no exp never expires; expiry must be checked against an injected clock"
+      ]
+    },
+    {
+      "id": "sessions-vs-jwt",
+      "difficulty": "core",
+      "prompt": "Sessions or JWTs: what does each side actually store, and which would you pick for a first-party web app? For calls between your own services?",
+      "expected_points": [
+        "sessions keep state server-side and hand out an opaque id; a JWT carries signed state the client holds",
+        "sessions are revocable by deletion; a JWT is valid until it expires unless you rebuild state (denylist, token version, refresh tokens)",
+        "sessions need a shared store to scale out; token verification needs no lookup",
+        "first-party browser app → session; service-to-service or several verifiers → tokens, with short lifetimes"
+      ]
+    },
+    {
+      "id": "oidc-pkce",
+      "difficulty": "core",
+      "prompt": "Sketch the authorization-code-with-PKCE flow, and tell me where OIDC differs from plain OAuth2.",
+      "expected_points": [
+        "redirect to the provider with state and a code_challenge (hash of a code_verifier you keep); the user authenticates there, never against your service",
+        "the provider redirects back with a code; you compare state, then your server exchanges the code plus code_verifier for tokens",
+        "PKCE proves the party redeeming the code is the one that started the flow, so an intercepted code is useless",
+        "OAuth2 delegates authorization; OIDC adds an id_token (a JWT about the user) validated against the provider's JWKS — and you still issue your own session",
+        "use a library (x/oauth2, go-oidc): discovery, key rotation, nonce and skew handling are where hand-rolled versions break"
+      ]
+    },
+    {
+      "id": "enumeration",
+      "difficulty": "stretch",
+      "prompt": "Why does the login handler verify a password against a dummy hash when the username does not exist — and how does the test prove it without measuring time?",
+      "expected_points": [
+        "otherwise response time (and message) reveal whether an account exists: user enumeration",
+        "identical status, identical body, and identical work on both paths",
+        "the test counts Verify calls through a wrapping hasher; timing assertions would be flaky under -race"
+      ]
+    },
+    {
+      "id": "revocation-cost",
+      "difficulty": "stretch",
+      "prompt": "A user's laptop is stolen with a live token that expires in 12 hours. What are your options, and what do they cost?",
+      "expected_points": [
+        "nothing consults the server when a signed token is used, so it stays valid until exp",
+        "options: very short access tokens plus a server-side refresh token, a jti denylist, or a per-user token version",
+        "each option restores a server lookup — the statelessness that motivated JWTs is partly given back",
+        "with a session it is one delete"
+      ]
+    }
+  ]
+}

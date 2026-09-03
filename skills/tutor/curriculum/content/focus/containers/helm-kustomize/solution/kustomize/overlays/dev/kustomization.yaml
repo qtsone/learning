@@ -1,0 +1,27 @@
+# Reference solution — dev. Read top to bottom it says exactly how dev differs
+# from the base, and nothing else: that list is the review.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: timesvc-dev
+
+resources:
+  - ../../base
+
+# The typed field for the commonest patch there is. It reads better than a
+# strategic-merge file and cannot go stale in the way a hand-written patch can.
+replicas:
+  - name: timesvc
+    count: 1
+
+patches:
+  - path: resources-patch.yaml
+
+# Same generator name as the base, merged rather than replaced: dev overrides
+# one literal and inherits PORT and SHUTDOWN_TIMEOUT. behavior: replace would
+# work today and silently drop whatever the base adds next month.
+configMapGenerator:
+  - name: timesvc-config
+    behavior: merge
+    literals:
+      - LOG_LEVEL=debug

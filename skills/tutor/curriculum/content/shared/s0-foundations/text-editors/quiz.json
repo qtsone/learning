@@ -1,0 +1,64 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "language-server",
+      "difficulty": "core",
+      "prompt": "In your own words: what is a language server, and why is it a separate program rather than part of the editor?",
+      "expected_points": [
+        "a separate program that understands one specific language",
+        "the editor sends it the file/cursor state and displays its answers: diagnostics, completions, go-to-definition, hover",
+        "separation via a shared protocol means any editor can use any language's server"
+      ]
+    },
+    {
+      "id": "verify-features",
+      "difficulty": "core",
+      "prompt": "You've installed a language extension for a new language. How would you check the editor actually understands your file, rather than just displaying text?",
+      "expected_points": [
+        "introduce a deliberate mistake and expect a diagnostic squiggle / Problems entry",
+        "trigger completions and expect legal, context-aware suggestions",
+        "go-to-definition (F12) or hover works on a name"
+      ]
+    },
+    {
+      "id": "keyboard-first",
+      "difficulty": "core",
+      "prompt": "You need a file whose name you half-remember, buried deep in a big project, and then you forget the shortcut for a command you need. What do you reach for in each case, instead of the mouse?",
+      "expected_points": [
+        "quick open (Cmd/Ctrl+P) with fuzzy matching finds the file by partial name",
+        "the command palette (Cmd/Ctrl+Shift+P) finds any command by name",
+        "the palette shows shortcuts, so it replaces memorizing them"
+      ]
+    },
+    {
+      "id": "ide-choice",
+      "difficulty": "core",
+      "prompt": "A friend asks whether to use a full IDE or VS Code for (a) their first months learning to program across a couple of languages, and (b) full-time work in one huge single-language codebase. What do you advise, and why?",
+      "expected_points": [
+        "lightweight editor for (a): fast, free, one tool across languages, less overwhelming",
+        "an IDE is defensible for (b): deepest single-language analysis and tooling out of the box",
+        "the justification is fit-for-task trade-offs (setup effort, resources, cost, depth), not a universal best"
+      ]
+    },
+    {
+      "id": "nxm",
+      "difficulty": "stretch",
+      "prompt": "Five editors, ten languages. How many integrations does the world need with editor-specific plugins, and how many with the Language Server Protocol? Why did that arithmetic win?",
+      "expected_points": [
+        "without a protocol: 5 x 10 = 50 integrations; with LSP: 5 + 10 = 15",
+        "each editor implements the protocol once, each language ships one server",
+        "so even niche editors get first-class language support"
+      ]
+    },
+    {
+      "id": "multicursor-vs-replace",
+      "difficulty": "stretch",
+      "prompt": "When would you pick multi-cursor over find-and-replace-all, and when the reverse?",
+      "expected_points": [
+        "multi-cursor: you confirm each edit site visually as you add selections, and can make edits that differ per cursor position",
+        "replace-all: better for many occurrences across files, but can silently hit unintended matches"
+      ]
+    }
+  ]
+}

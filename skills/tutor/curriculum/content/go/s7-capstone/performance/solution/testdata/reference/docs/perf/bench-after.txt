@@ -1,0 +1,36 @@
+$ go test -bench='BenchmarkList' -run='^$' -count=10 ./internal/store
+
+goos: darwin
+goarch: arm64
+pkg: tutor.local/capstone-reference/internal/store
+cpu: Apple M1 Pro
+BenchmarkListByTag/n=100-10         	 4697502	       247.2 ns/op	     896 B/op	       1 allocs/op
+BenchmarkListByTag/n=100-10         	 4880803	       250.3 ns/op	     896 B/op	       1 allocs/op
+BenchmarkListByTag/n=100-10         	 4571610	       247.9 ns/op	     896 B/op	       1 allocs/op
+BenchmarkListByTag/n=100-10         	 4906592	       247.6 ns/op	     896 B/op	       1 allocs/op
+BenchmarkListByTag/n=100-10         	 4913294	       249.2 ns/op	     896 B/op	       1 allocs/op
+BenchmarkListByTag/n=100-10         	 4769307	       249.1 ns/op	     896 B/op	       1 allocs/op
+BenchmarkListByTag/n=100-10         	 4529037	       259.5 ns/op	     896 B/op	       1 allocs/op
+BenchmarkListByTag/n=100-10         	 4773114	       258.4 ns/op	     896 B/op	       1 allocs/op
+BenchmarkListByTag/n=100-10         	 4601395	       248.0 ns/op	     896 B/op	       1 allocs/op
+BenchmarkListByTag/n=100-10         	 4523556	       259.8 ns/op	     896 B/op	       1 allocs/op
+BenchmarkListByTag/n=10000-10       	   33406	     37807 ns/op	   81920 B/op	       1 allocs/op
+BenchmarkListByTag/n=10000-10       	   33469	     35807 ns/op	   81920 B/op	       1 allocs/op
+BenchmarkListByTag/n=10000-10       	   33369	     35891 ns/op	   81920 B/op	       1 allocs/op
+BenchmarkListByTag/n=10000-10       	   33424	     35950 ns/op	   81920 B/op	       1 allocs/op
+BenchmarkListByTag/n=10000-10       	   33411	     35959 ns/op	   81920 B/op	       1 allocs/op
+BenchmarkListByTag/n=10000-10       	   33190	     36236 ns/op	   81920 B/op	       1 allocs/op
+BenchmarkListByTag/n=10000-10       	   32962	     35869 ns/op	   81920 B/op	       1 allocs/op
+BenchmarkListByTag/n=10000-10       	   33448	     36653 ns/op	   81920 B/op	       1 allocs/op
+BenchmarkListByTag/n=10000-10       	   33392	     35775 ns/op	   81920 B/op	       1 allocs/op
+BenchmarkListByTag/n=10000-10       	   33573	     35637 ns/op	   81920 B/op	       1 allocs/op
+BenchmarkListAll-10                 	    4143	    277979 ns/op	  802823 B/op	       1 allocs/op
+BenchmarkListAll-10                 	    3735	    290705 ns/op	  802821 B/op	       1 allocs/op
+BenchmarkListAll-10                 	    4302	    280634 ns/op	  802821 B/op	       1 allocs/op
+BenchmarkListAll-10                 	    4047	    288308 ns/op	  802819 B/op	       1 allocs/op
+BenchmarkListAll-10                 	    4290	    278462 ns/op	  802821 B/op	       1 allocs/op
+BenchmarkListAll-10                 	    4147	    283275 ns/op	  802821 B/op	       1 allocs/op
+BenchmarkListAll-10                 	    4056	    279917 ns/op	  802819 B/op	       1 allocs/op
+BenchmarkListAll-10                 	    4261	    279385 ns/op	  802821 B/op	       1 allocs/op
+BenchmarkListAll-10                 	    4321	    278312 ns/op	  802822 B/op	       1 allocs/op
+BenchmarkListAll-10                 	    4282	    276452 ns/op	  802823 B/op	       1 allocs/op

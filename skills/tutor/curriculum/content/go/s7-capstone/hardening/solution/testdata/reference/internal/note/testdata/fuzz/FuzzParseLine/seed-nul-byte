@@ -1,0 +1,2 @@
+go test fuzz v1
+string("n1|title\x00tail|work")

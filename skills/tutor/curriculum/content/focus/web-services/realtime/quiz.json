@@ -1,0 +1,106 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "transport-choice",
+      "difficulty": "core",
+      "prompt": "You have three features: a live-price dashboard, a chat room, and a notification badge that may lag a minute. Pick polling, SSE or WebSockets for each and defend the choice on directionality, proxy friendliness and reconnection.",
+      "expected_points": [
+        "the deciding question is whether the client must send over the same connection: if not, SSE; if yes, WebSockets",
+        "polling is fine when the latency promise is loose — no held connection, no per-client state, and every proxy already understands it",
+        "SSE is plain HTTP, so existing middleware, cookies and observability apply unchanged, and reconnection is the browser's job",
+        "WebSockets cost a library, a protocol you cannot debug with curl, a reconnection loop you write, and their own origin check",
+        "buffering proxies are the risk for SSE; the HTTP/1.1 six-connections-per-origin cap bites multi-tab users"
+      ]
+    },
+    {
+      "id": "sse-endpoint",
+      "difficulty": "core",
+      "prompt": "Walk me through what your SSE handler sets up before it streams anything, and why nothing reaches the client without an explicit flush.",
+      "expected_points": [
+        "Content-Type: text/event-stream, Cache-Control: no-cache, X-Accel-Buffering: no — and no Connection header, which net/http owns and HTTP/2 ignores",
+        "a frame is field: value lines ended by a blank line; id, event, retry, data, with one data: line per line of payload",
+        "Go buffers writes, so a frame sits in a bufio.Writer until it fills — which for one small event is never",
+        "http.NewResponseController(w).Flush() rather than w.(http.Flusher), because middleware wraps the ResponseWriter and the assertion fails on the wrapper",
+        "the first flush doubles as the probe: with no flusher in the chain it reports http.ErrNotSupported without writing, so a 500 is still possible"
+      ]
+    },
+    {
+      "id": "slow-consumer",
+      "difficulty": "core",
+      "prompt": "One client stops reading. Why does the hub give every subscriber a bounded channel and send with a `select`/`default`, and what did you do in the `default` branch?",
+      "expected_points": [
+        "a direct or blocking write lets one stalled client stall the whole fan-out; an unbounded buffer lets it exhaust memory",
+        "the non-blocking send bounds both: the publisher never waits on a reader",
+        "the default branch is a product decision — drop newest, drop oldest, or disconnect",
+        "the exercise disconnects, because it is the only option where the client learns it fell behind instead of silently losing data",
+        "eviction is only humane because reconnection is automatic and ids make replay possible"
+      ]
+    },
+    {
+      "id": "hub-lifecycle",
+      "difficulty": "core",
+      "prompt": "Why does the hub — and nobody else — close a subscriber's channel, and why under the same mutex it publishes under? What happens if a handler returns without unsubscribing?",
+      "expected_points": [
+        "sending on a closed channel panics, and the panic lands in the publisher's goroutine — an unrelated request dies because a client disconnected",
+        "closing under the publish lock makes 'removed from the map' and 'closed' one atomic fact, so no send can race a close",
+        "close must run exactly once, so a guarded flag makes Unsubscribe idempotent, and it must tolerate nil and unknown subscribers",
+        "a handler that forgets leaks a map entry the publisher walks on every event, so the leak makes every future publish more expensive",
+        "defer Unsubscribe on the line after Subscribe, before any error branch exists to forget it; the request context is what ends the loop"
+      ]
+    },
+    {
+      "id": "staying-connected",
+      "difficulty": "core",
+      "prompt": "Long-lived connections need two things to stay healthy: heartbeats and reconnection. Explain what each is for, what a heartbeat looks like on SSE versus WebSockets, and exactly what your handler does with a `Last-Event-ID` header.",
+      "expected_points": [
+        "proxies, load balancers and carrier NAT close connections with no bytes for some idle period, usually without telling either end, so the heartbeat goes well under the shortest idle timeout in the path",
+        "on SSE it is a comment frame, invisible to application code; on WebSockets a ping control frame the browser answers, and the real point is the read deadline pushed forward on every pong — a half-open connection is invisible otherwise",
+        "the failing write is also how you discover the connection is gone",
+        "EventSource reconnects on its own after the delay you advertised with retry:, sending back the last id it saw",
+        "the handler asks the hub for the events after that id and writes them, then continues live — the transport gives the round trip, the backlog is yours to keep",
+        "when the id has fallen out, do not replay a partial range: send a real resync event, because comments are invisible to the page",
+        "subscribe before replaying — the other order loses anything published in between, while subscribing first can only duplicate an event the client spots by id",
+        "the ticker comes from the injected Clock so the test fires a tick instead of sleeping"
+      ]
+    },
+    {
+      "id": "websocket-handshake",
+      "difficulty": "core",
+      "prompt": "Describe the WebSocket upgrade handshake you implemented, why `Origin` is your problem and not the browser's, and the two rules for running the connection afterwards that the exercise left to a library.",
+      "expected_points": [
+        "GET with Connection: Upgrade, Upgrade: websocket, Sec-WebSocket-Version: 13 and a Sec-WebSocket-Key of 16 base64 bytes; the server answers 101 with Sec-WebSocket-Accept",
+        "the accept value is base64(SHA-1(key + a fixed GUID)) — proof the responder speaks WebSocket, not authentication and not integrity",
+        "the same-origin policy does not apply and the browser attaches session cookies anyway, so an unchecked Origin is cross-site WebSocket hijacking; deny by default, compare exactly, and a request with no Origin is not a browser",
+        "exactly one reader goroutine and one writer goroutine; concurrent writes interleave frames, so other producers go through a channel the writer owns",
+        "closing is a handshake: send a close frame with a status, wait briefly for the peer's, then close the socket",
+        "framing, masking and close codes belong to a maintained library — getting them wrong is a memory-safety bug, not a rendering glitch"
+      ]
+    },
+    {
+      "id": "operating-streams",
+      "difficulty": "stretch",
+      "prompt": "Your deploy now takes 30 seconds per instance, and a user connected to replica A never sees events published on replica B. Explain both, and what you would do.",
+      "expected_points": [
+        "http.Server.Shutdown waits for active handlers, and a healthy stream never returns, so shutdown blocks until its deadline",
+        "shut the hub down first: every subscriber channel closes, the handlers return, and the server drains immediately (BaseContext is the same lever)",
+        "the hub is per-process state, so fan-out does not cross replicas",
+        "options are a shared broker every instance subscribes to, or sticky routing so a client and its events land on the same instance",
+        "either way the per-replica hub stays — the broker feeds it, it does not replace it"
+      ]
+    },
+    {
+      "id": "production-surprises",
+      "difficulty": "stretch",
+      "prompt": "Your stream works perfectly on your laptop and breaks once it is behind nginx and a cloud load balancer. Name the ways that happens and the fix for each.",
+      "expected_points": [
+        "the proxy buffers the response, so the stream arrives all at once, late — X-Accel-Buffering: no (and the proxy's own buffering settings)",
+        "an idle timeout in the path reaps a quiet connection — heartbeat below it",
+        "the server's own WriteTimeout bounds writing one response, and a stream is one response that lasts hours — exempt the route or set a per-write deadline via ResponseController",
+        "compression middleware buffers, so it must be flushed too or skipped on this route",
+        "http.TimeoutHandler buffers the whole response and its writer implements neither Flush nor Unwrap, so ResponseController reports ErrNotSupported — register streaming routes outside the timeout middleware",
+        "the six-connections-per-origin cap on HTTP/1.1 hangs the seventh tab — terminating HTTP/2 in front makes it a per-connection stream limit instead"
+      ]
+    }
+  ]
+}

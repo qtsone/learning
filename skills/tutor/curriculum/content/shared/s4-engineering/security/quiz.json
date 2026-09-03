@@ -1,0 +1,77 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "owasp-mapping",
+      "difficulty": "core",
+      "prompt": "Pick three OWASP Top 10 categories and describe, for each, a concrete code pattern that has that vulnerability.",
+      "expected_points": [
+        "injection: untrusted text concatenated into SQL/shell/HTML that an engine parses",
+        "broken access control: authenticated but unauthorized reach, e.g. incrementing an id or ../ path traversal",
+        "cryptographic failures: plaintext or fast-hashed passwords, hardcoded secrets, homemade crypto",
+        "any other category with a matching concrete pattern (SSRF: server fetches user-supplied URL; misconfiguration: default creds/debug endpoints; outdated components: dependency with a known CVE)"
+      ]
+    },
+    {
+      "id": "trust-boundary",
+      "difficulty": "core",
+      "prompt": "What is a trust boundary, where was it in the vault exercise, and why validate with an allowlist instead of a blocklist?",
+      "expected_points": [
+        "the line where data from outside your control enters code that acts on it (args, env, files, network, db content)",
+        "in vault: the exported functions receiving caller-supplied names/paths/passwords",
+        "blocklists fail open — attackers find the character you forgot; allowlists fail closed by accepting only the known-safe shape",
+        "validate at the boundary so interior code can trust its inputs"
+      ]
+    },
+    {
+      "id": "injection-fix",
+      "difficulty": "core",
+      "prompt": "Explain what `nobody' OR '1'='1` does to a concatenated SQL query, and why a parameterized query stops it where escaping quotes would not.",
+      "expected_points": [
+        "concatenation lets the payload's quote terminate the string so OR '1'='1' becomes SQL that matches every row",
+        "parameterization sends query text and values in separate channels; the value is bound as data and never parsed as SQL",
+        "escaping is a blocklist with dialect/encoding corner cases — fragile by construction"
+      ]
+    },
+    {
+      "id": "secrets",
+      "difficulty": "core",
+      "prompt": "Why must secrets never be committed to source control, and what is the correct handling — including after one has already leaked?",
+      "expected_points": [
+        "a commit lives in history forever, in every clone/fork/backup; deleting it later removes nothing",
+        "read secrets at runtime from environment variables or a secret store; local dev uses untracked files",
+        "missing secret should be a loud startup error, never a baked-in fallback",
+        "a leaked secret is revoked and rotated, not just removed from the code"
+      ]
+    },
+    {
+      "id": "password-kdf",
+      "difficulty": "core",
+      "prompt": "Why is SHA-256 the wrong way to store passwords, and what do bcrypt's salt and work factor each buy you?",
+      "expected_points": [
+        "SHA-256 is deliberately fast, so stolen hashes fall to offline GPU guessing at billions per second",
+        "unsalted equal passwords share a hash — rainbow tables and cross-user cracking",
+        "salt: random per password, defeats precomputation and hash clustering",
+        "work factor: tunable slowness that keeps guessing expensive as hardware improves; both stored inside the hash string"
+      ]
+    },
+    {
+      "id": "traversal",
+      "difficulty": "stretch",
+      "prompt": "Your teammate fixes ReadNote by rejecting any name containing `..`. Is that enough? What would you do instead?",
+      "expected_points": [
+        "no — absolute paths bypass it, and it wrongly rejects harmless names like notes..txt",
+        "allowlist the shape instead: filepath.IsLocal (or os.Root) guarantees the resolved path stays inside the directory"
+      ]
+    },
+    {
+      "id": "crypto-hygiene",
+      "difficulty": "stretch",
+      "prompt": "Why does generating a session token with math/rand instead of crypto/rand matter, and why do secret comparisons use constant-time functions?",
+      "expected_points": [
+        "math/rand is predictable — an attacker can reconstruct the sequence and mint valid tokens; crypto/rand draws from the OS CSPRNG",
+        "variable-time comparison leaks how many leading bytes matched, enabling byte-by-byte timing attacks; constant-time compare gives no signal"
+      ]
+    }
+  ]
+}

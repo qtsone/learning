@@ -1,0 +1,20 @@
+learning (tutor) — Copyright (C) 2026 Iulian Bacalu (qtsone)
+
+This project — the curriculum engine, the tutor skill, and all curriculum
+content (lessons, exercises, quizzes, solutions, and tooling) — is licensed
+under the GNU Affero General Public License, version 3 or (at your option)
+any later version (AGPL-3.0-or-later). See the LICENSE file for the full
+license text.
+
+Additional permission under AGPL section 7: the Learner Exception in
+LICENSE-EXCEPTION.md grants learners the right to use code they write to
+complete the curriculum exercises — including code derived from the provided
+exercise starter files — under terms of their own choosing.
+
+Contributions are accepted under the Contributor License Agreement in
+.github/CLA.md.
+
+qtsone, as copyright steward of this project, may additionally offer the
+work under separate commercial license terms (dual licensing). Such offers
+do not restrict, revoke, or otherwise affect the rights granted to anyone
+under the AGPL.

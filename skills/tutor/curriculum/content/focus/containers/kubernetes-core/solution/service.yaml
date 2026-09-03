@@ -1,0 +1,20 @@
+# Reference solution. One stable name and virtual IP in front of pods whose
+# IPs change every time they are recreated.
+
+apiVersion: v1 # core group: no group name, just the version
+kind: Service
+metadata:
+  name: timesvc # this is the in-cluster DNS name: timesvc.timesvc.svc.cluster.local
+  namespace: timesvc
+  labels:
+    app: timesvc
+spec:
+  type: ClusterIP # explicit, though it is the default
+  # A flat map — no matchLabels here. Every pair must appear on the pods, or
+  # this Service silently matches nothing and reports no error at all.
+  selector:
+    app: timesvc
+  ports:
+    - name: http
+      port: 80 # what callers dial on the Service
+      targetPort: http # the container's named port, resolved per pod

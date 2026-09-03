@@ -1,0 +1,23 @@
+# Reference solution — prod. The env entry is merged into the base's list by
+# its name, not appended and not replacing it: GOMAXPROCS survives untouched,
+# GOMEMLIMIT moves up with the limit it has to stay under (900MiB under 1Gi,
+# the same ~85% headroom the base keeps).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timesvc
+spec:
+  template:
+    spec:
+      containers:
+        - name: timesvc
+          env:
+            - name: GOMEMLIMIT
+              value: "900MiB"
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 1Gi

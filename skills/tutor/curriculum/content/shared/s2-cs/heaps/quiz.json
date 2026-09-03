@@ -1,0 +1,76 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "heap-property-layout",
+      "difficulty": "core",
+      "prompt": "Take the array [2, 5, 3, 9, 6, 8]. Describe the tree it encodes, the rule every parent obeys, and the index formulas for a node's children and parent. Why does the tree have to be complete for the array trick to work?",
+      "expected_points": [
+        "heap property (min-heap): every parent <= its children — vertical order only, siblings unordered (5 and 3 are fine)",
+        "children of index i at 2i+1 and 2i+2, parent at (i-1)/2 with integer division",
+        "completeness means levels are filled left to right with no gaps, so position alone encodes the links; a hole would shift every later index and break the formulas"
+      ]
+    },
+    {
+      "id": "sift-trace",
+      "difficulty": "core",
+      "prompt": "Push 1 onto [2, 5, 3, 9, 6, 8]: which indices change, in what order, and when does it stop? Then: why are push and pop O(log n) in the WORST case, when your BST's O(log n) was only best-case?",
+      "expected_points": [
+        "append at index 6, swap with parent index 2 (3 > 1), swap with parent index 0 (2 > 1), stop at the root",
+        "each sift step moves exactly one level, and a complete tree of n nodes has about log2 n levels",
+        "the shape is fixed by the size alone — no insertion order can make a heap lopsided, unlike the BST chain from the trees lesson"
+      ]
+    },
+    {
+      "id": "pop-mechanics",
+      "difficulty": "core",
+      "prompt": "Walk me through pop: why does the LAST element replace the root, and why does sift-down always swap with the smaller child?",
+      "expected_points": [
+        "the minimum is at the root, but the only slot completeness allows to disappear is the last one — so the last element moves to the root and the array shrinks",
+        "sift-down then repairs the order rule from the top: swap downward while a child is smaller",
+        "promoting the smaller child guarantees the new parent is <= both children, since the smaller child was already <= its sibling; swapping with the larger child puts a bigger key above a smaller one"
+      ]
+    },
+    {
+      "id": "container-heap-contract",
+      "difficulty": "core",
+      "prompt": "In your TaskQueue: who calls Len, Less, Swap, Push, and Pop — you or the package? Why must you call heap.Push(&q, t) instead of q.Push(t), and why does your Pop method remove the last element when heap.Pop hands back the most urgent task?",
+      "expected_points": [
+        "the five methods are plumbing that container/heap calls; your code only calls the package functions heap.Init/Push/Pop",
+        "q.Push alone appends without sifting up, silently breaking the heap property",
+        "heap.Pop swaps the root to the end, sifts down over the rest, then calls your Pop — so the most urgent task is sitting in the last slot when your method removes it",
+        "Push and Pop take pointer receivers because they change the slice's length"
+      ]
+    },
+    {
+      "id": "topk-choice",
+      "difficulty": "core",
+      "prompt": "You need the top 10 scores from a stream of 10 million entries. Compare sorting everything against a min-heap capped at 10 elements: time, memory, and what happens when the stream never ends. And why a MIN-heap to track the LARGEST scores?",
+      "expected_points": [
+        "sorting costs O(n log n) time and O(n) memory and needs all the data at once",
+        "the capped heap costs O(n log k) time and O(k) memory and works on an endless stream",
+        "the min-heap's root is the weakest member of the current top-k — exactly the one to compare against and evict, in O(log k)"
+      ]
+    },
+    {
+      "id": "heap-vs-bst",
+      "difficulty": "stretch",
+      "prompt": "Your BST and your heap are both binary trees with an ordering rule. Why can the BST answer Contains in O(h) while the heap cannot beat O(n) — and what does the heap get in exchange for that weakness?",
+      "expected_points": [
+        "the BST's rule is horizontal — smaller keys left, larger right — so one comparison discards an entire subtree",
+        "the heap's rule is only vertical (parent <= child), so a key could hide in either subtree and search must check everything",
+        "in exchange: guaranteed shape and O(log n) operations, O(1) access to the minimum, and pointer-free array storage"
+      ]
+    },
+    {
+      "id": "heapsort",
+      "difficulty": "stretch",
+      "prompt": "Push all n values into your MinHeap, then pop until it's empty. What comes out, what algorithm did you just implement, and how does its guarantee compare with the sorts from the sorting lesson?",
+      "expected_points": [
+        "the values come out in ascending order",
+        "that's heapsort: n pushes plus n pops at O(log n) each, so O(n log n) total",
+        "the bound is worst-case guaranteed like merge sort's, without merge sort's O(n) extra space (a real heapsort works in place inside one array)"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+$ go tool pprof -sample_index=alloc_space -top -nodecount=6 mem.out
+
+File: store.test
+Type: alloc_space
+Time: 2026-08-16 23:17:35 CEST
+Showing nodes accounting for 23.34GB, 99.88% of 23.37GB total
+Dropped 37 nodes (cum <= 0.12GB)
+      flat  flat%   sum%        cum   cum%
+   23.34GB 99.88% 99.88%    23.34GB 99.88%  tutor.local/capstone-reference/internal/store.(*Memory).List
+         0     0% 99.88%    23.36GB   100%  testing.(*B).launch
+         0     0% 99.88%    23.37GB   100%  testing.(*B).runN
+         0     0% 99.88%    23.37GB   100%  tutor.local/capstone-reference/internal/store_test.BenchmarkListByTag.func1

@@ -1,0 +1,38 @@
+# The dev overlay, complete — read it as the worked example for the prod one.
+#
+# Everything it does is a *difference from the base*. It never restates the
+# probes, the preStop hook or the grace period, so a fix to any of those lands
+# in both environments the moment it lands in the base.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: timesvc-dev
+
+resources:
+  - ../../base
+
+# One replica: dev is allowed to blink. Note what that buys and what it costs
+# — with a single pod, maxUnavailable: 0 has nothing to surge over, so a dev
+# rollout does have a gap. Nobody is calling dev; prod is a different answer.
+replicas:
+  - name: timesvc
+    count: 1
+
+# The image the pipeline last deployed here. The deploy job rewrites this line
+# (kustomize edit set image) with the exact artifact it just pushed, so what is
+# committed is a record, not a wish.
+images:
+  - name: ghcr.io/ada/timesvc
+    newTag: sha-0000000
+
+# Merged into the base's generated ConfigMap: same three keys, one different
+# value. The generated name still ends in a content hash, so flipping this to
+# info tomorrow rolls the Deployment by itself.
+configMapGenerator:
+  - name: timesvc-config
+    behavior: merge
+    literals:
+      - LOG_LEVEL=debug
+
+patches:
+  - path: resources-patch.yaml

@@ -1,0 +1,27 @@
+# Reference solution.
+#
+# The controller reads each pod's CPU usage from metrics-server, divides it by
+# the pod's CPU *request* (100m), averages that across ready pods, and moves the
+# replica count toward keeping the average at 70%. Delete the request from the
+# Deployment and this object reports <unknown> and never scales.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: timesvc
+  namespace: timesvc
+  labels:
+    app: timesvc
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: timesvc
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70

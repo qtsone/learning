@@ -1,0 +1,86 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "service-dns",
+      "difficulty": "core",
+      "prompt": "Your app connects to `db:5432`. Who resolves `db`, and why is that better than putting the container's IP in the config?",
+      "expected_points": [
+        "Compose puts every service on a project network and Docker's embedded DNS resolves the service name to the container",
+        "the name is stable while the IP changes each time the container is recreated",
+        "no config edit or restart is needed when the database container is replaced"
+      ]
+    },
+    {
+      "id": "ports-vs-network",
+      "difficulty": "core",
+      "prompt": "If `db` publishes no ports at all, can `app` still reach it? Explain what `ports:` actually does.",
+      "expected_points": [
+        "yes — container-to-container traffic uses the container port on the shared network",
+        "ports: only maps a host port to a container port, for access from your machine",
+        "so the database usually needs no published port; publishing 5432 mostly invites host collisions"
+      ]
+    },
+    {
+      "id": "volumes-choice",
+      "difficulty": "core",
+      "prompt": "Why does the database data go in a named volume while `./app` is a bind mount? What would go wrong if you swapped them?",
+      "expected_points": [
+        "named volume is Docker-managed storage, right for data that must outlive the container",
+        "bind mount is an exact host path, right for source you edit in your editor",
+        "a bind-mounted data dir drags in host uids, permissions and slower/looser filesystem semantics — Postgres commonly refuses to start or risks corruption",
+        "bind-mounting source into an image with no toolchain does nothing, which is why the app service targets the dev stage"
+      ]
+    },
+    {
+      "id": "depends-on-health",
+      "difficulty": "core",
+      "prompt": "What does the list form `depends_on: [db]` wait for, and what does `condition: service_healthy` add?",
+      "expected_points": [
+        "the list form only waits for the db container to start — the process running, not the database accepting connections",
+        "Postgres's first boot runs initdb and restarts internally, so the app connects into that gap and dies",
+        "service_healthy waits for the healthcheck (pg_isready) to pass, defined by test/interval/retries/start_period"
+      ]
+    },
+    {
+      "id": "lifecycle",
+      "difficulty": "core",
+      "prompt": "You ran `docker compose down`, then `up`, and yesterday's rows are still there. Why — and which command removes them? How would you watch the app's logs and get a psql shell meanwhile?",
+      "expected_points": [
+        "down removes containers and the network but keeps named volumes",
+        "down -v deletes the named volumes and therefore the data",
+        "docker compose logs -f app follows logs; docker compose exec db psql -U app appdb opens a shell in the running container"
+      ]
+    },
+    {
+      "id": "env-split",
+      "difficulty": "core",
+      "prompt": "What is the difference between the `.env` file next to `compose.yaml` and a service's `environment:` block? How does that split keep the password out of git?",
+      "expected_points": [
+        "compose reads .env and substitutes ${VAR} into the file before parsing it",
+        "environment:/env_file: set variables inside the container",
+        "compose.yaml holds only placeholders and is committed; .env holds values and is git-ignored; .env.example documents the keys"
+      ]
+    },
+    {
+      "id": "not-production",
+      "difficulty": "stretch",
+      "prompt": "Where does Compose stop being the right tool? Name two concrete things it cannot do.",
+      "expected_points": [
+        "single host: nothing reschedules containers when a machine dies",
+        "no reconciliation loop or rolling update/rollback story you would bet a release on",
+        "it is genuinely good for development, CI integration tests and small single-box deployments"
+      ]
+    },
+    {
+      "id": "still-retry",
+      "difficulty": "stretch",
+      "prompt": "With `condition: service_healthy` in place, does your app still need retry logic when talking to the database?",
+      "expected_points": [
+        "yes — healthcheck ordering only covers startup",
+        "the database can restart or become unreachable at any time later",
+        "retry with backoff in the client is the correctness mechanism; ordering is a convenience"
+      ]
+    }
+  ]
+}

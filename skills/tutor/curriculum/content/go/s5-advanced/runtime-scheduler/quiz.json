@@ -1,0 +1,81 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "gmp-syscall-story",
+      "difficulty": "core",
+      "prompt": "Name the three letters of the GMP model and what each one is. Then tell the whole story of a goroutine entering a blocking syscall — from the moment the thread enters the kernel to the moment the goroutine runs Go code again.",
+      "expected_points": [
+        "G = goroutine (small stack + state), M = OS thread, P = scheduling token holding a local run queue; running Go code requires all three",
+        "the M is trapped in the kernel with its G; sysmon notices and detaches the P",
+        "the P is handed to another M (woken or newly created) so other goroutines keep running",
+        "on return the M needs a P; if none is free the G goes to the global run queue and the M parks"
+      ]
+    },
+    {
+      "id": "gomaxprocs-stealing",
+      "difficulty": "core",
+      "prompt": "GOMAXPROCS=1 and you start 100,000 goroutines. Is that a contradiction? Explain what GOMAXPROCS actually bounds, and how work stealing fits into the picture when GOMAXPROCS is larger.",
+      "expected_points": [
+        "no contradiction: GOMAXPROCS is the number of Ps — simultaneous execution slots — not a limit on goroutines",
+        "parallelism (running at the same instant) is bounded; concurrency (in-flight, interleaved goroutines) is not",
+        "an idle P's M, after checking the global queue and netpoller, steals half of another P's local run queue",
+        "stealing is why goroutines spawned in one place spread across all Ps without any placement by the programmer"
+      ]
+    },
+    {
+      "id": "preemption",
+      "difficulty": "core",
+      "prompt": "A goroutine runs `for { x++ }` — no function calls. Before Go 1.14 this could freeze a program; today it can't. Explain both preemption mechanisms and why the old one failed here, plus why this bug was worse than mere unfairness.",
+      "expected_points": [
+        "cooperative preemption reuses the stack-bound check in function prologues — the runtime poisons the bound so the next call reschedules",
+        "a call-free loop never hits a prologue check, so it could hold its P forever",
+        "since Go 1.14 sysmon sends a signal (SIGURG) to a G running ~10ms+, suspending it at nearly any instruction",
+        "GC begins with stop-the-world, so one unpreemptible loop could stall garbage collection and thus the whole program"
+      ]
+    },
+    {
+      "id": "goroutine-cost",
+      "difficulty": "core",
+      "prompt": "Roughly what does a new goroutine cost, what happens when it outgrows its stack, and when is goroutine-per-request the right design versus when would you bound goroutine creation?",
+      "expected_points": [
+        "~2 KiB initial stack (runtime-adaptive) plus a small descriptor — versus megabytes for an OS thread",
+        "stacks grow by allocating a larger stack and copying, transparently, up to a large cap; they can shrink at GC",
+        "per-request is right when goroutines mostly park on runtime/netpoller waits and hold little — the net/http model",
+        "bound (worker pool / semaphore channel) when each goroutine holds scarce resources, blocks a thread in syscalls/cgo, or spawning is unbounded by any upstream limit"
+      ]
+    },
+    {
+      "id": "diagnose-threads",
+      "difficulty": "core",
+      "prompt": "A service on 8 cores shows latency spikes; schedtrace reports threads climbing past 1,000 while gomaxprocs=8 and all run queues sit near zero. What is happening, what evidence would you collect, and name one fix?",
+      "expected_points": [
+        "thread growth with empty run queues points at goroutines blocking OS threads in syscalls or cgo — not CPU starvation",
+        "each simultaneously blocking call traps an M and forces the runtime to back-fill with new threads; the 10k-thread limit eventually kills the process",
+        "evidence: execution trace showing Gs in syscall state, a threadcreate profile, or bisecting the recent dependency change",
+        "fix: bound the blocking calls with a semaphore/worker pool, or replace the blocking API with a pollable / pure-Go alternative — raising GOMAXPROCS is not a fix"
+      ]
+    },
+    {
+      "id": "why-p-exists",
+      "difficulty": "stretch",
+      "prompt": "Play language designer: goroutines and threads seem sufficient — why did Go add the P at all?",
+      "expected_points": [
+        "P cleanly bounds parallelism at GOMAXPROCS regardless of how many threads exist",
+        "one-owner Ps make local run queues lock-free; a single global locked queue was the old design and didn't scale across cores",
+        "Ps carry per-P caches (e.g. allocator caches), avoiding cross-thread contention"
+      ]
+    },
+    {
+      "id": "sleep-vs-socket-vs-syscall",
+      "difficulty": "stretch",
+      "prompt": "Three goroutines block: one in time.Sleep, one reading an idle TCP socket, one in a raw blocking read(2) on a pipe. How many OS threads do the three of them tie up, and why is each case different?",
+      "expected_points": [
+        "sleep: zero threads — the runtime's timer machinery parks the G",
+        "socket: zero threads — the netpoller registers the fd (epoll/kqueue) and parks the G until readiness",
+        "raw syscall: one whole thread — the M is trapped in the kernel and its P is handed off",
+        "the asymmetry is why goroutine-per-connection servers scale but syscall/cgo-heavy workloads need bounding"
+      ]
+    }
+  ]
+}

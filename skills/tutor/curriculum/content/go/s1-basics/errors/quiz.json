@@ -1,0 +1,76 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "errors-are-values",
+      "difficulty": "core",
+      "prompt": "Go has no try/catch. How does a Go function tell its caller something went wrong, and what do Gophers like about that compared to exceptions?",
+      "expected_points": [
+        "a fallible function returns an error as an ordinary value, by convention the last return value",
+        "nil means success; non-nil carries a failure description",
+        "no hidden control flow — every place a failure can happen is visible in the code",
+        "errors obey normal value rules: return, store, compare, pass along"
+      ]
+    },
+    {
+      "id": "check-and-return",
+      "difficulty": "core",
+      "prompt": "Describe the standard shape of calling a function that can fail. What do you do when err is non-nil, and what about the other return value?",
+      "expected_points": [
+        "value, err := f() then if err != nil immediately after the call",
+        "if you cannot handle it, return the error (plus a zero value) to your caller",
+        "never use the other return value when err is non-nil — it is a meaningless zero value",
+        "error branches return early so the happy path stays unindented"
+      ]
+    },
+    {
+      "id": "wrap-w-vs-v",
+      "difficulty": "core",
+      "prompt": "fmt.Errorf(\"transfer: %w\", err) versus fmt.Errorf(\"transfer: %v\", err) — the printed messages are identical. What is the difference and why does it matter?",
+      "expected_points": [
+        "%w keeps the original error inside the new one, forming a chain",
+        "errors.Is can still find the underlying sentinel through the chain",
+        "%v flattens the error to text, severing the chain so errors.Is returns false"
+      ]
+    },
+    {
+      "id": "sentinel-vs-adhoc",
+      "difficulty": "core",
+      "prompt": "In the exercise, why is ErrInsufficientFunds a package-level variable instead of fmt.Errorf(\"insufficient funds\") at the failure site? When is the ad-hoc form the right call?",
+      "expected_points": [
+        "a sentinel is one identity callers can branch on with errors.Is",
+        "matching message text is brittle — wording changes and wrapping break it",
+        "ad-hoc errors are right when the message is only for humans and no caller branches on it"
+      ]
+    },
+    {
+      "id": "context-chain",
+      "difficulty": "core",
+      "prompt": "A failed transfer prints: transfer from \"alice\" to \"bob\": withdraw 100 from \"alice\": have 50: insufficient funds. How was that message built, and what can code still learn from the error beyond reading the text?",
+      "expected_points": [
+        "each layer wrapped the error it received with fmt.Errorf and %w, adding its own context",
+        "fragments read outermost first, which is why messages are lowercase without trailing punctuation",
+        "errors.Is(err, ErrInsufficientFunds) is still true — the cause survives every layer"
+      ]
+    },
+    {
+      "id": "eq-vs-is",
+      "difficulty": "stretch",
+      "prompt": "err == ErrAccountNotFound compiles and sometimes even works. Why is it still the wrong way to check?",
+      "expected_points": [
+        "== compares only the outermost error",
+        "it silently becomes false as soon as any layer wraps the sentinel",
+        "errors.Is walks the whole chain, so it keeps working as the code evolves"
+      ]
+    },
+    {
+      "id": "message-style",
+      "difficulty": "stretch",
+      "prompt": "Why does Go convention say error messages should be lowercase with no trailing punctuation?",
+      "expected_points": [
+        "messages get chained with a colon separator as errors are wrapped",
+        "capitalized or punctuated fragments read badly in the middle of a chain"
+      ]
+    }
+  ]
+}

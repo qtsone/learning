@@ -1,0 +1,65 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "array-vs-slice",
+      "difficulty": "core",
+      "prompt": "What is the difference between an array and a slice in Go? What three fields make up a slice header?",
+      "expected_points": [
+        "array: fixed length that is part of the type, assignment copies all elements",
+        "slice: a small header describing a window onto a backing array",
+        "header fields: pointer to an element of the backing array, len, cap"
+      ]
+    },
+    {
+      "id": "len-cap-prediction",
+      "difficulty": "core",
+      "prompt": "Given `s := make([]int, 3, 5)` and `t := s[1:3]`: what are len(t) and cap(t)? If you then write `t[0] = 99`, what happens to s?",
+      "expected_points": [
+        "len(t) = 2 (hi - lo)",
+        "cap(t) = 4 — capacity runs from the pointer to the end of the backing array (cap(s) - lo), not to hi",
+        "s[1] becomes 99: slicing shares the backing array, so t aliases s"
+      ]
+    },
+    {
+      "id": "append-reassign",
+      "difficulty": "core",
+      "prompt": "Why is `s = append(s, v)` the required shape? What can go wrong if you write `t := append(s, v)` and keep using both t and s?",
+      "expected_points": [
+        "when len == cap, append allocates a bigger array, copies the elements, and returns a header pointing at the new memory",
+        "the returned header is the only one guaranteed current — the old s may point at a stale or shared array",
+        "whether t and s alias depends on spare capacity, so the bug appears only at certain lengths"
+      ]
+    },
+    {
+      "id": "copy-aliasing",
+      "difficulty": "core",
+      "prompt": "How do you make an independent duplicate of a slice, and why isn't `dst := src` enough?",
+      "expected_points": [
+        "dst := src copies only the header — both slices alias the same backing array",
+        "allocate with make([]int, len(src)) then copy(dst, src)",
+        "copy transfers min(len(dst), len(src)) elements and never grows dst, so an unsized destination silently copies nothing"
+      ]
+    },
+    {
+      "id": "half-open",
+      "difficulty": "core",
+      "prompt": "Slice expressions are half-open: s[lo:hi] includes lo but excludes hi. How did that convention help you avoid index bugs in Insert and Remove?",
+      "expected_points": [
+        "length of a range is simply hi - lo",
+        "s[:i] and s[i:] partition the slice with no overlap and no off-by-one adjustment",
+        "in Remove, s[:i] plus s[i+1:] cleanly skips exactly element i; in Insert, i == len(s) naturally means append"
+      ]
+    },
+    {
+      "id": "remove-one-liner",
+      "difficulty": "stretch",
+      "prompt": "The famous one-liner `append(s[:i], s[i+1:]...)` removes element i. The exercise tests reject it — why? When would it be the right choice?",
+      "expected_points": [
+        "s[:i] aliases s, so the append shifts elements inside the input's backing array — the caller's slice is visibly modified",
+        "the returned slice still aliases the input",
+        "it is fine (and efficient) when the caller owns the slice and wants in-place removal — the contract decides"
+      ]
+    }
+  ]
+}

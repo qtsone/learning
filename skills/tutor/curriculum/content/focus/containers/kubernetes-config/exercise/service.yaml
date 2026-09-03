@@ -1,0 +1,21 @@
+# Carried over from Kubernetes Core, unchanged. Nothing in this lesson touches
+# it: the Service picks pods by label and forwards to the container's named
+# port, whatever the pod's configuration and probes end up looking like.
+#
+# Worth remembering while you work: a pod only appears behind this Service once
+# its readiness probe passes.
+apiVersion: v1
+kind: Service
+metadata:
+  name: timesvc
+  namespace: timesvc
+  labels:
+    app: timesvc
+spec:
+  type: ClusterIP
+  selector:
+    app: timesvc
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

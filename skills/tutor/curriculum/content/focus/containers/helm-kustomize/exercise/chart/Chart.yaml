@@ -1,0 +1,9 @@
+# The chart's identity card. Helm reads it before it renders anything.
+apiVersion: v2
+name: timesvc
+# TODO: describe the chart in one line — this is what `helm search` shows.
+# TODO: type — application (installable) or library (helpers only, renders nothing).
+# TODO: version — the *chart's* semantic version. Bump it when the templates
+#       change, even if the application did not.
+# TODO: appVersion — the version of timesvc this chart ships by default. Quote
+#       it: 1.10 unquoted is the number 1.1.

@@ -1,0 +1,76 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "lifo-fifo-identify",
+      "difficulty": "core",
+      "prompt": "For each of these, say stack or queue and defend the choice: undo in an editor, jobs sent to a printer, the browser back button, keystrokes waiting to be processed.",
+      "expected_points": [
+        "undo and back button are stacks: the most recent action must come out first",
+        "printer jobs and keystroke buffers are queues: arrival order must be preserved",
+        "the deciding question is whether removal should return the newest or the oldest element"
+      ]
+    },
+    {
+      "id": "empty-and-peek-contract",
+      "difficulty": "core",
+      "prompt": "What should Pop or Dequeue do when the container is empty, and how does Peek differ from Pop? How did your implementation signal the empty case?",
+      "expected_points": [
+        "empty removal must be signaled, not panic — the comma-ok (value, bool) convention, like a map lookup",
+        "Peek returns the same element Pop would but leaves the container unchanged",
+        "callers check ok before trusting the value"
+      ]
+    },
+    {
+      "id": "slice-vs-linked",
+      "difficulty": "core",
+      "prompt": "Compare a slice-backed and a linked-node queue: what goes wrong when you dequeue from the front of a slice, and what does the linked version cost you instead?",
+      "expected_points": [
+        "shifting elements on each dequeue is O(n), so draining n elements is O(n^2)",
+        "reslicing items[1:] is O(1) time but keeps the backing array reachable, pinning memory the queue will never read again",
+        "linked nodes with head and tail give true O(1) at both ends and let dequeued nodes be garbage-collected",
+        "the linked version pays an allocation per element and loses cache-friendly contiguity"
+      ]
+    },
+    {
+      "id": "amortized-growth",
+      "difficulty": "core",
+      "prompt": "A push onto a slice-backed stack sometimes copies every element into a bigger array. Why do we still describe push as O(1)?",
+      "expected_points": [
+        "growth doubles capacity, so expensive copies are rare and get rarer",
+        "total copy work across n pushes is O(n), so the average per push is constant",
+        "this averaged figure is called amortized O(1); individual pushes can still be slow"
+      ]
+    },
+    {
+      "id": "brackets-walkthrough",
+      "difficulty": "core",
+      "prompt": "Walk through how your Balanced decides that \"([)]\" is unbalanced. Why can't a simple open-minus-close counter do this job?",
+      "expected_points": [
+        "openers are pushed; each closer pops and must pair with the popped opener",
+        "on ')' the pop returns '[', which does not pair, so the answer is false",
+        "a counter only tracks how many are open, not which opener was most recent — nesting is LIFO, so a stack is required",
+        "a leftover non-empty stack at the end also means unbalanced"
+      ]
+    },
+    {
+      "id": "queues-in-systems",
+      "difficulty": "core",
+      "prompt": "Name two real systems built around queues and explain why FIFO is the right discipline for each.",
+      "expected_points": [
+        "task scheduling (print jobs, background jobs): first submitted, first served is the fairness contract",
+        "buffering (keystrokes, packets, audio): producer and consumer run at different speeds and order must survive the handoff",
+        "breadth-first search processes vertices in discovery order, which is exactly FIFO"
+      ]
+    },
+    {
+      "id": "queue-from-two-stacks",
+      "difficulty": "stretch",
+      "prompt": "Design puzzle: build a queue out of two stacks. How does it work, and what is the amortized cost of dequeue?",
+      "expected_points": [
+        "enqueue pushes onto an in-stack; dequeue pops from an out-stack, refilling it by draining the in-stack when empty",
+        "each element is moved at most twice, so dequeue is amortized O(1) even though a single refill is O(n)"
+      ]
+    }
+  ]
+}

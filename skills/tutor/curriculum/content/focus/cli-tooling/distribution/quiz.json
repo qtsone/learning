@@ -1,0 +1,82 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "semver-cli",
+      "difficulty": "core",
+      "prompt": "You rename `--output` to `--out`, add a `verify` subcommand, and fix a wrong exit code. Which version bumps does each one force, and why?",
+      "expected_points": [
+        "renaming a flag breaks existing invocations — major",
+        "a new subcommand is additive — minor",
+        "the exit-code fix changes something scripts branch on, so it is major (or patch only if the old code was undocumented/plainly broken) — the learner should reason about the promise, not recite a table",
+        "a CLI's public API is its commands, flags, exit codes, machine-readable output shape and config keys — not its human-readable wording"
+      ]
+    },
+    {
+      "id": "ldflags-x",
+      "difficulty": "core",
+      "prompt": "How does the version number get into a released binary, and what happens when you mistype the `-X` symbol path?",
+      "expected_points": [
+        "go build -ldflags \"-X <full import path>.<var>=<value>\" overwrites a package-level string var at link time",
+        "the target must be a var (not a const) initialised to a constant string; in a subpackage the path is the module path plus the directory, not main",
+        "a wrong symbol path is silently ignored: the build succeeds and ships the placeholder",
+        "the defence is running --version in the pipeline and asserting on its output"
+      ]
+    },
+    {
+      "id": "cross-compile",
+      "difficulty": "core",
+      "prompt": "Explain what `CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build` needs installed on your machine, and why Go can do that when C toolchains struggle.",
+      "expected_points": [
+        "nothing extra — no cross compiler, no system linker, no target headers",
+        "the Go compiler/linker target every platform and the runtime plus standard library are compiled from source for the target",
+        "the condition is pure Go: cgo would need a C compiler for the target, so CGO_ENABLED=0",
+        "the payoff is a static binary that runs on any distro or a scratch container; go tool dist list shows the pairs"
+      ]
+    },
+    {
+      "id": "goreleaser-tag",
+      "difficulty": "core",
+      "prompt": "You push the tag `v1.4.2` and CI runs goreleaser. Walk me through what it does, and where the version string comes from.",
+      "expected_points": [
+        "the version comes from the git tag ({{ .Version }} is the tag without the leading v); a dirty tree or a missing tag makes it refuse",
+        "builds the goos/goarch matrix with the configured flags and ldflags templates",
+        "archives the binaries, writes checksums.txt, generates release notes from commit subjects since the previous tag",
+        "creates the release and uploads the artifacts, then publishes downstream packages such as the Homebrew formula"
+      ]
+    },
+    {
+      "id": "homebrew-tap",
+      "difficulty": "core",
+      "prompt": "What exactly is a Homebrew tap, what does the formula for a Go tool contain, and what does goreleaser do about it?",
+      "expected_points": [
+        "a tap is a git repo named homebrew-<something> under your account; brew install you/tap/digest resolves to it",
+        "the formula is Ruby: for a prebuilt binary it holds the release archive URL per platform, its sha256, and an install step copying the binary into bin",
+        "the brews: block generates and commits that formula after a successful release, with URLs and checksums filled in",
+        "it needs a token with write access to the tap repo — a different credential from the release token; homebrew-core would mean review and notability rules"
+      ]
+    },
+    {
+      "id": "go-install-version",
+      "difficulty": "stretch",
+      "prompt": "A user installs your tool with `go install example.com/digest@v1.4.2` — no goreleaser involved. What does `--version` print, and how did you arrange that?",
+      "expected_points": [
+        "your ldflags never ran, so the vars still hold their placeholders",
+        "runtime/debug.ReadBuildInfo gives bi.Main.Version (v1.4.2 here) and vcs.revision / vcs.time settings",
+        "precedence: linker flags, then build info, then placeholder",
+        "(devel) and empty are not real versions, so a plain local build still says dev"
+      ]
+    },
+    {
+      "id": "reproducible",
+      "difficulty": "stretch",
+      "prompt": "Two builds of the same commit produce different bytes. Name the likely causes and what each fix is — and say why anyone should care.",
+      "expected_points": [
+        "absolute paths from the build machine — fix with -trimpath",
+        "a wall-clock timestamp in ldflags — stamp the commit date instead",
+        "a different Go toolchain version — pin it; archive file timestamps — mod_timestamp",
+        "reproducibility lets anyone check that the published binary corresponds to the published source; checksums detect tampering in transit, signatures are what prove origin"
+      ]
+    }
+  ]
+}

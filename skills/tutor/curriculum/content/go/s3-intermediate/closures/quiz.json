@@ -1,0 +1,65 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "capture-by-reference",
+      "difficulty": "core",
+      "prompt": "A closure uses a variable from its enclosing function. After the closure is created, the enclosing function assigns a new value to that variable. When the closure runs, which value does it see, and why?",
+      "expected_points": [
+        "the new value — closures capture the variable itself, not a snapshot of its value",
+        "the closure holds a reference to the shared variable, so reads and writes on either side are visible to the other",
+        "the variable outlives the enclosing function if the closure does (it escapes to the heap)"
+      ]
+    },
+    {
+      "id": "options-pattern",
+      "difficulty": "core",
+      "prompt": "Sketch the functional options pattern for a constructor and explain what it buys you over a plain config struct parameter.",
+      "expected_points": [
+        "an Option is a func(*T) that edits the value under construction; WithX(v) returns a closure capturing v; the constructor takes ...Option, sets defaults, then applies each in order",
+        "a config struct can't distinguish a deliberate zero value from an omitted field, so defaults get ambiguous",
+        "new options can be added later without breaking existing call sites, and the struct's fields can stay unexported"
+      ]
+    },
+    {
+      "id": "loopvar-122",
+      "difficulty": "core",
+      "prompt": "Before Go 1.22, closures created inside a for loop famously all saw the same final value of the loop variable. Why did that happen, and what changed in Go 1.22?",
+      "expected_points": [
+        "pre-1.22 the loop declared one variable for the whole loop, so every closure captured that same variable, which held its final value by the time the closures ran",
+        "Go 1.22 gives each iteration a fresh loop variable, so capturing it is safe",
+        "the fix or old workaround i := i created a fresh per-iteration copy; the module's go directive decides which semantics apply"
+      ]
+    },
+    {
+      "id": "functional-limits",
+      "difficulty": "core",
+      "prompt": "Go has generics, so you can write Map and Filter — yet idiomatic Go still mostly uses plain for loops. When does passing a function as a value earn its place, and when should you just write the loop?",
+      "expected_points": [
+        "function values fit when the function is the varying part of a fixed algorithm: comparators/predicates for stdlib APIs, functional options, deferred cleanup, callbacks",
+        "Go has no method-chaining culture and function literals are verbose, so pipelines of Map/Filter read worse and allocate intermediate slices",
+        "prefer the plain loop when the body grows complex, needs early exit, or a chain of higher-order calls replaces one clear loop"
+      ]
+    },
+    {
+      "id": "shared-state-object",
+      "difficulty": "stretch",
+      "prompt": "In your Counter exercise, inc and reset both work on the same count. What does that make the pair, conceptually — and at what point would you reach for a struct with methods instead?",
+      "expected_points": [
+        "two closures over one variable are shared mutable state — effectively an object whose fields are the captured variables and whose methods are the closures",
+        "with several captured variables or several closures, a named struct with methods states the same design more clearly",
+        "(bonus) once goroutines exist, shared captured variables become a data-race concern"
+      ]
+    },
+    {
+      "id": "two-stage-option",
+      "difficulty": "stretch",
+      "prompt": "WithPort(9090) executes and returns before NewServer ever runs. Explain exactly what WithPort returns and how the 9090 survives until it is used.",
+      "expected_points": [
+        "WithPort returns a closure of type Option (func(*Server)); calling WithPort does not touch any server",
+        "the closure captures the port argument, carrying 9090 with it",
+        "NewServer later calls the closure with the server under construction, which is when the assignment happens"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words, with costs and trade-offs named rather than pattern labels recited; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "monolith-vs-services",
+      "difficulty": "core",
+      "prompt": "A 26-engineer company in 4 teams asks you whether to split their single deployable into microservices. What do you need to know before answering, and what does the split actually cost them — organizationally and operationally?",
+      "expected_points": [
+        "separate logical boundaries (modules: who may call whom, who owns which data) from deployment boundaries (what ships, scales and fails independently); a modular monolith enforces the first without paying for the second",
+        "decide from the drivers, not fashion: team count and structure, deploy contention (merges per release x rollback rate), differential load per module, domain stability — modernity is not an argument",
+        "operational cost: every cross-boundary call becomes a network call with timeouts, partial failure, retries and required idempotency; cross-service transactions become sagas or outbox workflows; each service wants its own pipeline, dashboards, alerts, capacity plan and on-call share; every boundary needs versioning and tolerant readers",
+        "organizational cost: Conway's law — services that cut across team boundaries create permanent coordination overhead, and a service with no owning team pages whoever is unlucky; services outnumbering teams is a smell while small",
+        "what it buys: independent deploys, independent scaling of a genuine hot spot, fault isolation, team autonomy — so default to modular monolith first and extract when a specific driver pays a specific bill"
+      ]
+    },
+    {
+      "id": "event-driven-tradeoffs",
+      "difficulty": "core",
+      "prompt": "Checkout currently calls the email service, the search indexer, and analytics inline. Describe what changes if checkout instead publishes an `order.placed` event — what gets better, and what gets worse?",
+      "expected_points": [
+        "a command asks a named party to act and cares about the answer; an event states a fact and whoever cares reacts — publishing cuts temporal coupling (all up now), failure coupling (their outage is your outage) and knowledge coupling (caller lists every party)",
+        "gains: failure isolation (the email provider's bad day no longer breaks checkout — the queue absorbs it and redelivery drains it), lower latency on the request path, additive extension (a new consumer subscribes without touching the producer), spike absorption via buffering and backpressure",
+        "debuggability cost: there is no call stack — 'what happened to order 123?' becomes a correlation exercise across producer and consumers, so tracing and correlation IDs stop being optional or you get untraceable event soup",
+        "consistency cost: downstream consumers now lag, so 'how stale may this be?' becomes a stated per-consumer requirement; at-least-once delivery makes duplicates the default so every consumer must be idempotent; event schemas are contracts consumed by parties you don't know, so additive changes and tolerant readers apply"
+      ]
+    },
+    {
+      "id": "hexagonal-rule",
+      "difficulty": "core",
+      "prompt": "Explain hexagonal (ports and adapters) architecture to a colleague, and tell them how a reviewer could mechanically check whether a module actually follows it.",
+      "expected_points": [
+        "three roles: a domain core of business rules importing nothing about HTTP, SQL, brokers or vendor SDKs; ports — interfaces owned by the domain stating what it needs (store, payments, event publisher) and offers; adapters connecting those ports to real technology",
+        "the load-bearing dependency rule: source dependencies point inward — the core names its ports and never names an adapter; the day a framework or driver type appears in a domain type the rule is broken",
+        "mechanically checkable via the import list: the domain package must not import the HTTP layer or the database driver; ports are named in business language (Store, Payments, Events — not PostgresClient) and owned by the domain, so vendor types cannot leak inward",
+        "what it buys: the domain tests against in-memory fakes and injected clocks with no database, broker or server; edges swap (add a gRPC adapter beside HTTP) touching adapters only; a clean port is already the seam if the module later becomes a service",
+        "the cost is indirection plus mapping between domain object, database row and API shape — spend it where the rules are real (checkout, pricing) and skip it on CRUD, which is itself a framed trade-off"
+      ]
+    },
+    {
+      "id": "diagnose-pattern",
+      "difficulty": "core",
+      "prompt": "You join a codebase whose folders are named like modules and whose README says 'modular monolith'. How do you find out what it really is — what evidence do you gather, and what would convince you the boundaries are fiction?",
+      "expected_points": [
+        "count deployables first — one unit or many is a fact, not an opinion — and note that it says nothing about the insides",
+        "map the dependency graph (who imports whom, in which direction); cycles and everybody-imports-everybody are the mud signature regardless of folder names",
+        "find the transactions: a commit writing two modules' tables is real coupling whatever the diagram claims; check table ownership, since two modules writing one table are one module in disguise and a service sharing another's database has the costs of two and the coupling of one",
+        "classify the edges as synchronous or event-driven — the synchronous ones are the failure-coupling map",
+        "symptoms need numbers, not adjectives: release-train arithmetic (merges per release x rollback rate = unrelated changes reverted per bad deploy), one hot module forcing the whole app to scale, a non-critical dependency taking down the core flow, teams blocked on each other's tests and deploy windows"
+      ]
+    },
+    {
+      "id": "incremental-migration",
+      "difficulty": "core",
+      "prompt": "The evidence says a module should become its own service. Why not schedule a rewrite — and what does an incremental path look like instead, step by step?",
+      "expected_points": [
+        "big-bang rewrites fail predictably: a feature freeze nobody honors, a moving target while the old system keeps changing, and one riskiest-possible cutover day",
+        "draw the seam as a module boundary first (branch by abstraction): introduce the port inside the monolith and move every caller onto it — no deployment change, pure refactoring with compiler help, and it already improves tests",
+        "strangler fig: stand the new implementation beside the old, route one endpoint or read path to it, verify with shadow traffic or dual-read diffing, widen the slice, let the old path atrophy, delete it",
+        "extract data last — a service sharing the old database is still coupled where it hurts, since schema changes need cross-service coordination; route access through the owning module's interface first and move tables once nothing else touches them",
+        "pick the first extraction by driver x safety (a real scaling or ownership driver plus low blast radius — read-mostly paths with staleness tolerance beat the transactional core), and require every step to be independently shippable and reversible with a verification signal",
+        "extracting a module whose boundary was never enforced just distributes the mud: boundary enforcement precedes extraction"
+      ]
+    },
+    {
+      "id": "dual-write",
+      "difficulty": "stretch",
+      "prompt": "A teammate's design says: 'commit the order, then publish `order.placed` to the broker.' What is wrong with that, and what would you do instead?",
+      "expected_points": [
+        "it is a dual write to two systems: crash between commit and publish and the order exists while no consumer ever hears about it — no email, no index update, forever; reversing the order loses the opposite way (event for an order that never committed)",
+        "the outbox pattern closes it: the event row is inserted in the same transaction as the order, so they commit atomically, and a relay reads the outbox and publishes afterwards",
+        "the relay republishes on doubt, so delivery is at-least-once and consumers still need idempotency (dedupe on event id or a (order id, consumer) key); the relay's own lag is an operational signal worth alerting on"
+      ]
+    },
+    {
+      "id": "choreography-orchestration",
+      "difficulty": "stretch",
+      "prompt": "When would you let a multi-step flow emerge from chained events, and when would you give it an explicit owner?",
+      "expected_points": [
+        "choreography: each consumer reacts to events with no owner — flexible and additive, but 'where is order 123 stuck?' has no single answer",
+        "orchestration: a component issues commands and tracks workflow state — a box you can point at when it stalls, and a box that can itself fail or become a bottleneck",
+        "rule of thumb: independent fan-out side effects choreograph well, while multi-step workflows needing compensation (refund, cancel, retry) deserve an orchestrator; applying one style to everything is pattern-matching rather than reasoning"
+      ]
+    }
+  ]
+}

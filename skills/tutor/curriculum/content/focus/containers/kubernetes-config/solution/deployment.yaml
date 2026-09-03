@@ -1,0 +1,105 @@
+# Reference solution. The Deployment now says three things it did not say
+# before: where its configuration comes from, how the platform can tell whether
+# it is healthy, and how much of a node it needs.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timesvc
+  namespace: timesvc
+  labels:
+    app: timesvc
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: timesvc
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  revisionHistoryLimit: 5
+  template:
+    metadata:
+      labels:
+        app: timesvc
+    spec:
+      containers:
+        - name: timesvc
+          image: timesvc:1.2.0
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            # Named per key rather than envFrom: explicit about what the process
+            # reads, and it leaves features.yaml out — envFrom would try to turn
+            # that key into an environment variable, and the kubelet would skip
+            # it as an invalid name and say so in an event.
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: timesvc-config
+                  key: LOG_LEVEL
+            - name: NOW_CACHE_TTL
+              valueFrom:
+                configMapKeyRef:
+                  name: timesvc-config
+                  key: NOW_CACHE_TTL
+            # By reference. The value lives in the Secret; this file, which is
+            # committed and pasted into tickets, only names it.
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: timesvc-secrets
+                  key: API_KEY
+          volumeMounts:
+            # The whole ConfigMap as a directory: /etc/timesvc/config/features.yaml.
+            # No subPath, because a subPath mount is a copy and never updates.
+            - name: features
+              mountPath: /etc/timesvc/config
+              readOnly: true
+          startupProbe:
+            # Buys the process 60s to boot (12 x 5s) before liveness applies.
+            # Same cheap endpoint as liveness: this gates restarts, not traffic.
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+            failureThreshold: 12
+          livenessProbe:
+            # Process-local only. Its remedy is a restart, so it must never fail
+            # for a reason a restart cannot fix.
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          readinessProbe:
+            # Dependency-aware. Its remedy is removal from the Service's
+            # endpoints, which is exactly right for "cannot serve right now".
+            httpGet:
+              path: /readyz
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+            successThreshold: 1
+          resources:
+            requests:
+              # What the scheduler reserves, and what the HPA takes 70% of.
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              # Memory is the OOM-kill line, so it is deliberately well above
+              # the steady-state footprint. CPU throttles rather than kills;
+              # this ceiling is generous enough that normal work never hits it.
+              cpu: 500m
+              memory: 128Mi
+      volumes:
+        - name: features
+          configMap:
+            name: timesvc-config
+            items:
+              - key: features.yaml
+                path: features.yaml

@@ -1,0 +1,64 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "holds-vs-points",
+      "difficulty": "core",
+      "prompt": "Given `x := 42` and `p := &x`: what does `p` hold, what is `*p`, and what does `x` become after `*p = 7`?",
+      "expected_points": [
+        "p holds the address of x, not 42",
+        "*p dereferences: follow the address and get the value 42",
+        "*p = 7 writes through the pointer, so x becomes 7 — x and *p name the same box"
+      ]
+    },
+    {
+      "id": "pass-by-value",
+      "difficulty": "core",
+      "prompt": "Why does `func bump(n int) { n = n + 1 }` leave the caller's variable unchanged, and how do you fix it?",
+      "expected_points": [
+        "Go copies every argument — the function increments its own copy",
+        "fix: take *int and write through it with *n, calling bump(&x)",
+        "even then the pointer itself is copied; a copied address still points at the caller's box"
+      ]
+    },
+    {
+      "id": "nil-panic",
+      "difficulty": "core",
+      "prompt": "What is the zero value of a pointer, what happens if you dereference it, and how do you write code that can't hit that?",
+      "expected_points": [
+        "zero value is nil — points at nothing",
+        "dereferencing nil panics at runtime (invalid memory address / nil pointer dereference), the compiler can't catch it",
+        "guard with if p != nil before dereferencing (or return a fallback early)"
+      ]
+    },
+    {
+      "id": "value-or-pointer",
+      "difficulty": "core",
+      "prompt": "A teammate asks whether their new function should take a `Player` or a `*Player`. What questions decide it?",
+      "expected_points": [
+        "mutation: only a pointer lets the function change the caller's value",
+        "size: pointers avoid copying large structs, but small copies are cheap",
+        "nil-ability: a pointer can express absent; a value cannot be nil and is safer when none of the above apply"
+      ]
+    },
+    {
+      "id": "local-escape",
+      "difficulty": "stretch",
+      "prompt": "Is `return &pl` at the end of NewPlayer safe, given `pl` is a local variable? Why does the C horror story not apply?",
+      "expected_points": [
+        "safe and idiomatic in Go — the standard constructor shape",
+        "the compiler sees the address escape and keeps the value alive (heap allocation), the garbage collector frees it later"
+      ]
+    },
+    {
+      "id": "slices-maps",
+      "difficulty": "stretch",
+      "prompt": "Why could functions change slice elements back in the arrays-slices lesson, even though Go is pass-by-value? Why do you rarely need `*[]int`?",
+      "expected_points": [
+        "the copied slice header contains a pointer to the backing array",
+        "so element writes are visible to the caller; maps behave similarly",
+        "a pointer to a slice/map is rarely needed since they already act reference-like for their contents"
+      ]
+    }
+  ]
+}

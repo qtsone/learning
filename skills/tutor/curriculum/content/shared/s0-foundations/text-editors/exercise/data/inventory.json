@@ -1,0 +1,9 @@
+{
+  "store": "Foundations Supply Co.",
+  "items": [
+    { "name": "mechanical keyboard", "price": 89, "in_stock": true },
+    { "name": "monitor stand" "price": 25, "in_stock": false },
+    { "name": "usb cable", "price": 9, "in_stock": true, }
+  ]
+  "currency": "EUR"
+}

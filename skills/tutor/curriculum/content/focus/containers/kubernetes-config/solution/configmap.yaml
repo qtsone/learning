@@ -1,0 +1,24 @@
+# Reference solution. Non-secret configuration, in the two shapes that reach a
+# container by two different routes.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: timesvc-config
+  namespace: timesvc
+  labels:
+    app: timesvc
+data:
+  # Env-shaped keys: read once, at process start. Changing them here changes
+  # nothing until the pods are replaced.
+  LOG_LEVEL: "info"
+  NOW_CACHE_TTL: "30s"
+  # File-shaped key: the name becomes a filename when this ConfigMap is mounted
+  # as a volume. main.go re-reads it per request, so an edit here lands in a
+  # running pod (after the kubelet's sync, up to about a minute) with no restart.
+  features.yaml: |
+    now:
+      default_zone: UTC
+      round_to_second: true
+    zones:
+      - Europe/Berlin
+      - America/New_York

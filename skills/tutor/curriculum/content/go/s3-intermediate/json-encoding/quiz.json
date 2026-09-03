@@ -1,0 +1,75 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "tags-and-visibility",
+      "difficulty": "core",
+      "prompt": "In your Task struct, what do `json:\"notes,omitempty\"` and `json:\"-\"` each do? And why would a lowercase field like `auditToken` never appear in the JSON even without any tag?",
+      "expected_points": [
+        "the tag renames the field's JSON key; omitempty drops the field when it holds the type's zero value",
+        "json:\"-\" excludes an exported field from encoding entirely",
+        "unexported fields are invisible to encoding/json because packages can only see exported identifiers — they are skipped silently, not by choice"
+      ]
+    },
+    {
+      "id": "unmarshal-behavior",
+      "difficulty": "core",
+      "prompt": "You unmarshal a JSON document into a Task. The document contains a field your struct doesn't have, and is missing a field your struct does have. What happens in each case?",
+      "expected_points": [
+        "unknown JSON fields are ignored without error — the sender can add fields without breaking you",
+        "missing fields are left untouched: zero value in a fresh struct, existing data preserved in a reused one",
+        "nothing signals that a field was absent, which is exactly the gap pointer fields fill"
+      ]
+    },
+    {
+      "id": "custom-marshaler",
+      "difficulty": "core",
+      "prompt": "How did encoding/json know to call your Priority's MarshalJSON — you never registered it anywhere. And why must UnmarshalJSON be on the pointer receiver?",
+      "expected_points": [
+        "Priority satisfies json.Marshaler implicitly — the encoder checks the interface, same mechanism as io.Reader",
+        "MarshalJSON must return valid JSON bytes, hence delegating to json.Marshal for correct quoting",
+        "UnmarshalJSON mutates the receiver, so it needs the pointer; only *Priority's method set satisfies json.Unmarshaler"
+      ]
+    },
+    {
+      "id": "absent-vs-empty",
+      "difficulty": "core",
+      "prompt": "In TaskPatch you used *string for Title instead of string. What concrete pair of inputs would ApplyPatch get wrong with a plain string, and when is a plain value with omitempty the better choice?",
+      "expected_points": [
+        "{\"title\":\"\"} and {} both leave a plain string as \"\" — clear-the-title and don't-touch-it become indistinguishable",
+        "nil pointer means absent, non-nil means present, even pointing at the zero value",
+        "prefer a plain value when zero and absent genuinely mean the same thing; reach for the pointer only when the program must act differently on absent vs zero"
+      ]
+    },
+    {
+      "id": "streaming",
+      "difficulty": "core",
+      "prompt": "What do json.Encoder and json.Decoder buy you over Marshal/Unmarshal plus io.ReadAll, and how does your ReadTasks loop know the difference between a finished stream and a broken one?",
+      "expected_points": [
+        "they work incrementally against io.Writer/io.Reader, so memory doesn't scale with stream size and callers compose (bytes.Buffer in tests, files or network in production)",
+        "Encode writes one value plus a newline — a loop naturally produces NDJSON; Decode reads one value per call",
+        "io.EOF at a value boundary (checked with errors.Is) is the clean end; any other error, like io.ErrUnexpectedEOF mid-value, is a real failure"
+      ]
+    },
+    {
+      "id": "omitempty-trap",
+      "difficulty": "stretch",
+      "prompt": "A teammate adds omitempty to the Done field: `json:\"done,omitempty\"`. All tests they wrote still pass. What did they just break?",
+      "expected_points": [
+        "every Done=false task now marshals without a done key at all — false is the zero value",
+        "consumers can no longer tell 'not done' from 'field absent'; the document's meaning changed",
+        "omitempty is only safe when zero and absent are genuinely synonymous"
+      ]
+    },
+    {
+      "id": "numbers-into-any",
+      "difficulty": "stretch",
+      "prompt": "You decode `{\"count\": 3}` into a map[string]any and assert the value with .(int). The assertion fails. Why, and what does this suggest about decoding into typed structs?",
+      "expected_points": [
+        "JSON has no integer type, so numbers decode into any as float64",
+        "the assertion needs .(float64) — or better, avoid the situation",
+        "a typed struct is a schema: declaring Count int makes the decoder do the conversion and the checking for you"
+      ]
+    }
+  ]
+}

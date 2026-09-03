@@ -1,0 +1,14 @@
+.DS_Store
+.ruff_cache/
+
+# `go build` in a package-main exercise writes the binary in-tree, and anyone
+# running a lesson's own instructions produces one. Never ship them —
+# `tutor.py validate` also fails on any content file over 512KB as a backstop.
+skills/tutor/curriculum/content/**/exercise/project-concurrent
+skills/tutor/curriculum/content/**/exercise/containers-capstone
+skills/tutor/curriculum/content/**/exercise/clockwork
+skills/tutor/curriculum/content/**/exercise/deploying-go
+skills/tutor/curriculum/content/**/exercise/dockerizing-go
+skills/tutor/curriculum/content/**/exercise/app/compose-app
+skills/tutor/curriculum/content/**/exercise/app/timesvc
+__pycache__/

@@ -1,0 +1,66 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "client-server",
+      "difficulty": "core",
+      "prompt": "When you load a web page, who is the client and who is the server? What defines each role?",
+      "expected_points": [
+        "the browser is the client, the program hosting the site is the server",
+        "the client asks first, the server waits for requests and answers",
+        "a server is a program in a role, not special hardware"
+      ]
+    },
+    {
+      "id": "dns",
+      "difficulty": "core",
+      "prompt": "What does DNS do, and why can't your computer just use example.com directly?",
+      "expected_points": [
+        "DNS resolves human-readable names to IP addresses",
+        "packets are delivered to numeric IP addresses, so the name must be translated first",
+        "names stay stable while the underlying addresses can change or be several"
+      ]
+    },
+    {
+      "id": "http-anatomy",
+      "difficulty": "core",
+      "prompt": "Sketch an HTTP exchange for me: what goes in the request, and what comes back in the response?",
+      "expected_points": [
+        "request: a method (GET/POST), a URL/path, headers, optional body",
+        "response: a status code, headers, and a body with the content",
+        "status code first digit is the category: 2xx success, 3xx redirect, 4xx client error, 5xx server error"
+      ]
+    },
+    {
+      "id": "lifecycle",
+      "difficulty": "core",
+      "prompt": "Walk me through what happens between typing example.com and seeing the page, step by step.",
+      "expected_points": [
+        "browser completes the URL, then resolves the name via DNS to an IP",
+        "opens a connection to that IP on a port, then sends an HTTP GET request",
+        "server program builds and sends the response with status, headers, HTML body",
+        "browser renders the HTML and issues further requests for referenced resources"
+      ]
+    },
+    {
+      "id": "status-blame",
+      "difficulty": "stretch",
+      "prompt": "You curl a URL and get a 404. Your friend says the server must be down. Are they right?",
+      "expected_points": [
+        "no — the server answered, so it is up and reachable",
+        "4xx means the request was the problem (that path does not exist)",
+        "a down server gives no HTTP response at all; a 5xx means the server failed while handling the request"
+      ]
+    },
+    {
+      "id": "not-just-web",
+      "difficulty": "stretch",
+      "prompt": "Is git push 'using the web'? What is the difference between the internet and the web?",
+      "expected_points": [
+        "the internet is the network that moves packets between computers",
+        "the web (HTTP in browsers) is one conversation style on top of it",
+        "git push is a client/server exchange over the internet too, with git as the client and GitHub as the server"
+      ]
+    }
+  ]
+}

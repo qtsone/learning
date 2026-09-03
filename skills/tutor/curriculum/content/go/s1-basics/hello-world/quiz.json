@@ -1,0 +1,63 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "toolchain",
+      "difficulty": "core",
+      "prompt": "What is the difference between `go run .` and `go build .`? When would you use each?",
+      "expected_points": [
+        "both compile the program",
+        "go run compiles and executes, discarding the binary — good during development",
+        "go build produces a binary on disk you can run again or ship"
+      ]
+    },
+    {
+      "id": "anatomy",
+      "difficulty": "core",
+      "prompt": "Explain what each of these three lines does: `package main`, `import \"fmt\"`, `func main()`.",
+      "expected_points": [
+        "package main marks an executable program",
+        "import makes the fmt standard-library package available",
+        "func main is the entry point where execution starts and the program exits when it returns"
+      ]
+    },
+    {
+      "id": "package-dot",
+      "difficulty": "core",
+      "prompt": "In `fmt.Println`, what does the `fmt.` part mean?",
+      "expected_points": [
+        "Println lives inside the imported fmt package",
+        "package.Name is how you access anything from an imported package"
+      ]
+    },
+    {
+      "id": "gofmt",
+      "difficulty": "core",
+      "prompt": "Why does Go ship a formatter, and why does everyone use its output unchanged?",
+      "expected_points": [
+        "one canonical style ends formatting debates",
+        "every Go codebase reads the same, which helps reading others' code",
+        "editors run it automatically; gofmt -w does it manually"
+      ]
+    },
+    {
+      "id": "compiled",
+      "difficulty": "stretch",
+      "prompt": "You make a typo like `fmt.Printlnn`. When do you find out — when running, or before? Why?",
+      "expected_points": [
+        "at compile time, before anything runs",
+        "the compiler checks names/types up front — contrast with interpreted languages surfacing it at runtime"
+      ]
+    },
+    {
+      "id": "testable-design",
+      "difficulty": "stretch",
+      "prompt": "Why did the exercise split `Greeting` (returns a string) from `main` (prints it)?",
+      "expected_points": [
+        "returning a value makes the logic testable",
+        "printing is a side effect tests can't easily observe",
+        "main stays a thin shell around tested logic"
+      ]
+    }
+  ]
+}

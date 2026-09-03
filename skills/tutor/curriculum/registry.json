@@ -1,0 +1,2170 @@
+{
+  "schema": 1,
+  "version": "2026.08.0",
+  "languages": {
+    "go": {
+      "name": "Go",
+      "status": "available",
+      "path": [
+        "s0",
+        "s1",
+        "s2",
+        "s3",
+        "s4",
+        "s5",
+        "s6",
+        "s7"
+      ]
+    },
+    "python": {
+      "name": "Python",
+      "status": "stub",
+      "path": [
+        "s0",
+        "p1",
+        "s2",
+        "p3",
+        "s4",
+        "p5",
+        "s6",
+        "p7"
+      ]
+    }
+  },
+  "stages": {
+    "s0": {
+      "title": "Foundations",
+      "slug": "foundations",
+      "pool": "shared",
+      "dir": "shared/s0-foundations",
+      "lessons": [
+        "shared.foundations.what-is-a-program",
+        "shared.foundations.terminal-basics",
+        "shared.foundations.text-editors",
+        "shared.foundations.version-control-git",
+        "shared.foundations.git-branching-remotes",
+        "shared.foundations.how-the-internet-works",
+        "shared.foundations.reading-docs",
+        "shared.foundations.dev-environment"
+      ]
+    },
+    "s1": {
+      "title": "Programming Basics (Go)",
+      "slug": "go-basics",
+      "pool": "go",
+      "dir": "go/s1-basics",
+      "lessons": [
+        "go.basics.hello-world",
+        "go.basics.variables-types",
+        "go.basics.control-flow",
+        "go.basics.functions",
+        "go.basics.packages-modules",
+        "go.basics.arrays-slices",
+        "go.basics.maps",
+        "go.basics.structs",
+        "go.basics.pointers",
+        "go.basics.methods",
+        "go.basics.errors",
+        "go.basics.strings-runes",
+        "go.basics.testing-basics",
+        "go.basics.io-files",
+        "go.basics.project-cli-tracker"
+      ]
+    },
+    "s2": {
+      "title": "CS Fundamentals",
+      "slug": "cs-fundamentals",
+      "pool": "shared",
+      "dir": "shared/s2-cs",
+      "lessons": [
+        "shared.cs.big-o",
+        "shared.cs.arrays-linked-lists",
+        "shared.cs.stacks-queues",
+        "shared.cs.hash-tables",
+        "shared.cs.recursion",
+        "shared.cs.sorting",
+        "shared.cs.searching",
+        "shared.cs.trees",
+        "shared.cs.heaps",
+        "shared.cs.graphs",
+        "shared.cs.dynamic-programming",
+        "shared.cs.problem-patterns"
+      ]
+    },
+    "s3": {
+      "title": "Intermediate Go",
+      "slug": "go-intermediate",
+      "pool": "go",
+      "dir": "go/s3-intermediate",
+      "lessons": [
+        "go.intermediate.interfaces",
+        "go.intermediate.composition",
+        "go.intermediate.type-assertions",
+        "go.intermediate.generics",
+        "go.intermediate.closures",
+        "go.intermediate.stdlib-io",
+        "go.intermediate.json-encoding",
+        "go.intermediate.time",
+        "go.intermediate.goroutines",
+        "go.intermediate.channels",
+        "go.intermediate.sync",
+        "go.intermediate.context",
+        "go.intermediate.concurrency-patterns",
+        "go.intermediate.tooling",
+        "go.intermediate.project-concurrent"
+      ]
+    },
+    "s4": {
+      "title": "Engineering Practice",
+      "slug": "engineering",
+      "pool": "shared",
+      "dir": "shared/s4-engineering",
+      "lessons": [
+        "shared.eng.clean-code",
+        "shared.eng.code-organization",
+        "shared.eng.tdd",
+        "shared.eng.debugging",
+        "shared.eng.sql-databases",
+        "shared.eng.security",
+        "shared.eng.http-clients",
+        "shared.eng.ci-cd",
+        "shared.eng.code-review",
+        "shared.eng.documentation"
+      ]
+    },
+    "s5": {
+      "title": "Advanced Go",
+      "slug": "go-advanced",
+      "pool": "go",
+      "dir": "go/s5-advanced",
+      "lessons": [
+        "go.advanced.http-servers",
+        "go.advanced.rest-services",
+        "go.advanced.grpc",
+        "go.advanced.databases",
+        "go.advanced.runtime-scheduler",
+        "go.advanced.garbage-collection",
+        "go.advanced.memory-model",
+        "go.advanced.profiling",
+        "go.advanced.advanced-testing",
+        "go.advanced.reflection-unsafe",
+        "go.advanced.observability",
+        "go.advanced.project-service"
+      ]
+    },
+    "s6": {
+      "title": "Systems & Design",
+      "slug": "systems",
+      "pool": "shared",
+      "dir": "shared/s6-systems",
+      "lessons": [
+        "shared.systems.design-intro",
+        "shared.systems.networking",
+        "shared.systems.api-design",
+        "shared.systems.data-storage",
+        "shared.systems.caching",
+        "shared.systems.message-queues",
+        "shared.systems.distributed-systems",
+        "shared.systems.scalability",
+        "shared.systems.reliability",
+        "shared.systems.architecture",
+        "shared.systems.case-studies",
+        "shared.systems.design-capstone"
+      ]
+    },
+    "s7": {
+      "title": "Expert Capstone (Go)",
+      "slug": "go-capstone",
+      "pool": "go",
+      "dir": "go/s7-capstone",
+      "lessons": [
+        "go.capstone.planning",
+        "go.capstone.build-core",
+        "go.capstone.hardening",
+        "go.capstone.operations",
+        "go.capstone.oss-contribution",
+        "go.capstone.performance"
+      ]
+    },
+    "p1": {
+      "title": "Programming Basics (Python)",
+      "slug": "python-basics",
+      "pool": "python",
+      "dir": "python/p1-basics",
+      "lessons": [
+        "python.basics.hello-python",
+        "python.basics.variables-control-flow",
+        "python.basics.functions",
+        "python.basics.collections",
+        "python.basics.errors-testing",
+        "python.basics.project-cli-tracker"
+      ]
+    },
+    "p3": {
+      "title": "Intermediate Python",
+      "slug": "python-intermediate",
+      "pool": "python",
+      "dir": "python/p3-intermediate",
+      "lessons": [
+        "python.intermediate.idioms-iterators",
+        "python.intermediate.classes-protocols",
+        "python.intermediate.typing",
+        "python.intermediate.asyncio",
+        "python.intermediate.tooling",
+        "python.intermediate.project-concurrent"
+      ]
+    },
+    "p5": {
+      "title": "Advanced Python",
+      "slug": "python-advanced",
+      "pool": "python",
+      "dir": "python/p5-advanced",
+      "lessons": [
+        "python.advanced.web-services",
+        "python.advanced.databases",
+        "python.advanced.profiling",
+        "python.advanced.advanced-testing",
+        "python.advanced.observability",
+        "python.advanced.project-service"
+      ]
+    },
+    "p7": {
+      "title": "Expert Capstone (Python)",
+      "slug": "python-capstone",
+      "pool": "python",
+      "dir": "python/p7-capstone",
+      "lessons": [
+        "python.capstone.planning",
+        "python.capstone.build-core",
+        "python.capstone.hardening",
+        "python.capstone.operations",
+        "python.capstone.oss-contribution",
+        "python.capstone.performance"
+      ]
+    }
+  },
+  "packs": {
+    "containers": {
+      "title": "Containers & Kubernetes",
+      "dir": "focus/containers",
+      "languages": [
+        "go"
+      ],
+      "insertions": [
+        {
+          "after": "s4",
+          "slug": "containers-i",
+          "title": "Focus: Containers I",
+          "lessons": [
+            "focus.containers.docker-fundamentals",
+            "focus.containers.dockerizing-go",
+            "focus.containers.compose"
+          ]
+        },
+        {
+          "after": "s5",
+          "slug": "containers-ii",
+          "title": "Focus: Containers II",
+          "lessons": [
+            "focus.containers.kubernetes-core",
+            "focus.containers.kubernetes-config",
+            "focus.containers.deploying-go",
+            "focus.containers.helm-kustomize",
+            "focus.containers.capstone"
+          ]
+        }
+      ]
+    },
+    "web-services": {
+      "title": "Web Services",
+      "dir": "focus/web-services",
+      "languages": [
+        "go"
+      ],
+      "insertions": [
+        {
+          "after": "s5",
+          "slug": "web-services",
+          "title": "Focus: Web Services",
+          "lessons": [
+            "focus.web.auth",
+            "focus.web.authorization",
+            "focus.web.realtime",
+            "focus.web.api-hardening",
+            "focus.web.graphql",
+            "focus.web.background-jobs",
+            "focus.web.performance",
+            "focus.web.capstone"
+          ]
+        }
+      ]
+    },
+    "cli-tooling": {
+      "title": "CLI Tooling",
+      "dir": "focus/cli-tooling",
+      "languages": [
+        "go"
+      ],
+      "insertions": [
+        {
+          "after": "s3",
+          "slug": "cli-tooling",
+          "title": "Focus: CLI Tooling",
+          "lessons": [
+            "focus.cli.flags-config",
+            "focus.cli.cobra",
+            "focus.cli.terminal-ux",
+            "focus.cli.files-processes",
+            "focus.cli.distribution",
+            "focus.cli.capstone"
+          ]
+        }
+      ]
+    },
+    "ml": {
+      "title": "Machine Learning",
+      "dir": "focus/ml",
+      "languages": [
+        "python"
+      ],
+      "insertions": []
+    }
+  },
+  "lessons": {
+    "shared.foundations.what-is-a-program": {
+      "title": "What Is a Program?",
+      "duration": "1-2h",
+      "objectives": [
+        "Explain how source code becomes machine code and why the CPU cannot execute source text directly",
+        "Compare compilers and interpreters, and name one language that typifies each approach",
+        "Describe the roles of the CPU and memory when a program runs, using a simple mental model of instructions and data",
+        "Trace what happens, step by step, from typing a run command to a program printing output"
+      ],
+      "verify": {
+        "type": "discussion"
+      }
+    },
+    "shared.foundations.terminal-basics": {
+      "title": "The Terminal",
+      "duration": "2-3h",
+      "objectives": [
+        "Explain what a shell is and how it differs from the terminal window that hosts it",
+        "Navigate the filesystem using pwd, cd, and ls, and distinguish absolute from relative paths",
+        "Create, copy, move, and delete files and directories from the command line",
+        "Explain what PATH is and diagnose why a command produces 'command not found'",
+        "Look up a command's usage with man pages or --help instead of guessing flags"
+      ],
+      "verify": {
+        "type": "script"
+      }
+    },
+    "shared.foundations.text-editors": {
+      "title": "Editors & IDEs",
+      "duration": "1-2h",
+      "objectives": [
+        "Set up VS Code with a language extension and verify features like autocomplete and go-to-definition work",
+        "Explain what a language server does and how the editor uses it to provide diagnostics and completions",
+        "Use keyboard-driven workflows (command palette, quick-open, multi-cursor) instead of mouse navigation for common edits",
+        "Choose between a full IDE and a lightweight editor for a given task and justify the choice"
+      ],
+      "verify": {
+        "type": "discussion"
+      }
+    },
+    "shared.foundations.version-control-git": {
+      "title": "Version Control with Git",
+      "duration": "2-4h",
+      "objectives": [
+        "Explain why version control exists and what problems it solves compared to copying folders around",
+        "Initialize a repository and record changes using git init, add, and commit with meaningful messages",
+        "Inspect history and pending changes using git log, git status, and git diff, and explain what each shows",
+        "Explain the difference between the working tree, the staging area, and a commit",
+        "Write a .gitignore that excludes build artifacts and secrets, and explain why they must not be committed"
+      ],
+      "verify": {
+        "type": "script"
+      }
+    },
+    "shared.foundations.git-branching-remotes": {
+      "title": "Branches & Remotes",
+      "duration": "2-4h",
+      "objectives": [
+        "Explain what a branch is and why work happens on branches instead of directly on main",
+        "Create, switch between, and merge branches, and resolve a simple merge conflict",
+        "Connect a local repository to a GitHub remote and synchronize with push and pull",
+        "Walk through the pull-request flow: branch, push, open PR, review, merge",
+        "Explain the difference between a local branch, a remote branch, and a remote-tracking branch"
+      ],
+      "verify": {
+        "type": "script"
+      }
+    },
+    "shared.foundations.how-the-internet-works": {
+      "title": "How the Internet Works",
+      "duration": "1-2h",
+      "objectives": [
+        "Explain the client/server model and identify the client and server in everyday examples like loading a web page",
+        "Describe what DNS does and why names like example.com must be resolved to IP addresses",
+        "Outline an HTTP request/response at a high level: method, URL, status code, headers, body",
+        "Trace the lifecycle of a browser request from typing a URL to the page rendering, naming each major step"
+      ],
+      "verify": {
+        "type": "discussion"
+      }
+    },
+    "shared.foundations.reading-docs": {
+      "title": "Reading Docs & Error Messages",
+      "duration": "1-2h",
+      "objectives": [
+        "Locate the official documentation for a tool or language and distinguish it from unofficial tutorials and forum posts",
+        "Dissect an error message into its parts (error type, message, location/stack trace) and use them to find the failing line",
+        "Formulate a good question about a problem, including what was tried, expected, and observed, with a minimal example",
+        "Choose between reading a reference, a tutorial, or a changelog based on what kind of answer is needed"
+      ],
+      "verify": {
+        "type": "discussion"
+      }
+    },
+    "shared.foundations.dev-environment": {
+      "title": "Your Dev Environment",
+      "duration": "2-3h",
+      "objectives": [
+        "Install the language toolchain for the chosen track and verify the installation from the terminal",
+        "Explain what environment variables are, set one persistently in the shell profile, and verify it with echo",
+        "Explain why the toolchain's binary directory must be on PATH and fix a setup where it is not",
+        "Organize a project directory with a sensible layout and initialize it under version control",
+        "Verify the whole setup end to end by creating, building, and running a minimal program"
+      ],
+      "verify": {
+        "type": "script"
+      }
+    },
+    "go.basics.hello-world": {
+      "title": "Hello, Go",
+      "duration": "1-2h",
+      "objectives": [
+        "Explain the difference between `go run` and `go build` and what each produces",
+        "Explain why every executable Go program needs a `main` package with a `main` function",
+        "Write and run a program that prints formatted output using the fmt package",
+        "Format source code with gofmt and explain why Go enforces one canonical style"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.basics.variables-types": {
+      "title": "Variables & Types",
+      "duration": "2-3h",
+      "objectives": [
+        "Choose between `var` declarations and `:=` short assignment and justify the choice in context",
+        "State the zero value for each basic type (numbers, string, bool) and explain why Go guarantees them",
+        "Explain what makes Go statically typed and predict when a type conversion is required",
+        "Declare typed and untyped constants and use `iota` to define a sequence of related constants"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.basics.control-flow": {
+      "title": "Control Flow",
+      "duration": "2-3h",
+      "objectives": [
+        "Write if/else chains including the `if` statement with a short initializer",
+        "Choose between `switch` and if/else chains and explain Go's implicit break behavior",
+        "Implement all forms of `for` (classic, condition-only, infinite, range) for a given problem",
+        "Use `break` and `continue` correctly, including with labels, and explain what each skips"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.basics.functions": {
+      "title": "Functions",
+      "duration": "2-3h",
+      "objectives": [
+        "Implement functions with multiple return values and use the (result, error) convention",
+        "Explain what named return values do and when they help or hurt readability",
+        "Implement a variadic function and call it by spreading a slice with `...`",
+        "Decompose a small program into functions with clear single responsibilities"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.basics.packages-modules": {
+      "title": "Packages & Modules",
+      "duration": "2-3h",
+      "objectives": [
+        "Create a module with `go mod init` and explain what go.mod records",
+        "Explain how identifier capitalization controls what a package exports",
+        "Organize code into multiple packages and import them with module-rooted paths",
+        "Add an external dependency and explain how `go mod tidy` keeps go.mod accurate"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.basics.arrays-slices": {
+      "title": "Arrays & Slices",
+      "duration": "3-4h",
+      "objectives": [
+        "Explain the difference between an array and a slice, including the slice header (pointer, len, cap)",
+        "Predict the length and capacity of a slice after slicing and append operations",
+        "Explain why `append` sometimes returns a new backing array and why its result must be reassigned",
+        "Use `copy` to duplicate a slice and explain when two slices alias the same backing array",
+        "Implement common slice manipulations (insert, remove, filter) without index bugs"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.basics.maps": {
+      "title": "Maps",
+      "duration": "2-3h",
+      "objectives": [
+        "Create, read, update, and delete map entries, including initialization with `make` and literals",
+        "Use the comma-ok idiom to distinguish a missing key from a zero value",
+        "Explain why map iteration order is randomized and how to iterate keys in a stable order",
+        "Implement a set using `map[T]struct{}` and justify the empty-struct value type"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.basics.structs": {
+      "title": "Structs",
+      "duration": "2-3h",
+      "objectives": [
+        "Define structs and initialize them with field-named literals, explaining why positional literals are fragile",
+        "Explain how struct embedding promotes fields and how it differs from a named field",
+        "Predict when two struct values can be compared with == and when comparison fails to compile",
+        "Model a small domain (e.g. a contact list) using structs with appropriate field types"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.basics.pointers": {
+      "title": "Pointers",
+      "duration": "3-4h",
+      "objectives": [
+        "Explain what & and * do and trace what a pointer holds versus what it points to",
+        "Explain why Go is pass-by-value and demonstrate how a pointer parameter lets a function mutate its argument",
+        "Predict when dereferencing causes a nil pointer panic and guard against it",
+        "Choose between passing a value and passing a pointer and justify the choice (mutation, size, nil-ability)"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.basics.methods": {
+      "title": "Methods",
+      "duration": "2-3h",
+      "objectives": [
+        "Declare methods with receivers and explain how they differ from plain functions",
+        "Choose between value and pointer receivers and justify the choice for a given type",
+        "Explain why a method with a pointer receiver cannot mutate through a value receiver copy",
+        "Explain at an introductory level how the method set of T differs from that of *T"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.basics.errors": {
+      "title": "Errors",
+      "duration": "3-4h",
+      "objectives": [
+        "Explain why Go treats errors as ordinary values rather than exceptions",
+        "Implement the check-and-return error handling pattern with `if err != nil`",
+        "Wrap errors with fmt.Errorf and %w so callers can inspect the chain with errors.Is",
+        "Define and use a sentinel error and explain when a sentinel beats an ad-hoc error string",
+        "Add context to errors as they propagate without losing the underlying cause"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.basics.strings-runes": {
+      "title": "Strings, Bytes & Runes",
+      "duration": "3-4h",
+      "objectives": [
+        "Explain how Go strings store UTF-8 bytes and why len(s) is not the character count",
+        "Predict the difference between indexing a string (byte) and ranging over it (rune)",
+        "Use the strings package (Split, Join, Contains, TrimSpace, etc.) to solve text-processing tasks",
+        "Use strings.Builder for repeated concatenation and explain why += in a loop is wasteful"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.basics.testing-basics": {
+      "title": "Testing Basics",
+      "duration": "3-4h",
+      "objectives": [
+        "Write a test function following the TestXxx(t *testing.T) convention and run it with `go test`",
+        "Implement a table-driven test and explain why Go favors this pattern",
+        "Use t.Run to create named subtests and run a single case with `go test -run`",
+        "Measure coverage with `go test -cover` and explain what coverage does and does not guarantee"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.basics.io-files": {
+      "title": "I/O & Files",
+      "duration": "3-4h",
+      "objectives": [
+        "Read and write whole files with the os package, handling errors at every step",
+        "Explain what `defer` guarantees and use it to close files reliably, including its LIFO order",
+        "Use bufio.Scanner to process a file line by line and explain why buffering matters",
+        "Choose between reading a whole file into memory and streaming it, and justify the choice"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.basics.project-cli-tracker": {
+      "title": "Mini-Project: CLI Tracker",
+      "duration": "5-8h",
+      "objectives": [
+        "Design and implement a small CLI tracker (e.g. habits or todos) combining structs, slices, maps, and methods",
+        "Persist tracker data to a file and load it back, handling missing or corrupt files with wrapped errors",
+        "Parse command-line arguments to support add/list/complete subcommands",
+        "Write table-driven tests covering the core tracker logic",
+        "Structure the project as a module with gofmt-clean code and a clear package layout"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.cs.big-o": {
+      "title": "Big-O: Time & Space",
+      "duration": "2-3h",
+      "objectives": [
+        "Explain what Big-O notation measures and why constant factors and lower-order terms are dropped",
+        "Rank the common growth classes (O(1), O(log n), O(n), O(n log n), O(n^2), O(2^n)) and give a concrete example algorithm for each",
+        "Derive the time complexity of code with single, nested, and sequential loops by counting operations",
+        "Analyze the space complexity of a function, distinguishing auxiliary space from input space",
+        "Choose between a time-optimal and a space-optimal approach for a given problem and justify the trade-off"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.cs.arrays-linked-lists": {
+      "title": "Arrays & Linked Lists",
+      "duration": "3-4h",
+      "objectives": [
+        "Explain how contiguous memory gives arrays O(1) indexing and cache-friendly iteration, while linked nodes trade that for O(1) insertion given a node reference",
+        "Implement a singly linked list with append, prepend, delete, and search operations that pass the provided tests",
+        "State the Big-O cost of index, search, insert-at-head, and insert-at-tail for arrays/slices versus linked lists",
+        "Choose between a slice and a linked list for a described workload and justify the choice with access-pattern and memory arguments"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.cs.stacks-queues": {
+      "title": "Stacks & Queues",
+      "duration": "2-3h",
+      "objectives": [
+        "Explain LIFO and FIFO ordering and identify which discipline a described problem requires",
+        "Implement a stack and a queue with push/pop (enqueue/dequeue) and peek operations that pass the provided tests",
+        "Compare slice-backed and linked-node implementations, including the amortized cost of growth and the pitfall of dequeuing from a slice's front",
+        "Apply a stack to a classic use case such as balanced-parentheses checking or undo history",
+        "Name real systems where queues appear (task scheduling, BFS, buffering) and explain why FIFO fits each"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.cs.hash-tables": {
+      "title": "Hash Tables",
+      "duration": "3-4h",
+      "objectives": [
+        "Explain how a hash function maps keys to buckets and what properties make a hash function good for table use",
+        "Describe collision handling by separate chaining and open addressing, and compare their trade-offs",
+        "Explain load factor and why exceeding a threshold triggers resizing, including the cost of rehashing",
+        "Implement a basic hash table with put, get, and delete that handles collisions and passes the provided tests",
+        "Explain why hash table operations are O(1) on average but O(n) in the worst case, and what drives the degradation"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.cs.recursion": {
+      "title": "Recursion",
+      "duration": "2-3h",
+      "objectives": [
+        "Explain how the call stack tracks recursive calls and why missing or wrong base cases cause stack overflow",
+        "Identify the base case and recursive case in a problem statement before writing any code",
+        "Implement recursive solutions to classic problems (e.g. factorial, reversing, tree-shaped input) that pass the provided tests",
+        "Convert a recursive solution to an iterative one and explain when iteration is preferable",
+        "Trace a recursive execution by hand, drawing the stack frames for a small input"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.cs.sorting": {
+      "title": "Sorting",
+      "duration": "3-4h",
+      "objectives": [
+        "Implement insertion sort and merge sort that pass the provided tests, and explain each algorithm's time and space complexity",
+        "Explain how quicksort partitions and why its worst case is O(n^2) despite an O(n log n) average",
+        "Define sorting stability and give an example where an unstable sort produces a wrong-looking result",
+        "Use the standard library's sort facilities with a custom comparison to sort structs by multiple keys",
+        "Choose an appropriate sort for a given input size and ordering requirement and justify the choice"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.cs.searching": {
+      "title": "Searching",
+      "duration": "1-2h",
+      "objectives": [
+        "Explain why binary search requires sorted input and how halving the search space yields O(log n)",
+        "Implement binary search correctly, avoiding the classic off-by-one and midpoint-overflow mistakes, passing the provided tests",
+        "Compare linear and binary search costs and identify the input sizes and sortedness conditions where each wins",
+        "Adapt binary search to variant problems such as finding the first or last occurrence of a value"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.cs.trees": {
+      "title": "Trees & BSTs",
+      "duration": "3-4h",
+      "objectives": [
+        "Define tree terminology (root, leaf, height, depth, subtree) and explain what makes a binary tree a BST",
+        "Implement BST insert and search that maintain the BST invariant and pass the provided tests",
+        "Implement in-order, pre-order, and post-order traversals and explain what ordering each produces",
+        "Explain why BST operations are O(log n) when balanced but degrade to O(n) when the tree becomes a chain",
+        "Choose between a BST and a hash table for a described lookup workload and justify using ordering and complexity arguments"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.cs.heaps": {
+      "title": "Heaps & Priority Queues",
+      "duration": "2-3h",
+      "objectives": [
+        "Explain the heap property and how a complete binary tree is stored compactly in an array",
+        "Trace sift-up and sift-down operations by hand and state why push and pop cost O(log n)",
+        "Implement a priority queue using the language's heap facilities (e.g. container/heap) that passes the provided tests",
+        "Choose a heap over a sorted slice for a top-k or scheduling problem and justify the complexity difference"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.cs.graphs": {
+      "title": "Graphs",
+      "duration": "3-4h",
+      "objectives": [
+        "Model a problem as a graph, choosing directed vs undirected and weighted vs unweighted representations",
+        "Compare adjacency-list and adjacency-matrix representations by memory use and edge-lookup cost",
+        "Implement BFS and DFS traversals that pass the provided tests, tracking visited nodes to handle cycles",
+        "Explain why BFS finds shortest paths in unweighted graphs while DFS does not",
+        "Apply graph traversal to a practical problem such as connectivity or reachability checking"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.cs.dynamic-programming": {
+      "title": "Dynamic Programming Intro",
+      "duration": "4-5h",
+      "objectives": [
+        "Identify overlapping subproblems and optimal substructure as the signals that a problem admits dynamic programming",
+        "Implement a top-down memoized solution to a classic problem (e.g. Fibonacci, climbing stairs) and show the complexity drop from exponential to polynomial",
+        "Implement a bottom-up tabulated solution to the same class of problem and pass the provided tests",
+        "Compare memoization and tabulation in terms of code shape, stack usage, and space optimization opportunities",
+        "Define the state, transition, and base cases for a new DP problem before coding it"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.cs.problem-patterns": {
+      "title": "Problem-Solving Patterns",
+      "duration": "4-6h",
+      "objectives": [
+        "Implement the two-pointers technique to solve pair-sum and in-place array problems in O(n) that pass the provided tests",
+        "Implement the sliding-window technique for fixed and variable window sizes on subarray/substring problems",
+        "Recognize which pattern (two pointers, sliding window, hashing, stack, BFS/DFS, DP) fits a fresh problem statement and justify the choice",
+        "Solve the mixed problem set capstone by combining data structures and patterns from across the stage within the stated complexity bounds"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.intermediate.interfaces": {
+      "title": "Interfaces",
+      "duration": "3-4h",
+      "objectives": [
+        "Explain how Go's implicit interface satisfaction differs from nominal implements-style typing and what that enables at package boundaries",
+        "Implement a type satisfying io.Reader or io.Writer and compose it with stdlib functions like io.Copy",
+        "Design a small consumer-side interface (1-2 methods) instead of a large provider-side one, and justify the choice",
+        "Explain why interfaces should be defined where they are consumed, not where they are implemented",
+        "Predict whether a concrete type satisfies a given interface by reasoning about its method set"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.intermediate.composition": {
+      "title": "Composition & Embedding",
+      "duration": "2-3h",
+      "objectives": [
+        "Implement struct embedding to reuse behavior and explain how method promotion resolves shadowed names",
+        "Embed an interface in a struct to override a subset of its methods (partial wrapping)",
+        "Explain why Go favors composition over inheritance and what problems classical inheritance causes that embedding avoids",
+        "Choose between embedding and an explicit named field for a given design and justify the trade-off"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.intermediate.type-assertions": {
+      "title": "Type Assertions & Switches",
+      "duration": "2-3h",
+      "objectives": [
+        "Implement type assertions using the comma-ok form and explain when the single-value form panics",
+        "Implement a type switch that handles multiple concrete types behind one interface",
+        "Choose between errors.Is and errors.As for a given error-inspection need and justify the choice",
+        "Explain why errors.Is/As traverse wrapped error chains and how %w wrapping enables that",
+        "Explain why heavy type-switching can signal a design that wants a new interface method instead"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.intermediate.generics": {
+      "title": "Generics",
+      "duration": "3-4h",
+      "objectives": [
+        "Implement a generic function with type parameters and a constraint interface (e.g. a Map/Filter over slices)",
+        "Explain the difference between the comparable constraint, constraints built from type sets (~int | ~string), and method-based constraints",
+        "Choose between a generic function and an interface-based design for a given problem and justify the trade-off",
+        "Explain why type inference sometimes fails and when explicit instantiation is required",
+        "Identify code where generics add complexity without benefit and argue for the simpler non-generic form"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.intermediate.closures": {
+      "title": "Closures & First-Class Functions",
+      "duration": "2-3h",
+      "objectives": [
+        "Implement a closure that captures and mutates enclosing state, and explain that variables are captured by reference",
+        "Implement the functional options pattern for configuring a constructor",
+        "Explain the loop-variable capture pitfall and how Go 1.22's per-iteration loop variables changed it",
+        "Explain where functional style helps in Go and where its limits (no method chaining culture, verbosity) argue for plain loops"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.intermediate.stdlib-io": {
+      "title": "The io Philosophy",
+      "duration": "3-4h",
+      "objectives": [
+        "Explain how io.Reader/io.Writer act as universal composition points across os, net, bytes, strings, and compress packages",
+        "Implement a custom io.Reader or io.Writer adapter that transforms data as it flows through (e.g. uppercase, counting)",
+        "Choose between bytes.Buffer, strings.Builder, and bufio wrappers for a given task and justify the choice",
+        "Implement stream composition by chaining readers/writers instead of buffering whole payloads in memory, and explain the memory benefit",
+        "Explain the io.Reader contract subtleties: partial reads, returning n > 0 with io.EOF, and why callers must handle both"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.intermediate.json-encoding": {
+      "title": "JSON & Encoding",
+      "duration": "2-3h",
+      "objectives": [
+        "Implement struct tags controlling field names, omitempty, and field skipping with -",
+        "Explain why only exported fields are marshaled and how unmarshal handles unknown or missing JSON fields",
+        "Implement a custom marshaler/unmarshaler (MarshalJSON/UnmarshalJSON) for a type the default encoding cannot represent",
+        "Choose between a pointer field and a zero value to distinguish absent from empty in JSON, and justify the choice",
+        "Implement streaming encode/decode with json.Encoder/Decoder over an io.Reader/Writer"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.intermediate.time": {
+      "title": "Time",
+      "duration": "2-3h",
+      "objectives": [
+        "Implement parsing and formatting with Go's reference-time layout (2006-01-02) and explain why layouts work this way",
+        "Explain the difference between wall clock and monotonic clock readings in time.Time and why elapsed-time measurement needs the monotonic clock",
+        "Choose between time.Timer, time.Ticker, and time.After for a given scheduling need, and explain the resource-leak pitfall of time.After in loops",
+        "Implement correct duration arithmetic with time.Duration and explain why comparing times with Equal beats ==",
+        "Explain how time zones and Location affect parsing, formatting, and comparisons"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.intermediate.goroutines": {
+      "title": "Goroutines",
+      "duration": "2-3h",
+      "objectives": [
+        "Implement concurrent work with the go keyword and coordinate completion with sync.WaitGroup",
+        "Explain why goroutines are cheaper than OS threads and what happens when main returns while goroutines still run",
+        "Detect a data race with go test -race, explain the report, and fix the race",
+        "Explain what a goroutine leak is and identify one in given code",
+        "Explain why WaitGroup.Add must happen before starting the goroutine, not inside it"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.intermediate.channels": {
+      "title": "Channels",
+      "duration": "3-5h",
+      "objectives": [
+        "Explain the blocking semantics of unbuffered versus buffered channels and predict when a given send or receive blocks",
+        "Implement a pipeline of goroutines connected by channels, closed correctly so all stages terminate",
+        "Implement select to multiplex multiple channels, including a default case and a cancellation channel",
+        "Explain the rules of closing channels: who closes, why receiving from a closed channel yields zero values, and why sending to one panics",
+        "Predict the behavior of channel operations on nil channels and explain how that is exploited in select loops"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.intermediate.sync": {
+      "title": "Sync Primitives",
+      "duration": "2-3h",
+      "objectives": [
+        "Implement safe shared-state access with sync.Mutex and explain what happens without it under the race detector",
+        "Choose between Mutex and RWMutex for a given read/write ratio and justify the choice",
+        "Implement one-time initialization with sync.Once and lock-free counters with sync/atomic",
+        "Choose between channels and locks for a given concurrency problem and justify the choice (share memory by communicating vs protect state)",
+        "Explain why copying a struct containing a mutex is a bug and how go vet catches it"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.intermediate.context": {
+      "title": "Context",
+      "duration": "2-3h",
+      "objectives": [
+        "Implement cancellation propagation with context.WithCancel and honor ctx.Done() in a worker goroutine",
+        "Choose between WithTimeout and WithDeadline for a given call and explain why cancel must always be deferred",
+        "Explain why context is passed as the first parameter down call chains and never stored in structs",
+        "Explain why context values should carry request-scoped metadata only, not function parameters or dependencies",
+        "Implement a function that distinguishes context.Canceled from context.DeadlineExceeded and reacts appropriately"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.intermediate.concurrency-patterns": {
+      "title": "Concurrency Patterns",
+      "duration": "4-6h",
+      "objectives": [
+        "Implement a bounded worker pool that fans work out over a channel and collects results without leaking goroutines",
+        "Implement coordinated error handling and cancellation across goroutines with errgroup",
+        "Implement a semaphore (buffered channel or x/sync/semaphore) to limit concurrency, and explain when to prefer it over a worker pool",
+        "Implement graceful shutdown: stop accepting work, drain in-flight work, and exit within a deadline",
+        "Choose an appropriate concurrency pattern for a described workload and justify it in terms of backpressure and failure handling"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.intermediate.tooling": {
+      "title": "Go Tooling",
+      "duration": "2-3h",
+      "objectives": [
+        "Explain what classes of bugs go vet and staticcheck catch that the compiler does not, with concrete examples",
+        "Implement a golangci-lint configuration for a project and interpret its findings",
+        "Explain module version selection: semantic versioning, minimal version selection, and what go.sum guarantees",
+        "Explain what pprof profiles exist (CPU, heap) and when you would reach for each",
+        "Choose appropriate go commands (mod tidy, work, list, generate) for given maintenance scenarios and justify them"
+      ],
+      "verify": {
+        "type": "discussion"
+      }
+    },
+    "go.intermediate.project-concurrent": {
+      "title": "Mini-Project: Concurrent Tool",
+      "duration": "6-10h",
+      "objectives": [
+        "Implement a complete concurrent CLI tool (e.g. parallel link checker) combining goroutines, channels, and context",
+        "Implement bounded concurrency with per-request timeouts so the tool neither overwhelms targets nor hangs on slow ones",
+        "Implement clean shutdown on interrupt: cancel in-flight work and report partial results",
+        "Implement tests for concurrent code, including passing the race detector, and explain how you made the code testable",
+        "Justify your design choices (channels vs locks, pool size, error aggregation) in a code-review discussion"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.eng.clean-code": {
+      "title": "Clean Code",
+      "duration": "2-3h",
+      "objectives": [
+        "Rename a set of poorly named identifiers and justify each choice using intent-revealing naming criteria",
+        "Explain when a long function should be split and when splitting hurts cohesion, with a concrete example of each",
+        "Identify low-cohesion code in a sample and refactor it so each unit has a single reason to change",
+        "Classify comments in a code sample as justified (why, warning, contract) or deletable (what-narration), and defend each call",
+        "Critique a provided function against naming, size, and cohesion criteria and propose a prioritized cleanup"
+      ],
+      "verify": {
+        "type": "discussion"
+      }
+    },
+    "shared.eng.code-organization": {
+      "title": "Code Organization",
+      "duration": "2-3h",
+      "objectives": [
+        "Lay out a small multi-package project and justify what belongs in each package",
+        "Explain dependency direction and why stable, low-level packages must not import volatile, high-level ones",
+        "Detect an import cycle or wrong-direction dependency in a given project and restructure to remove it",
+        "Choose between one flat package and multiple packages for a given codebase size and justify the trade-off",
+        "Refactor a tangled single-file program into modules with clear boundaries while keeping its tests green"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.eng.tdd": {
+      "title": "Test-Driven Development",
+      "duration": "3-4h",
+      "objectives": [
+        "Implement a feature strictly via red-green-refactor, showing a failing test before each production change",
+        "Explain what each red-green-refactor phase is for and what skipping it costs",
+        "Choose between a fake, stub, and mock for a given dependency and justify the choice",
+        "Redesign a hard-to-test function (hidden I/O or globals) into a testable shape by injecting its dependencies",
+        "Explain how TDD pressures API design, with an example where writing the test first changed the interface"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.eng.debugging": {
+      "title": "Debugging",
+      "duration": "2-3h",
+      "objectives": [
+        "Apply the scientific method to a bug: state a hypothesis, design a minimal experiment, and record what the result rules out",
+        "Use a debugger (e.g. delve) to set breakpoints, step through execution, and inspect variables to locate a fault",
+        "Bisect to isolate a regression, both over commits (git bisect) and over input size or code paths",
+        "Explain when print/log debugging beats a debugger and vice versa, with a concrete scenario for each",
+        "Diagnose and fix a seeded bug in a provided program, documenting the reproduce-minimize-hypothesize trail"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.eng.sql-databases": {
+      "title": "SQL & Databases",
+      "duration": "4-6h",
+      "objectives": [
+        "Design a small relational schema with primary keys, foreign keys, and appropriate types, and justify its normalization",
+        "Write SELECT queries using WHERE, JOIN, GROUP BY, and ORDER BY to answer questions over a multi-table dataset",
+        "Implement CRUD operations against SQLite from code using parameterized queries via the standard database API",
+        "Explain why parameterized queries prevent SQL injection while string concatenation does not",
+        "Use a transaction to keep a multi-statement change atomic and demonstrate what rollback prevents"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.eng.security": {
+      "title": "Security Fundamentals",
+      "duration": "3-4h",
+      "objectives": [
+        "Describe the OWASP Top 10 categories and map each to a concrete vulnerable code pattern",
+        "Implement input validation that rejects malformed and hostile input at a trust boundary, and explain where the boundary lies",
+        "Explain why secrets must never live in source code and handle one correctly via environment or a secrets store",
+        "Hash passwords with a modern KDF (e.g. bcrypt/argon2) and explain why fast hashes like SHA-256 are wrong for this",
+        "Identify and fix seeded vulnerabilities (injection, path traversal, hardcoded secret) in a provided program"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.eng.http-clients": {
+      "title": "Consuming HTTP APIs",
+      "duration": "3-4h",
+      "objectives": [
+        "Explain HTTP method and status-code semantics and choose the correct handling for 2xx, 4xx, and 5xx responses",
+        "Implement an API client that sets timeouts, closes response bodies, and decodes JSON responses safely",
+        "Explain why a client without timeouts is a production incident waiting to happen",
+        "Implement retries with exponential backoff and jitter, retrying only idempotent or safe-to-repeat requests",
+        "Choose which failures to retry versus surface immediately, and justify the policy"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.eng.ci-cd": {
+      "title": "CI/CD",
+      "duration": "2-3h",
+      "objectives": [
+        "Explain what continuous integration catches and why merge-time automation beats manual pre-release testing",
+        "Write a GitHub Actions workflow that runs tests and lint on every push and pull request",
+        "Explain the difference between continuous integration, delivery, and deployment",
+        "Add a quality gate (formatting or vet/lint) that fails the pipeline and demonstrate it catching a violation",
+        "Diagnose a failing pipeline run from its logs and fix the underlying cause"
+      ],
+      "verify": {
+        "type": "script"
+      }
+    },
+    "shared.eng.code-review": {
+      "title": "Code Review",
+      "duration": "1-2h",
+      "objectives": [
+        "Explain what code review is for beyond bug-catching (knowledge sharing, consistency, design feedback)",
+        "Review a provided diff and produce comments that distinguish blocking defects from optional suggestions",
+        "Phrase critical feedback about code, not the author, and rewrite a hostile review comment constructively",
+        "Prepare a reviewable PR: small focused diff, descriptive title and description, self-review pass",
+        "Respond to review feedback on your own code, deciding when to push back with reasoning versus concede"
+      ],
+      "verify": {
+        "type": "discussion"
+      }
+    },
+    "shared.eng.documentation": {
+      "title": "Documentation",
+      "duration": "1-2h",
+      "objectives": [
+        "Write a README that lets a stranger install, run, and understand the purpose of a project without asking questions",
+        "Write doc comments for a public API that state the contract, not a restatement of the signature",
+        "Write an ADR capturing a real decision: context, options considered, decision, and consequences",
+        "Maintain a changelog entry for a release, distinguishing added, changed, fixed, and breaking items",
+        "Choose which documentation form (README, doc comment, ADR, changelog) fits a given piece of information and justify it"
+      ],
+      "verify": {
+        "type": "discussion"
+      }
+    },
+    "go.advanced.http-servers": {
+      "title": "HTTP Servers",
+      "duration": "3-4h",
+      "objectives": [
+        "Implement an HTTP server with net/http using http.Handler and http.HandlerFunc, and explain the difference between the two",
+        "Use Go 1.22+ ServeMux patterns (method prefixes and path wildcards) to route requests and extract path values",
+        "Implement composable middleware (logging, recovery, request ID) as func(http.Handler) http.Handler and explain the order in which a middleware chain executes",
+        "Configure server timeouts (ReadTimeout, WriteTimeout, IdleTimeout) and explain what failure mode each one prevents",
+        "Implement graceful shutdown with server.Shutdown and a signal-aware context"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.advanced.rest-services": {
+      "title": "Building REST Services",
+      "duration": "3-5h",
+      "objectives": [
+        "Structure a REST service into handler, service, and storage layers, and justify the dependency direction between them",
+        "Implement request decoding and validation that returns field-level 400 errors instead of panicking or leaking internals",
+        "Design an error-mapping layer that translates domain errors to appropriate HTTP status codes in exactly one place",
+        "Implement consistent JSON response envelopes for success and error cases, including correct status codes for create/update/delete",
+        "Explain why handlers should stay thin and demonstrate it by unit-testing business logic without httptest"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.advanced.grpc": {
+      "title": "gRPC",
+      "duration": "3-5h",
+      "objectives": [
+        "Define a service in a .proto file and generate Go client and server code with protoc/buf, explaining what protobuf field numbers guarantee for compatibility",
+        "Implement a unary RPC server and client, propagating deadlines and handling status codes with the status/codes packages",
+        "Implement a server-streaming RPC and explain when streaming beats repeated unary calls",
+        "Implement a server interceptor for cross-cutting concerns (logging or auth) and compare it to HTTP middleware",
+        "Choose between gRPC and REST for a given service boundary and justify the choice in terms of contract, performance, and client ecosystem"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.advanced.databases": {
+      "title": "Databases in Production",
+      "duration": "3-5h",
+      "objectives": [
+        "Explain why pgx is preferred over database/sql+lib/pq for Postgres work and when the stdlib interface is still the right choice",
+        "Write and apply versioned SQL migrations, and explain why schema changes must be forward-only in production",
+        "Configure a connection pool (max conns, idle time, lifetimes) and explain how pool exhaustion manifests under load",
+        "Implement a multi-statement operation inside a transaction with correct rollback on error and context cancellation",
+        "Write queries that are safe from SQL injection using parameterized statements, and scan results into structs without an ORM"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.advanced.runtime-scheduler": {
+      "title": "Runtime & Scheduler",
+      "duration": "2-3h",
+      "objectives": [
+        "Explain the GMP model (goroutines, OS threads, processors) and trace what happens when a goroutine makes a blocking syscall",
+        "Explain how work stealing distributes goroutines across Ps and why GOMAXPROCS bounds parallelism but not concurrency",
+        "Describe how cooperative and asynchronous preemption work, and why a tight CPU loop no longer starves the scheduler since Go 1.14",
+        "Estimate the cost of a goroutine (initial stack size, growth) and argue when spawning per-request goroutines is or is not appropriate",
+        "Diagnose a scheduler-related symptom (e.g. latency spikes from thread blocking) by reasoning from the GMP model"
+      ],
+      "verify": {
+        "type": "discussion"
+      }
+    },
+    "go.advanced.garbage-collection": {
+      "title": "Garbage Collection",
+      "duration": "2-4h",
+      "objectives": [
+        "Explain Go's concurrent tri-color mark-and-sweep design and why it trades throughput for low pause times",
+        "Explain what GOGC controls, predict how changing it shifts CPU-vs-memory trade-offs, and describe when to set GOMEMLIMIT",
+        "Measure allocation behavior with go test -benchmem and identify which code changes reduce allocs/op",
+        "Reduce GC pressure in a hot path by reusing buffers (e.g. sync.Pool) and preallocating slices, and verify the improvement with benchmarks",
+        "Explain why fewer pointer-heavy data structures reduce mark phase cost"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.advanced.memory-model": {
+      "title": "Memory Model & Escape Analysis",
+      "duration": "3-4h",
+      "objectives": [
+        "Explain the happens-before relation and identify which Go operations (channel ops, mutex lock/unlock, sync/atomic) establish it",
+        "Identify a data race in code that 'looks fine', explain why the memory model makes its behavior undefined, and fix it with proper synchronization",
+        "Explain the difference between stack and heap allocation in Go and why the compiler, not the programmer, decides placement",
+        "Use go build -gcflags='-m' to read escape analysis output and explain why specific values escape to the heap",
+        "Refactor a function so a value no longer escapes, and confirm the change with escape analysis output and benchmark allocations"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.advanced.profiling": {
+      "title": "Profiling & Optimization",
+      "duration": "3-5h",
+      "objectives": [
+        "Write meaningful benchmarks with testing.B (including b.ReportAllocs and sub-benchmarks) and compare results with benchstat",
+        "Capture and interpret CPU and heap profiles with pprof, navigating top, list, and flame graph views to find the actual bottleneck",
+        "Explain the measure -> hypothesize -> change -> re-measure optimization loop and why optimizing without a profile is malpractice",
+        "Diagnose a provided slow program, attribute the cost to a specific function via profile evidence, and fix it with a measured improvement",
+        "Expose net/http/pprof endpoints on a running service and explain what each profile type (cpu, heap, goroutine, block, mutex) reveals"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.advanced.advanced-testing": {
+      "title": "Advanced Testing",
+      "duration": "3-4h",
+      "objectives": [
+        "Write a fuzz test with go test -fuzz, explain how the corpus and coverage guidance work, and turn a found crash into a regression test",
+        "Implement golden-file tests with an -update flag and explain when golden files beat inline assertions",
+        "Separate fast unit tests from slower integration tests (build tags or testing.Short) and explain the CI implications",
+        "Write an integration test against a real dependency (e.g. a temporary SQLite/Postgres database) with proper setup and teardown via TestMain or t.Cleanup",
+        "Choose between a fake, a stub, and a real dependency for a given test and justify the trade-off"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.advanced.reflection-unsafe": {
+      "title": "Reflection, unsafe & codegen",
+      "duration": "3-4h",
+      "objectives": [
+        "Use the reflect package to walk an arbitrary struct's fields and tags, as encoding/json does internally",
+        "Explain the costs of reflection (performance, loss of compile-time safety) and identify code where it is and is not justified",
+        "Explain what guarantees unsafe.Pointer breaks, and recognize the few legitimate patterns (e.g. zero-copy conversions) versus cargo-culted ones",
+        "Implement a go:generate-based code generator invocation and explain why codegen is often the better answer than reflection in Go",
+        "Given a problem, choose between generics, reflection, and code generation, and justify the choice"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.advanced.observability": {
+      "title": "Observability",
+      "duration": "3-4h",
+      "objectives": [
+        "Explain the roles of the three observability signals (logs, metrics, traces) and which questions each answers",
+        "Implement structured logging with log/slog, including levels, per-request attributes, and a handler configured for production JSON output",
+        "Instrument a service with counters, gauges and histograms rendered in the Prometheus text exposition format, choose correct metric types and labels, and explain label cardinality risks",
+        "Propagate W3C trace context through an HTTP handler and an outbound call so spans join one trace, and map the result onto OpenTelemetry's model",
+        "Given a symptom (e.g. p99 latency spike), describe which signal you would consult first and how you would drill down"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.advanced.project-service": {
+      "title": "Mini-Project: Production Service",
+      "duration": "8-12h",
+      "objectives": [
+        "Build a complete HTTP service that combines routing, layered structure, authentication, and a real database with migrations",
+        "Secure the service with authentication middleware and explain the chosen token/session strategy and its threat model",
+        "Achieve meaningful test coverage across unit and integration levels, including at least one httptest-driven API test suite",
+        "Instrument the service with structured logs, Prometheus-format metrics, and health endpoints, and demonstrate graceful shutdown",
+        "Defend the architecture in review: justify layer boundaries, error-handling strategy, and at least one measured performance decision"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.systems.design-intro": {
+      "title": "System Design Intro",
+      "duration": "2h",
+      "objectives": [
+        "Translate a vague product prompt into functional and non-functional requirements, explicitly separating must-haves from nice-to-haves",
+        "Produce back-of-the-envelope estimates for QPS, storage, and bandwidth from stated user counts and justify each assumption",
+        "Explain why every design choice is a trade-off and frame at least two alternatives with costs for a given requirement",
+        "Structure a design discussion: requirements, estimation, high-level architecture, deep dives, bottlenecks"
+      ],
+      "verify": {
+        "type": "discussion"
+      }
+    },
+    "shared.systems.networking": {
+      "title": "Networking Deep Dive",
+      "duration": "3-4h",
+      "objectives": [
+        "Explain the TCP handshake, flow control, and head-of-line blocking, and choose between TCP and UDP for a given workload with justification",
+        "Describe what TLS provides (confidentiality, integrity, authenticity) and walk through the handshake including certificate verification",
+        "Contrast HTTP/1.1, HTTP/2, and HTTP/3 in terms of multiplexing, head-of-line blocking, and transport, and pick one for a given service",
+        "Compare L4 and L7 load balancing and explain when each is appropriate",
+        "Implement a small program exercising raw TCP connections and TLS configuration and observe connection behavior"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.systems.api-design": {
+      "title": "API Design",
+      "duration": "2-3h",
+      "objectives": [
+        "Choose between REST and gRPC for a concrete service scenario and justify the choice by audience, tooling, and performance needs",
+        "Design a versioning strategy (URI, header, or schema evolution) and explain what breaking vs non-breaking changes it permits",
+        "Compare offset and cursor pagination and explain why cursors survive concurrent inserts while offsets do not",
+        "Explain idempotency, identify which HTTP methods must be idempotent, and design an idempotency-key scheme for unsafe operations"
+      ],
+      "verify": {
+        "type": "discussion"
+      }
+    },
+    "shared.systems.data-storage": {
+      "title": "Data Storage at Scale",
+      "duration": "3h",
+      "objectives": [
+        "Choose between SQL and NoSQL stores for a given access pattern and justify by consistency, query flexibility, and scaling needs",
+        "Explain how a B-tree index accelerates reads, what it costs on writes, and read a query plan to spot a missing index",
+        "Contrast leader-follower and multi-leader replication, and explain replication lag and its impact on read-your-writes",
+        "Design a sharding scheme (key choice, resharding strategy) and identify hot-key and cross-shard-query hazards"
+      ],
+      "verify": {
+        "type": "discussion"
+      }
+    },
+    "shared.systems.caching": {
+      "title": "Caching",
+      "duration": "3h",
+      "objectives": [
+        "Place caches across the layers (browser, CDN, gateway, application, database) and explain what each layer can and cannot absorb",
+        "Choose between cache-aside, read-through, write-through, and write-behind for a given workload and justify the choice",
+        "Explain why invalidation is hard: stale reads, thundering herd, and cache stampedes, and implement mitigations (TTL, jitter, singleflight)",
+        "Implement a TTL-based in-memory cache with an eviction policy and demonstrate correct behavior under concurrent access",
+        "Explain when a CDN or Redis is the right tool versus in-process caching"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.systems.message-queues": {
+      "title": "Message Queues",
+      "duration": "3h",
+      "objectives": [
+        "Explain when to move work to async processing and what latency, complexity, and consistency costs the queue introduces",
+        "Contrast at-most-once, at-least-once, and exactly-once delivery semantics and explain why exactly-once end-to-end requires idempotent consumers",
+        "Implement an idempotent consumer that survives redelivery without duplicating side effects",
+        "Explain the dual-write problem and implement the transactional outbox pattern to publish events atomically with state changes",
+        "Design dead-letter and retry policies for poison messages"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.systems.distributed-systems": {
+      "title": "Distributed Systems",
+      "duration": "3-4h",
+      "objectives": [
+        "State the CAP theorem precisely and explain why the real choice during a partition is between consistency and availability",
+        "Rank consistency models (linearizable, sequential, causal, eventual) and pick the weakest model that still satisfies a given feature",
+        "Explain at a high level how consensus (Raft-style leader election and log replication) achieves agreement despite node failures",
+        "Enumerate distributed failure modes — partial failure, network partitions, clock skew, split brain — and describe a defense for each",
+        "Explain why 'the network is reliable' and other distributed-computing fallacies lead to real production bugs"
+      ],
+      "verify": {
+        "type": "discussion"
+      }
+    },
+    "shared.systems.scalability": {
+      "title": "Scalability Patterns",
+      "duration": "4-5h",
+      "objectives": [
+        "Explain why statelessness enables horizontal scaling and refactor session state out of an application instance",
+        "Implement a rate limiter (token bucket or sliding window) and choose appropriate limits and responses (429, Retry-After)",
+        "Explain backpressure and demonstrate how a bounded queue protects a service from overload where an unbounded one fails",
+        "Design a work-sharding scheme that distributes load across workers without hot spots and handles worker failure"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "shared.systems.reliability": {
+      "title": "Reliability & Operations",
+      "duration": "2-3h",
+      "objectives": [
+        "Define SLI, SLO, and error budget, and derive a concrete SLO with alerting thresholds for a given service",
+        "Design symptom-based alerts that page on user impact rather than causes, and explain why cause-based paging burns teams out",
+        "Walk through an incident response: detection, mitigation, communication, and a blameless postmortem with action items",
+        "Choose graceful-degradation strategies (fallbacks, load shedding, circuit breaking) for a dependency outage scenario and justify them"
+      ],
+      "verify": {
+        "type": "discussion"
+      }
+    },
+    "shared.systems.architecture": {
+      "title": "Architecture Patterns",
+      "duration": "2-3h",
+      "objectives": [
+        "Argue for a modular monolith versus microservices for a given team size and product stage, citing operational and organizational costs",
+        "Explain event-driven architecture and identify where it buys decoupling and where it costs debuggability and consistency",
+        "Describe hexagonal (ports and adapters) architecture and show how it keeps domain logic independent of frameworks and databases",
+        "Identify which pattern an existing codebase follows and propose an incremental migration path when it no longer fits"
+      ],
+      "verify": {
+        "type": "discussion"
+      }
+    },
+    "shared.systems.case-studies": {
+      "title": "Design Case Studies",
+      "duration": "3-4h",
+      "objectives": [
+        "Design a URL shortener end-to-end: key generation, storage, redirect latency, and analytics, defending each component choice",
+        "Design a chat system covering connection handling, message fan-out, ordering, and offline delivery",
+        "Apply the standard interview structure (requirements, estimation, high-level design, deep dive, bottlenecks) without prompting",
+        "Identify the scaling bottleneck in each design and propose the next evolution step when load grows 10x"
+      ],
+      "verify": {
+        "type": "discussion"
+      }
+    },
+    "shared.systems.design-capstone": {
+      "title": "System Design Capstone",
+      "duration": "4-6h",
+      "objectives": [
+        "Produce a complete written design for a self-chosen system: requirements, estimates, architecture diagram, data model, and API sketch",
+        "Justify every major component choice against at least one rejected alternative",
+        "Analyze the design's failure modes and describe how it degrades under partial outages and 10x load",
+        "Defend the design in a live review, revising it coherently when the tutor challenges assumptions"
+      ],
+      "verify": {
+        "type": "discussion"
+      }
+    },
+    "go.capstone.planning": {
+      "title": "Capstone: Planning",
+      "duration": "3-5h",
+      "objectives": [
+        "Select a capstone project and justify its scope against your skills, timeline, and the graduation criteria",
+        "Write a PRD that states the problem, target users, functional requirements, and explicit non-goals",
+        "Record at least three ADRs covering key technical choices (e.g. storage, API style, deployment target) with alternatives considered and trade-offs",
+        "Decompose the project into graded milestones with acceptance criteria for each",
+        "Defend the plan under tutor grilling: explain what you would cut first if the timeline slips and why"
+      ],
+      "verify": {
+        "type": "discussion"
+      }
+    },
+    "go.capstone.build-core": {
+      "title": "Capstone: Core Build",
+      "duration": "20-30h",
+      "objectives": [
+        "Implement the core functionality defined in your PRD, delivering each planned milestone with passing tests",
+        "Structure the codebase with clear package boundaries and dependency direction, and justify the layout in review",
+        "Apply idiomatic Go throughout: error wrapping, context propagation, small interfaces, and concurrency only where it earns its cost",
+        "Maintain a test suite that covers the core logic and runs green via go test ./... at every milestone",
+        "Explain during milestone reviews which ADRs held up, which you revised, and why"
+      ],
+      "verify": {
+        "type": "gotest"
+      },
+      "prereqs": [
+        "go.capstone.planning"
+      ]
+    },
+    "go.capstone.hardening": {
+      "title": "Capstone: Hardening",
+      "duration": "8-12h",
+      "objectives": [
+        "Deepen the test suite with integration tests, fuzz targets for parsing/input boundaries, and race-detector-clean concurrent paths",
+        "Perform a security pass: audit input validation, secret handling, dependency vulnerabilities (govulncheck), and document findings with fixes",
+        "Profile the service under realistic load with pprof and identify the top CPU and allocation hotspots",
+        "Fix at least one discovered defect or vulnerability and add a regression test that would have caught it",
+        "Justify what you chose not to harden and the risk you accepted"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "go.capstone.operations": {
+      "title": "Capstone: Operations",
+      "duration": "6-10h",
+      "objectives": [
+        "Build a CI pipeline that runs tests, lint, and vulnerability checks on every push and blocks merge on failure",
+        "Deploy the service to a real target (e.g. a container platform, tying in focus-pack skills where taken) with repeatable, scripted steps",
+        "Instrument the service with structured logs, metrics, and traces, and demonstrate answering 'is it healthy?' from telemetry alone",
+        "Implement graceful shutdown and health/readiness endpoints, and show they behave correctly during a rollout",
+        "Write a short runbook covering deployment, rollback, and the top two failure modes"
+      ],
+      "verify": {
+        "type": "script"
+      }
+    },
+    "go.capstone.oss-contribution": {
+      "title": "OSS Contribution",
+      "duration": "10-15h",
+      "objectives": [
+        "Find and evaluate a real open-source issue suited to your skills, and explain why the project and issue are a good fit",
+        "Navigate an unfamiliar codebase to locate the relevant code paths, and summarize how the affected subsystem works",
+        "Implement the fix or feature following the project's contribution guidelines, style, and test conventions",
+        "Open an upstream PR with a clear description, respond to maintainer review, and iterate until merged or meaningfully reviewed",
+        "Reflect on what differed from working in your own codebase and what you would do differently next time"
+      ],
+      "verify": {
+        "type": "discussion"
+      }
+    },
+    "go.capstone.performance": {
+      "title": "Performance Engineering",
+      "duration": "8-12h",
+      "objectives": [
+        "Define a measurable performance goal for a real bottleneck in your capstone (latency, throughput, or memory) with a baseline benchmark",
+        "Diagnose the bottleneck end-to-end using pprof profiles, execution traces, and benchmarks, and identify the dominant cost",
+        "Implement an optimization and prove the improvement with before/after benchmark comparisons (benchstat), not intuition",
+        "Explain the trade-offs your optimization introduced (complexity, memory, readability) and why they are acceptable",
+        "Pass the graduation review: present the full optimization loop and defend your methodology under grilling"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "focus.containers.docker-fundamentals": {
+      "title": "Docker Fundamentals",
+      "duration": "2-3h",
+      "objectives": [
+        "Explain the difference between an image and a container, and how a container's writable layer relates to the image's read-only layers",
+        "Explain how image layers are built and cached, and predict which Dockerfile changes invalidate the cache",
+        "Run, inspect, stop, and remove containers with docker CLI commands, including port publishing and log inspection",
+        "Pull and push images to a registry, and explain how tags and digests identify images",
+        "Explain how namespaces and cgroups make a container different from a virtual machine"
+      ],
+      "verify": {
+        "type": "script"
+      }
+    },
+    "focus.containers.dockerizing-go": {
+      "title": "Dockerizing Go Apps",
+      "duration": "2-3h",
+      "objectives": [
+        "Implement a multi-stage Dockerfile that builds a Go binary in one stage and copies only the binary into a minimal final stage",
+        "Explain why CGO_ENABLED=0 is required for a Go binary to run on scratch, and what static vs dynamic linking means here",
+        "Choose between scratch and distroless base images and justify the trade-offs (debuggability, CA certs, timezone data, shell access)",
+        "Order Dockerfile instructions so go.mod/go.sum dependency downloads are cached separately from source changes",
+        "Compare final image sizes before and after multi-stage optimization and explain where the savings come from"
+      ],
+      "verify": {
+        "type": "script"
+      }
+    },
+    "focus.containers.compose": {
+      "title": "Local Dev with Compose",
+      "duration": "1.5-2.5h",
+      "objectives": [
+        "Implement a compose file that runs a Go app together with a database and wires them via service names on a shared network",
+        "Explain how Compose DNS-based service discovery lets the app reach the database by service name instead of an IP",
+        "Choose between named volumes and bind mounts for database persistence and live code reloading, and justify each choice",
+        "Use depends_on with a healthcheck so the app starts only after the database is ready, and explain why depends_on alone is insufficient",
+        "Manage the stack lifecycle with up/down/logs/exec, including tearing down with and without volumes"
+      ],
+      "verify": {
+        "type": "script"
+      }
+    },
+    "focus.containers.kubernetes-core": {
+      "title": "Kubernetes Core",
+      "duration": "3-4h",
+      "objectives": [
+        "Explain the role of pods, deployments, and services, and why you deploy via a Deployment rather than bare pods",
+        "Implement manifests for a Deployment and a Service that expose a containerized app inside a cluster",
+        "Explain how a Service selects pods via labels and how ClusterIP, NodePort, and LoadBalancer types differ",
+        "Inspect and debug workloads with kubectl (get, describe, logs, exec, port-forward), and diagnose a CrashLoopBackOff or ImagePullBackOff",
+        "Explain Kubernetes' reconciliation model: desired state in etcd, controllers converging actual state, and what happens when a pod dies"
+      ],
+      "verify": {
+        "type": "script"
+      }
+    },
+    "focus.containers.kubernetes-config": {
+      "title": "Kubernetes Configuration",
+      "duration": "2.5-3.5h",
+      "objectives": [
+        "Choose between ConfigMaps and Secrets for a given piece of configuration and justify the choice, including how each is mounted or injected as env vars",
+        "Implement liveness, readiness, and startup probes for a service and explain the distinct consequence of each probe failing",
+        "Explain the difference between resource requests and limits, and how they drive scheduling and OOM kills",
+        "Implement a HorizontalPodAutoscaler and explain how it uses resource requests to compute utilization targets",
+        "Explain why Kubernetes Secrets are only base64-encoded by default and what that implies for protecting them"
+      ],
+      "verify": {
+        "type": "script"
+      }
+    },
+    "focus.containers.deploying-go": {
+      "title": "Deploying Go on Kubernetes",
+      "duration": "2.5-3.5h",
+      "objectives": [
+        "Implement complete manifests (Deployment, Service, ConfigMap, probes, resources) for your own Go service",
+        "Implement graceful shutdown in Go: catch SIGTERM, drain in-flight requests with http.Server.Shutdown, and finish within terminationGracePeriodSeconds",
+        "Explain the pod termination sequence (endpoint removal, SIGTERM, grace period, SIGKILL) and why ignoring SIGTERM drops requests",
+        "Implement distinct readiness and liveness endpoints in your service and justify what each should and should not check",
+        "Perform a zero-downtime rolling update and verify no requests fail, explaining how maxSurge/maxUnavailable and readiness gates make that possible"
+      ],
+      "verify": {
+        "type": "script"
+      },
+      "prereqs": [
+        "go.advanced.project-service"
+      ]
+    },
+    "focus.containers.helm-kustomize": {
+      "title": "Helm & Kustomize",
+      "duration": "2.5-3.5h",
+      "objectives": [
+        "Explain the problem both Helm and Kustomize solve: maintaining per-environment variants of manifests without copy-paste drift",
+        "Implement a Helm chart for your service with values.yaml parameterizing image tag, replicas, and resources",
+        "Implement a Kustomize base plus dev and prod overlays that patch replicas and configuration per environment",
+        "Choose between Helm and Kustomize for a given scenario and justify the trade-offs (templating vs patching, packaging/distribution, release lifecycle)",
+        "Render manifests without applying them (helm template, kubectl kustomize) and use diffing to review changes before deploy"
+      ],
+      "verify": {
+        "type": "script"
+      }
+    },
+    "focus.containers.capstone": {
+      "title": "Containers Capstone",
+      "duration": "4-6h",
+      "objectives": [
+        "Implement an end-to-end pipeline that builds your Go service image, tags it, pushes it to a registry, and deploys it to a cluster",
+        "Choose an image tagging strategy (immutable digests/commit SHAs vs mutable tags like latest) and justify it for rollbacks and reproducibility",
+        "Deploy the full stack with configuration, probes, resources, and graceful shutdown carried forward from earlier lessons",
+        "Perform and verify a rollback after a bad release using deployment history",
+        "Explain each pipeline stage and its failure modes, and demonstrate the pipeline is repeatable from a clean state"
+      ],
+      "verify": {
+        "type": "script"
+      },
+      "prereqs": [
+        "focus.containers.deploying-go"
+      ]
+    },
+    "focus.web.auth": {
+      "title": "Authentication",
+      "duration": "4-5h",
+      "objectives": [
+        "Explain the difference between session-based and token-based authentication and when each fits a Go service",
+        "Implement server-side session auth with secure cookies (HttpOnly, Secure, SameSite) and session storage",
+        "Implement JWT issuance and validation in Go, and explain why the alg header and expiry claims must be verified",
+        "Describe the OAuth2 authorization-code flow with PKCE and where OIDC adds identity on top of OAuth2",
+        "Choose between sessions, JWT, and OAuth2/OIDC for a given service scenario and justify the trade-offs (revocation, statelessness, third-party login)"
+      ],
+      "verify": {
+        "type": "gotest"
+      },
+      "prereqs": [
+        "go.advanced.rest-services"
+      ]
+    },
+    "focus.web.authorization": {
+      "title": "Authorization Patterns",
+      "duration": "3-4h",
+      "objectives": [
+        "Explain why authentication and authorization must be separate concerns in a service",
+        "Implement an RBAC model in Go with roles, permissions, and a checked policy lookup",
+        "Contrast RBAC and ABAC and choose between them for a given access-control requirement, justifying the choice",
+        "Implement authorization enforcement as net/http middleware so handlers cannot be reached without a passing policy check",
+        "Explain why authorization checks belong at the resource level (object ownership) and demonstrate preventing an IDOR-style bypass"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "focus.web.realtime": {
+      "title": "WebSockets & SSE",
+      "duration": "3-4h",
+      "objectives": [
+        "Compare WebSockets, Server-Sent Events, and polling on directionality, proxy friendliness, and reconnection, and choose the right transport for a given feature",
+        "Implement an SSE endpoint in Go using http.Flusher with correct Content-Type and event framing",
+        "Implement a WebSocket handler in Go including the upgrade handshake, read/write goroutines, and clean shutdown",
+        "Implement a hub/broadcast pattern that fans messages out to many connected clients without leaking goroutines",
+        "Explain how ping/pong heartbeats and client reconnection (including SSE Last-Event-ID) keep realtime connections healthy"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "focus.web.api-hardening": {
+      "title": "API Hardening",
+      "duration": "3-4h",
+      "objectives": [
+        "Implement per-client rate limiting in Go middleware (token bucket via golang.org/x/time/rate or equivalent) and return correct 429 responses",
+        "Explain what CORS actually protects, how preflight requests work, and implement a correct (non-wildcard) CORS policy",
+        "Set security response headers (Content-Security-Policy, HSTS, X-Content-Type-Options) and explain the attack each one blocks",
+        "Implement deep request validation: body size limits, strict JSON decoding with DisallowUnknownFields, and field-level constraint checks",
+        "Explain why input validation at the boundary does not replace output encoding and parameterized queries downstream"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "focus.web.graphql": {
+      "title": "GraphQL in Go",
+      "duration": "4-5h",
+      "objectives": [
+        "Explain the schema-first workflow and define a GraphQL schema with object types, queries, and mutations",
+        "Implement resolvers in Go (e.g. with gqlgen) that map schema fields to data-fetching code",
+        "Explain how nested resolvers cause the N+1 query problem and implement a dataloader-style batching fix",
+        "Choose between GraphQL and REST for a given API scenario and justify the decision (client-driven queries vs caching, complexity, and operational cost)",
+        "Explain why GraphQL needs its own hardening (query depth/complexity limits) beyond standard HTTP protections"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "focus.web.background-jobs": {
+      "title": "Background Jobs",
+      "duration": "4-5h",
+      "objectives": [
+        "Explain why long-running work must move out of the request path and what a job queue adds over firing a bare goroutine",
+        "Implement a producer and a worker-pool consumer in Go that process jobs from a queue with graceful shutdown",
+        "Implement retry with exponential backoff and jitter, and route permanently failing jobs to a dead-letter destination",
+        "Explain at-least-once delivery and implement an idempotent consumer that is safe under duplicate deliveries",
+        "Explain the transactional outbox pattern and why writing to the database and enqueueing in one transaction prevents lost or phantom jobs"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "focus.web.performance": {
+      "title": "API Performance",
+      "duration": "4-5h",
+      "objectives": [
+        "Implement response caching for an API endpoint with explicit invalidation and correct HTTP cache headers (Cache-Control, ETag)",
+        "Detect an N+1 database access pattern in a handler and eliminate it with batched or joined queries",
+        "Implement cursor-based pagination and explain why it outperforms OFFSET pagination on large tables",
+        "Run a load test against an endpoint, read p50/p95/p99 latency and throughput, and identify the bottleneck",
+        "Choose which optimization (caching, query shape, pagination) to apply first for a measured slow endpoint and justify it with profiling or load-test data"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "focus.web.capstone": {
+      "title": "Web Services Capstone",
+      "duration": "8-12h",
+      "objectives": [
+        "Extend the S5 production service with authentication and middleware-enforced authorization on every protected route",
+        "Implement a realtime feature (WebSocket or SSE) integrated with the service's existing domain events",
+        "Implement a background-job flow with retries and an idempotent consumer for at least one slow operation",
+        "Harden the extended service with rate limiting, strict validation, and security headers, and demonstrate each with tests",
+        "Defend the design in review: justify the auth model, realtime transport, and job-queue choices against the alternatives"
+      ],
+      "verify": {
+        "type": "gotest"
+      },
+      "prereqs": [
+        "go.advanced.project-service"
+      ]
+    },
+    "focus.cli.flags-config": {
+      "title": "Flags & Configuration",
+      "duration": "3-4h",
+      "objectives": [
+        "Parse command-line flags with the standard flag package, including a custom flag.Value implementation for a non-primitive type",
+        "Implement a configuration precedence chain (defaults < config file < environment variables < flags) and justify that ordering",
+        "Load settings from environment variables into a typed config struct with validation and clear error messages for bad values",
+        "Choose between flags, env vars, and a config file for a given setting and justify the choice in terms of who changes it and how often"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "focus.cli.cobra": {
+      "title": "Cobra & Subcommands",
+      "duration": "3-4h",
+      "objectives": [
+        "Build a multi-level cobra command tree, distinguishing persistent flags from command-local flags and explaining where each is visible",
+        "Resolve defaults, environment and flags into one settings struct using pflag's Changed, and justify when viper is worth its cost",
+        "Implement RunE handlers that return errors instead of calling os.Exit, and explain why this makes commands testable",
+        "Choose between the stdlib flag package and cobra for a given tool and justify the trade-off (dependency weight vs command-tree features)"
+      ],
+      "verify": {
+        "type": "gotest"
+      },
+      "prereqs": [
+        "go.intermediate.interfaces"
+      ]
+    },
+    "focus.cli.terminal-ux": {
+      "title": "Terminal UX",
+      "duration": "3-4h",
+      "objectives": [
+        "Detect whether output is a TTY and degrade gracefully (no colors or progress animations when piped or redirected)",
+        "Render styled ANSI output while honoring the NO_COLOR convention and a --no-color flag",
+        "Implement an interactive prompt with input validation and a sensible default value",
+        "Implement a progress indicator for a long-running operation that writes to stderr, leaving stdout clean for data",
+        "Explain what a TUI framework's model-update-view loop (e.g. Bubble Tea) adds over line-based output, and identify when it is overkill"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "focus.cli.files-processes": {
+      "title": "Files, Processes & Signals",
+      "duration": "3-4h",
+      "objectives": [
+        "Run external commands with os/exec, capturing stdout, stderr, and the exit code, without invoking a shell",
+        "Explain why passing user input as exec.Command arguments avoids shell injection while building a command string does not",
+        "Handle SIGINT/SIGTERM via signal.NotifyContext to cancel in-flight work and clean up resources before exiting with the right code",
+        "Implement an atomic file write (temp file + rename) and explain what can be lost with a direct overwrite",
+        "Use filepath, os.UserHomeDir, and related APIs so paths and file handling work on both Unix and Windows"
+      ],
+      "verify": {
+        "type": "gotest"
+      }
+    },
+    "focus.cli.distribution": {
+      "title": "Distribution",
+      "duration": "2-3h",
+      "objectives": [
+        "Configure goreleaser to cross-compile release binaries for multiple OS/arch targets from a git tag",
+        "Embed version, commit, and build date via -ldflags and expose them through a --version flag, explaining when a version subcommand fits better",
+        "Apply semantic versioning to a CLI tool and explain which changes force a major version bump",
+        "Explain how a Homebrew tap distributes a Go binary and configure goreleaser to publish the formula"
+      ],
+      "verify": {
+        "type": "script"
+      }
+    },
+    "focus.cli.capstone": {
+      "title": "CLI Capstone",
+      "duration": "6-10h",
+      "objectives": [
+        "Design and ship a complete CLI tool combining layered configuration, a cobra command tree, and TTY-aware terminal output",
+        "Handle signals and external processes robustly so the tool exits cleanly with meaningful exit codes",
+        "Test command logic with table tests by injecting io.Reader/io.Writer dependencies instead of touching global state",
+        "Cut a tagged release with cross-platform binaries and embedded version metadata",
+        "Defend the tool's UX decisions (flag names, error messages, exit codes, help text) in a design review"
+      ],
+      "verify": {
+        "type": "gotest"
+      },
+      "prereqs": [
+        "go.intermediate.project-concurrent"
+      ]
+    },
+    "python.basics.hello-python": {
+      "title": "Hello, Python",
+      "duration": "1-2h",
+      "objectives": [
+        "Run Python code via scripts and the REPL",
+        "Explain how the interpreter executes a source file",
+        "Format code with a standard formatter"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.basics.variables-control-flow": {
+      "title": "Variables & Control Flow",
+      "duration": "2-3h",
+      "objectives": [
+        "Use variables, core built-in types, and truthiness correctly",
+        "Write branching and looping logic with if/for/while",
+        "Explain dynamic typing and when it bites"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.basics.functions": {
+      "title": "Functions & Modules",
+      "duration": "2-3h",
+      "objectives": [
+        "Define functions with default, keyword, and variadic parameters",
+        "Organize code into modules and import between them",
+        "Explain scope rules and the mutable-default-argument pitfall"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.basics.collections": {
+      "title": "Lists, Dicts, Sets & Tuples",
+      "duration": "2-3h",
+      "objectives": [
+        "Choose the right built-in collection for a problem",
+        "Use slicing, comprehensions, and dict methods idiomatically",
+        "Explain mutability and copy semantics"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.basics.errors-testing": {
+      "title": "Exceptions & Testing Basics",
+      "duration": "2-3h",
+      "objectives": [
+        "Raise and handle exceptions with try/except/finally",
+        "Write pytest tests including parametrized cases",
+        "Explain EAFP versus LBYL error handling"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.basics.project-cli-tracker": {
+      "title": "Mini-Project: CLI Tracker",
+      "duration": "4-6h",
+      "objectives": [
+        "Build a small CLI tool combining functions, collections, files, and error handling",
+        "Cover the core logic with a pytest suite"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.intermediate.idioms-iterators": {
+      "title": "Pythonic Idioms & Iterators",
+      "duration": "2-3h",
+      "objectives": [
+        "Write generators and use the iterator protocol",
+        "Use context managers and unpacking idiomatically",
+        "Recognize non-Pythonic code and refactor it"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.intermediate.classes-protocols": {
+      "title": "Classes, Dataclasses & Protocols",
+      "duration": "2-3h",
+      "objectives": [
+        "Model data with classes, dataclasses, and dunder methods",
+        "Use Protocols for structural typing over inheritance",
+        "Explain composition versus inheritance trade-offs"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.intermediate.typing": {
+      "title": "Static Typing",
+      "duration": "2-3h",
+      "objectives": [
+        "Annotate functions and data with type hints, including generics",
+        "Run a type checker and fix reported errors",
+        "Explain gradual typing and where annotations pay off"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.intermediate.asyncio": {
+      "title": "Concurrency with asyncio",
+      "duration": "3-4h",
+      "objectives": [
+        "Write async/await code with tasks and gather",
+        "Explain the event loop, cooperative scheduling, and the GIL",
+        "Choose between asyncio, threads, and processes"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.intermediate.tooling": {
+      "title": "Python Tooling",
+      "duration": "2-3h",
+      "objectives": [
+        "Manage environments and dependencies with modern tooling (venv/uv)",
+        "Lint and format with ruff; structure a packageable project",
+        "Explain lockfiles and reproducible installs"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.intermediate.project-concurrent": {
+      "title": "Mini-Project: Concurrent Tool",
+      "duration": "4-6h",
+      "objectives": [
+        "Build a concurrent tool (e.g. parallel link checker) with asyncio",
+        "Handle cancellation, timeouts, and bounded concurrency"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.advanced.web-services": {
+      "title": "Web Services with FastAPI",
+      "duration": "3-4h",
+      "objectives": [
+        "Build a REST service with routing, validation, and error mapping",
+        "Use Pydantic models for request/response schemas",
+        "Structure a service for testability"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.advanced.databases": {
+      "title": "Databases in Production",
+      "duration": "3-4h",
+      "objectives": [
+        "Use an ORM/driver with migrations, pools, and transactions",
+        "Write integration tests against a real database",
+        "Explain N+1 queries and how to avoid them"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.advanced.profiling": {
+      "title": "Profiling & Optimization",
+      "duration": "3-4h",
+      "objectives": [
+        "Profile CPU and memory with cProfile and allocation tools",
+        "Optimize a hotspot and prove the win with benchmarks",
+        "Explain when to reach for C extensions or alternative runtimes"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.advanced.advanced-testing": {
+      "title": "Advanced Testing",
+      "duration": "3-4h",
+      "objectives": [
+        "Use fixtures, mocking, and property-based testing (Hypothesis)",
+        "Write integration tests with realistic doubles for external services",
+        "Explain test isolation and flakiness sources"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.advanced.observability": {
+      "title": "Observability",
+      "duration": "3-4h",
+      "objectives": [
+        "Emit structured logs, Prometheus metrics, and OTel traces",
+        "Instrument a service to answer 'is it healthy?' from telemetry",
+        "Explain cardinality and sampling trade-offs"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.advanced.project-service": {
+      "title": "Mini-Project: Production Service",
+      "duration": "6-10h",
+      "objectives": [
+        "Build an HTTP service with auth, a database, and observability",
+        "Ship a test suite covering unit and integration levels"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.capstone.planning": {
+      "title": "Capstone: Planning",
+      "duration": "3-5h",
+      "objectives": [
+        "Spec a capstone project with a PRD and ADRs",
+        "Decompose it into graded milestones with acceptance criteria"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.capstone.build-core": {
+      "title": "Capstone: Core Build",
+      "duration": "20-30h",
+      "objectives": [
+        "Implement the core milestones with idiomatic, typed Python",
+        "Keep a green pytest suite at every milestone"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.capstone.hardening": {
+      "title": "Capstone: Hardening",
+      "duration": "8-12h",
+      "objectives": [
+        "Deepen tests, run a security pass, and profile under load",
+        "Fix a real defect and add a regression test"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.capstone.operations": {
+      "title": "Capstone: Operations",
+      "duration": "6-10h",
+      "objectives": [
+        "Build CI, deploy repeatably, and instrument the service",
+        "Write a runbook covering rollback and top failure modes"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.capstone.oss-contribution": {
+      "title": "OSS Contribution",
+      "duration": "10-15h",
+      "objectives": [
+        "Land a PR on a real open-source Python project",
+        "Navigate an unfamiliar codebase and follow its conventions"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.capstone.performance": {
+      "title": "Performance Engineering",
+      "duration": "8-12h",
+      "objectives": [
+        "Optimize a real bottleneck end-to-end with measured baselines",
+        "Defend the methodology and trade-offs in graduation review"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    }
+  }
+}

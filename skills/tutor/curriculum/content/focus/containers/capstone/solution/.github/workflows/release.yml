@@ -1,0 +1,159 @@
+# Reference pipeline. Four jobs, each one a gate for the next: test, build and
+# push exactly one immutable artifact, deploy that artifact to dev, then
+# promote the same artifact to prod behind a human.
+#
+# Nothing here builds twice. The image the prod job deploys is the image the
+# dev job proved, by digest — not "the same source rebuilt", which is a
+# different artifact with a different content hash and a different set of base
+# layers the moment upstream moves.
+name: release
+
+on:
+  # A merge to main releases on its own: the deploy is a consequence of the
+  # merge, not a thing someone remembers to do afterwards.
+  push:
+    branches: [main]
+  # And by hand, from any ref — the incident case. Re-running the last good
+  # commit is a deploy you want available without a revert commit first.
+  workflow_dispatch:
+
+# Read-only by default, widened per job. A workflow-level packages: write
+# hands every step in every job — including third-party actions — a token that
+# can publish to your registry.
+permissions:
+  contents: read
+
+env:
+  IMAGE: ghcr.io/ada/timesvc
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Tests
+        run: go test ./...
+
+  build-push:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    # The digest is what the deploy jobs consume. A tag is a label someone can
+    # move; the digest is the image's content hash, so naming it here is what
+    # makes "the thing dev tested" and "the thing prod runs" the same sentence.
+    outputs:
+      digest: ${{ steps.push.outputs.digest }}
+      tag: sha-${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      # No long-lived registry password anywhere: github.token is minted for
+      # this run and dies with it, and packages: write above is the only
+      # reason it may push at all.
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Build and push
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          # One tag, and it names the commit. Whoever finds this image in the
+          # registry in six months can check out exactly what is in it.
+          tags: ${{ env.IMAGE }}:sha-${{ github.sha }}
+          # The same commit goes into the binary (main.buildRevision) and onto
+          # the image (the OCI revision label), so a running pod and a stored
+          # image answer the question the same way.
+          build-args: REVISION=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-dev:
+    needs: [test, build-push]
+    runs-on: ubuntu-latest
+    # A GitHub environment is where this job's credentials live, and where a
+    # required reviewer would be configured. Dev takes anyone's merge.
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+      # The runner image already ships kubectl and kustomize. The kubeconfig
+      # arrives as an environment secret, base64 so it survives one line, and
+      # is scoped to a service account that may patch this Deployment and
+      # nothing else in the cluster.
+      - name: Cluster credentials
+        env:
+          KUBECONFIG_B64: ${{ secrets.KUBECONFIG_DEV }}
+        run: |
+          mkdir -p "$HOME/.kube"
+          printf '%s' "$KUBECONFIG_B64" | base64 -d >"$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+      - name: Deploy the dev overlay
+        run: |
+          cd deploy/overlays/dev
+          kustomize edit set image ${{ env.IMAGE }}@${{ needs.build-push.outputs.digest }}
+          kubectl apply -k .
+      # apply returns as soon as the API server has stored the object, which
+      # says nothing about whether a pod ever became ready. This is the step
+      # that turns the deploy into a claim you can check.
+      - name: Wait for the rollout
+        run: kubectl -n timesvc-dev rollout status deployment/timesvc --timeout=180s
+      - name: Confirm what is running
+        run: |
+          kubectl -n timesvc-dev get deployment timesvc \
+            -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
+      - name: Undo
+        if: failure()
+        run: |
+          kubectl -n timesvc-dev rollout undo deployment/timesvc
+          kubectl -n timesvc-dev rollout status deployment/timesvc --timeout=180s
+
+  deploy-prod:
+    # Promotion, in one line: prod cannot start until dev is green, and it
+    # deploys the digest dev proved rather than rebuilding anything.
+    needs: [build-push, deploy-dev]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cluster credentials
+        env:
+          KUBECONFIG_B64: ${{ secrets.KUBECONFIG_PROD }}
+        run: |
+          mkdir -p "$HOME/.kube"
+          printf '%s' "$KUBECONFIG_B64" | base64 -d >"$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+      - name: Deploy the prod overlay
+        run: |
+          cd deploy/overlays/prod
+          kustomize edit set image ${{ env.IMAGE }}@${{ needs.build-push.outputs.digest }}
+          kubectl apply -k .
+      - name: Wait for the rollout
+        run: kubectl -n timesvc-prod rollout status deployment/timesvc --timeout=300s
+      # Two different facts. The first is what the Deployment asks for; the
+      # second is what a pod behind the Service actually answers, which is the
+      # only one that proves the new binary is serving traffic.
+      - name: Confirm the revision that is serving
+        run: |
+          kubectl -n timesvc-prod get deployment timesvc \
+            -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
+          kubectl -n timesvc-prod run verify-${{ github.run_id }} \
+            --rm -i --restart=Never --image=curlimages/curl:8.11.1 -- \
+            -sS http://timesvc/version
+      # Rollback is a step in the pipeline, not an act of improvisation at
+      # 3 a.m. rollout undo restores the previous ReplicaSet's pod template,
+      # which is why the image reference has to be immutable: if both
+      # revisions say :latest, the undo changes nothing.
+      - name: Undo
+        if: failure()
+        run: |
+          kubectl -n timesvc-prod rollout undo deployment/timesvc
+          kubectl -n timesvc-prod rollout status deployment/timesvc --timeout=300s

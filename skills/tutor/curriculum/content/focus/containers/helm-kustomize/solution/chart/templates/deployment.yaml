@@ -1,0 +1,76 @@
+# Reference solution. Every value an installer may need is a lookup; everything
+# else is still literal, because a chart whose API is "all of Kubernetes" is a
+# chart nobody can upgrade.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "timesvc.fullname" . }}
+  labels:
+    {{- include "timesvc.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "timesvc.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      annotations:
+        # The rendered ConfigMap, hashed into the pod template. Change a value
+        # and this annotation changes, so `helm upgrade` produces a new pod
+        # template and a rollout — without it the upgrade patches the ConfigMap
+        # and leaves the pods, which read their environment once, at startup.
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      labels:
+        {{- include "timesvc.selectorLabels" . | nindent 8 }}
+    spec:
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.config.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "timesvc.fullname" . }}-config
+          env:
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+                  divisor: "1"
+            - name: GOMEMLIMIT
+              value: {{ .Values.goMemLimit | quote }}
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+            failureThreshold: 12
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: {{ .Values.preStopSleepSeconds }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

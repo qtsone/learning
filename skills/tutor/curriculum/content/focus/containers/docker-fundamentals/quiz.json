@@ -1,0 +1,96 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "not-a-vm",
+      "difficulty": "core",
+      "prompt": "A teammate says a container is a lightweight virtual machine. What do you tell them? Name the two kernel mechanisms and what each one controls.",
+      "expected_points": [
+        "a container is an ordinary host process, not a guest machine",
+        "namespaces restrict what it can see: PID tree, mount/filesystem root, network interfaces and ports, hostname, user IDs",
+        "cgroups restrict what it can use: CPU, memory, I/O limits",
+        "a VM boots a second kernel on emulated hardware; a container shares the host kernel, so it starts in milliseconds",
+        "consequences: Linux images need a Linux kernel (Docker runs a hidden Linux VM on macOS/Windows), and isolation is thinner than a VM's"
+      ]
+    },
+    {
+      "id": "image-vs-container",
+      "difficulty": "core",
+      "prompt": "What is the difference between an image and a container? Where do files your program writes at run time actually go?",
+      "expected_points": [
+        "image is a read-only stack of layers plus metadata; it is inert",
+        "container is that image plus a thin writable layer plus a running process",
+        "one image can back many containers, each with its own writable layer",
+        "run-time writes land in the writable layer, never in the image",
+        "docker rm deletes the writable layer, so that data is gone; volumes exist for data you keep"
+      ]
+    },
+    {
+      "id": "cache-prediction",
+      "difficulty": "core",
+      "prompt": "You built your image, then changed one line in main.go and rebuilt. Which instructions were cached and which re-ran — and why does copying go.mod before the source matter?",
+      "expected_points": [
+        "cache key is parent layer plus the instruction, plus file contents for COPY/ADD",
+        "FROM, WORKDIR, COPY go.mod and go mod download hit the cache since nothing they depend on changed",
+        "COPY . . misses because the copied files changed, and the first miss invalidates every instruction after it",
+        "copying the whole tree first would drag go mod download into the miss and re-download dependencies on every edit"
+      ]
+    },
+    {
+      "id": "tags-digests",
+      "difficulty": "core",
+      "prompt": "Why is `latest` not a version, and what does pinning by digest buy you that a tag cannot?",
+      "expected_points": [
+        "latest is just the default tag name, not a claim about recency",
+        "tags are mutable pointers the publisher can move at any time",
+        "concrete example of harm: identical source builds differently on two days, and the old image cannot be reproduced or bisected",
+        "a digest is the SHA-256 of the image content, an immutable identity",
+        "cost of digests: you own updating them, usually via an automated pull request"
+      ]
+    },
+    {
+      "id": "cli-loop",
+      "difficulty": "core",
+      "prompt": "Walk me through building your image and getting a request answered from your host — then stopping and removing it. Which command does what, and what does -p 8080:8080 actually do?",
+      "expected_points": [
+        "docker build -t name:tag . where . is the build context sent to the daemon",
+        "docker run -d -p host:container publishes a port from the container's own network namespace onto the host",
+        "docker ps / docker ps -a to see running and stopped containers; docker logs reads stdout and stderr",
+        "docker exec runs an extra process inside the existing container, for debugging",
+        "docker stop sends SIGTERM then SIGKILL; docker rm deletes the container and its writable layer",
+        "EXPOSE is documentation and does not publish anything"
+      ]
+    },
+    {
+      "id": "registries",
+      "difficulty": "core",
+      "prompt": "How does an image get from your laptop to another machine? Read me the parts of `ghcr.io/ada/clockwork:1.4.0`.",
+      "expected_points": [
+        "registry host / repository / tag, with Docker Hub assumed when the registry is omitted",
+        "docker login, docker tag to the target repository, docker push; docker pull (or an implicit pull on run) on the other side",
+        "pushing is normally CI's job rather than a laptop's",
+        "layers are shared and content-addressed, so a shared base is transferred once"
+      ]
+    },
+    {
+      "id": "deleted-secret",
+      "difficulty": "stretch",
+      "prompt": "A Dockerfile does `COPY secrets.env .` and later `RUN rm secrets.env`. Is the secret in the published image?",
+      "expected_points": [
+        "yes — the delete only writes a whiteout marker in a later layer",
+        "the bytes remain in the earlier layer and anyone who pulls the image can extract them",
+        "the fix is to keep it out of the build context entirely (.dockerignore), not to delete it afterwards"
+      ]
+    },
+    {
+      "id": "exec-form",
+      "difficulty": "stretch",
+      "prompt": "Why does `CMD [\"/bin/app\"]` behave differently from `CMD /bin/app` when someone runs `docker stop`?",
+      "expected_points": [
+        "shell form runs /bin/sh -c, so the shell is PID 1 and your binary is its child",
+        "a plain sh does not forward signals, so SIGTERM never reaches your program",
+        "after the grace period everything is SIGKILLed mid-flight; exec form makes your binary PID 1 and it receives the signal directly"
+      ]
+    }
+  ]
+}

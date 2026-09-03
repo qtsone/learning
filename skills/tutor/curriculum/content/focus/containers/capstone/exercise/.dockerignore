@@ -1,0 +1,9 @@
+# Everything here is either useless to the build or actively dangerous in an
+# image layer. A smaller build context is also a faster build.
+.git
+.github
+deploy
+RUNBOOK.md
+check.sh
+*.md
+.env

@@ -1,0 +1,66 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "source-to-machine",
+      "difficulty": "core",
+      "prompt": "You write a program as text in a file. Why can't the CPU run that file directly, and what has to happen before it can run?",
+      "expected_points": [
+        "the CPU only executes machine code — number-encoded instructions wired into the chip",
+        "source code is text designed for humans, not something the CPU understands",
+        "it must be translated to machine code, by a compiler ahead of time or an interpreter while running"
+      ]
+    },
+    {
+      "id": "compiler-vs-interpreter",
+      "difficulty": "core",
+      "prompt": "What is the difference between a compiler and an interpreter? Give one language for each.",
+      "expected_points": [
+        "a compiler translates the whole program ahead of time into an executable file of machine code",
+        "an interpreter is a program that reads and performs the source itself, piece by piece, on every run",
+        "Go (or C, Rust) is compiled; Python (or JavaScript) is interpreted"
+      ]
+    },
+    {
+      "id": "cpu-and-memory",
+      "difficulty": "core",
+      "prompt": "While a program is running, what is the CPU's job and what is memory's job? What two kinds of things live in memory?",
+      "expected_points": [
+        "the CPU executes tiny instructions one at a time, extremely fast, tracking which instruction is next",
+        "memory is the fast workspace of numbered boxes the program uses while it runs",
+        "memory holds both the program's instructions and its data",
+        "memory is not the disk — disk keeps files permanently, memory is wiped when the program ends"
+      ]
+    },
+    {
+      "id": "run-trace",
+      "difficulty": "core",
+      "prompt": "You run a compiled program and the word Hello appears on screen. Walk me through what happened in between, step by step.",
+      "expected_points": [
+        "the operating system finds the executable on disk",
+        "it loads the machine code into memory, sets aside memory for data, and points the CPU at the first instruction",
+        "the CPU fetches and executes instructions one at a time",
+        "an instruction hands the text to the operating system, which puts it on the screen; the program then exits and its memory is reclaimed"
+      ]
+    },
+    {
+      "id": "typo-timing",
+      "difficulty": "stretch",
+      "prompt": "You misspell a name in your code. In a compiled language versus an interpreted one, when do you find out — and why does that follow from how each works?",
+      "expected_points": [
+        "compiled: at compile time, because the compiler checks the whole program before producing an executable",
+        "interpreted: often only when the interpreter reaches that line at run time",
+        "the timing difference is a direct consequence of whole-program-ahead-of-time versus piece-by-piece-while-running"
+      ]
+    },
+    {
+      "id": "human-interpreter",
+      "difficulty": "stretch",
+      "prompt": "When you executed the paper-machine program by hand, were you acting as a compiler or an interpreter? Why?",
+      "expected_points": [
+        "an interpreter — reading one instruction at a time and performing it immediately",
+        "a compiler would have translated the whole program into another form first, without performing it"
+      ]
+    }
+  ]
+}

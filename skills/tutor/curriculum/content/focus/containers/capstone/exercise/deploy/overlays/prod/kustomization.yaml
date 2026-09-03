@@ -1,0 +1,15 @@
+# The prod overlay — yours to write. The dev one next door is the worked
+# example; copy its shape, not its numbers.
+#
+# TODO 1: apiVersion + kind, as in dev.
+# TODO 2: a namespace of its own, different from dev's.
+# TODO 3: resources — point at the base and only at the base. Listing
+#         ../../base/deployment.yaml here, or copying the file in, would give
+#         prod a second description of the same object that drifts from the
+#         first one within a month.
+# TODO 4: replicas for timesvc — enough that maxUnavailable: 0 has something
+#         to surge over, and more than dev.
+# TODO 5: images — the same repository the pipeline pushes to, with a real
+#         immutable tag as the committed bootstrap value. Not "latest".
+# TODO 6: patches — a resources-patch.yaml with prod-sized requests and
+#         limits, and whichever runtime setting stops agreeing with them.

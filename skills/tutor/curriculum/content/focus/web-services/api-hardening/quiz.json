@@ -1,0 +1,97 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "token-bucket",
+      "difficulty": "core",
+      "prompt": "Describe the token bucket your limiter implements, and why the clock is injected rather than read from `time.Now`.",
+      "expected_points": [
+        "each key has a bucket of at most burst tokens refilling at rate per second; a request spends one",
+        "burst absorbs a legitimate short spike while the long-run average stays at rate",
+        "the balance and its timestamp are stored and refill is computed on read — no goroutine per client",
+        "an injected clock makes the tests deterministic instead of sleeping, which matters under -race",
+        "the bucket map is shared across request goroutines so it needs a mutex"
+      ]
+    },
+    {
+      "id": "rate-limit-honesty",
+      "difficulty": "core",
+      "prompt": "You ship this limiter set to 100 requests/second and run four replicas. What is the real limit, and what else about this limiter is weaker than it looks?",
+      "expected_points": [
+        "per-instance, so four replicas allow roughly 400/s — global limiting needs shared state or a gateway",
+        "the key is only as good as what you can trust: RemoteAddr is shared by NAT, X-Forwarded-For is client-controlled",
+        "the bucket map grows per distinct key, so idle buckets must be evicted or the map is itself a DoS",
+        "eviction must not be faster than a full refill or it hands the client a fresh bucket"
+      ]
+    },
+    {
+      "id": "cors-what-it-is",
+      "difficulty": "core",
+      "prompt": "What does CORS actually protect, what is a preflight request asking, and why is `Access-Control-Allow-Origin: *` with credentials a bug?",
+      "expected_points": [
+        "the same-origin policy stops a page reading a cross-origin response; CORS is how the API opts into letting it",
+        "it is enforced by the browser, so it is not access control — curl ignores it and the handler still runs",
+        "a preflight is OPTIONS + Access-Control-Request-Method/-Headers asking permission before a non-simple request",
+        "wildcard plus credentials would let any site act as the logged-in user; browsers refuse it, and reflecting Origin is worse",
+        "Vary: Origin is required whenever the response depends on the origin, or a cache mixes them up"
+      ]
+    },
+    {
+      "id": "headers",
+      "difficulty": "core",
+      "prompt": "Which security response headers earn their place on a JSON API, and what attack does each one stop? Name one you deliberately do not send.",
+      "expected_points": [
+        "X-Content-Type-Options: nosniff stops the browser guessing a type and executing a response as HTML",
+        "CSP with default-src 'none' and frame-ancestors 'none' — nothing loads, nobody frames it",
+        "HSTS stops a plaintext downgrade, and is only meaningful (and only honoured) over TLS",
+        "X-XSS-Protection is dead and was itself a vulnerability; X-Frame-Options is redundant next to frame-ancestors",
+        "being able to justify each header is the point — an unexplained header is a liability"
+      ]
+    },
+    {
+      "id": "deep-validation",
+      "difficulty": "core",
+      "prompt": "Walk through what `DecodeJSON` does to a request body, in order, and which status code each failure earns.",
+      "expected_points": [
+        "reject a Content-Type that is not application/json with 415",
+        "wrap the body in http.MaxBytesReader — an unbounded body is a memory DoS — and answer 413",
+        "DisallowUnknownFields so a typo or a smuggled field is a 400, not a silent success",
+        "check there is exactly one JSON value; trailing data is a 400",
+        "malformed is 400, semantically invalid is 422, with field-level errors naming every failing field"
+      ]
+    },
+    {
+      "id": "validation-vs-encoding",
+      "difficulty": "core",
+      "prompt": "A colleague says boundary validation makes parameterized queries unnecessary. Answer them.",
+      "expected_points": [
+        "validation answers 'is this acceptable to my domain'; injection is a property of the sink's language",
+        "each sink has its own rule: SQL placeholders, contextual HTML encoding, shell quoting",
+        "blocklisting characters breaks legitimate data (O'Brien) and still misses encodings",
+        "accept the character, escape it where it is used; the two are complements, not substitutes"
+      ]
+    },
+    {
+      "id": "timeout-layers",
+      "difficulty": "stretch",
+      "prompt": "Name the server timeouts and what each one prevents, then explain why WriteTimeout must be larger than your handler timeout.",
+      "expected_points": [
+        "ReadHeaderTimeout (slow headers), ReadTimeout (slow body), WriteTimeout (client stops reading), IdleTimeout (parked keep-alives)",
+        "they all default to zero, which means no limit",
+        "TimeoutHandler answers 503 but cannot kill the handler goroutine, so contexts must be checked downward",
+        "if WriteTimeout is smaller the connection dies before the 503 explaining the failure can be sent"
+      ]
+    },
+    {
+      "id": "order",
+      "difficulty": "stretch",
+      "prompt": "Defend your middleware order. What breaks if CORS moves inside the rate limiter, and what breaks if the rate limiter moves inside the decoder?",
+      "expected_points": [
+        "a 429 without CORS headers is unreadable to the browser — the frontend sees 'network error' instead of your status",
+        "rate limiting inside parsing means a refused client still made you read a body and decode it",
+        "security headers outermost so rejections carry them too",
+        "the trade-off taken: preflights answered by CORS bypass the limiter, which is acceptable for small bodyless requests"
+      ]
+    }
+  ]
+}

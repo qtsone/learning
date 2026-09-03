@@ -1,0 +1,37 @@
+# Reference solution — the chart's API, and nothing else. Every key here is
+# something an installer may reasonably want to change; everything they may not
+# (the probe paths, the rollout strategy) stayed literal in the templates.
+replicaCount: 3
+
+image:
+  repository: timesvc
+  # Overridden per environment: --set image.tag=1.2.0, or a values file per
+  # environment. Never latest — an upgrade you cannot name is a rollback you
+  # cannot perform.
+  tag: "1.1.0"
+  pullPolicy: IfNotPresent
+
+config:
+  port: 8080
+  logLevel: info
+  # Parsed by the service with time.ParseDuration, and bounded well under the
+  # grace period below.
+  shutdownTimeout: 20s
+
+# preStop 10s + shutdownTimeout 20s + margin <= terminationGracePeriodSeconds 45s
+terminationGracePeriodSeconds: 45
+preStopSleepSeconds: 10
+
+# Go's syntax, not Kubernetes': MiB, not Mi. Roughly 85% of the memory limit,
+# leaving room for what the runtime does not count.
+goMemLimit: 110MiB
+
+# One key, one toYaml in the template: an installer replaces the whole block
+# with the shape they already know from a container spec.
+resources:
+  requests:
+    cpu: 100m
+    memory: 64Mi
+  limits:
+    cpu: 500m
+    memory: 128Mi

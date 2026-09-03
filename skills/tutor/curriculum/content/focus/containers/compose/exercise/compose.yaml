@@ -1,0 +1,19 @@
+# Your job: finish this file. Every numbered acceptance criterion in LESSON.md
+# maps to something you add here. Run `bash check.sh` after each edit — it
+# grades this file without needing Docker, and adds live checks if you have it.
+#
+# Indentation is spaces only. YAML rejects tabs, and so does check.sh.
+
+services:
+  app:
+    build: ./app
+    # TODO: build the dev stage, pass DATABASE_URL pointing at the db service,
+    # publish a port you can override per machine, bind-mount ./app so your
+    # edits reach the container, and start only once db is healthy.
+
+  db:
+    image: postgres
+    # TODO: pin the image, configure POSTGRES_* without writing the password
+    # here, add a healthcheck that reports when Postgres is really accepting
+    # connections, and keep the data on a named volume.
+# TODO: declare the named volume at the top level so Compose creates it.

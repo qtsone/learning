@@ -1,0 +1,75 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "two-signals",
+      "difficulty": "core",
+      "prompt": "Naive Fibonacci and merge sort are both recursive, but adding a cache transforms one and does nothing for the other. What are the two signals that a problem is worth dynamic programming, and which one does merge sort lack?",
+      "expected_points": [
+        "overlapping subproblems: the recursion reaches the same subproblem many times",
+        "optimal substructure: the best whole answer is built from best sub-answers",
+        "merge sort's subproblems are disjoint (no overlap), so caching buys nothing — that's divide-and-conquer"
+      ]
+    },
+    {
+      "id": "memo-mechanics",
+      "difficulty": "core",
+      "prompt": "Walk me through how memoization turns naive fib from exponential to linear. What are the two moves the cache needs, and what is the new time complexity in terms of subproblems?",
+      "expected_points": [
+        "check the cache before computing, store the result after computing",
+        "each of the n+1 distinct subproblems is computed at most once",
+        "cache lookups are O(1) (hash table), so total time is O(n), not O(1) — and space is O(n)"
+      ]
+    },
+    {
+      "id": "tabulation",
+      "difficulty": "core",
+      "prompt": "Describe the bottom-up (tabulated) fib. What does the table hold, why does the fill order matter, and why is there no recursion?",
+      "expected_points": [
+        "table[i] holds the answer to subproblem i; base cases fill the first entries",
+        "iterate smallest to largest so every entry a cell reads (i-1, i-2) is already filled",
+        "a plain loop replaces recursion, so there is no call stack involved"
+      ]
+    },
+    {
+      "id": "memo-vs-tab",
+      "difficulty": "core",
+      "prompt": "You have a working memoized solution and a working tabulated one. Compare them: code shape, stack behavior, and which one you can space-optimize. When would you prefer each?",
+      "expected_points": [
+        "memoization mirrors the recurrence (recursive function + cache) and computes only reached states, but the recursion depth can overflow the stack",
+        "tabulation is a loop, no stack risk, but typically computes all states",
+        "tabulation with a bounded lookback can shrink the table to the last k values (fib: two variables); a memo cache can't easily discard entries",
+        "prefer top-down to derive/prototype, bottom-up for deep inputs or space savings"
+      ]
+    },
+    {
+      "id": "recipe-new-problem",
+      "difficulty": "core",
+      "prompt": "New problem, no coding: you climb a staircase taking 1, 2, or 3 steps at a time — how many distinct ways to reach step n? Give me the state, the transition, and the base cases.",
+      "expected_points": [
+        "state: ways(i) = number of distinct ways to reach step i",
+        "transition: ways(i) = ways(i-1) + ways(i-2) + ways(i-3), since the last move came from one of those steps",
+        "base cases: enough small steps answered directly, e.g. ways(0)=1, ways(1)=1, ways(2)=2 (accept consistent variants)"
+      ]
+    },
+    {
+      "id": "lookback-space",
+      "difficulty": "stretch",
+      "prompt": "FibConstSpace got away with two variables, but your MinCoins table couldn't shrink. What property of the transition decides whether the table can shrink, and where does MinCoins violate it?",
+      "expected_points": [
+        "if the transition only reads the last k states, only k values need to be kept",
+        "MinCoins reads best[a-c] for every coin c, reaching arbitrarily far back, so the whole table must stay live"
+      ]
+    },
+    {
+      "id": "deep-input-stack",
+      "difficulty": "stretch",
+      "prompt": "A correctly memoized function still crashes on n around a few million. What is failing, why does memoization not help, and what is the fix?",
+      "expected_points": [
+        "stack overflow: the first descent still recurses n frames deep before anything is cached",
+        "memoization cuts recomputation, not recursion depth",
+        "switch to bottom-up tabulation (a loop) — and ideally the constant-space variant"
+      ]
+    }
+  ]
+}

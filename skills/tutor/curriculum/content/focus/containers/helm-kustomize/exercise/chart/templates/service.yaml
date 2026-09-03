@@ -1,0 +1,17 @@
+# Given, and worth reading before you write the others: this is the shape every
+# template in a chart has. Names and labels come from the helpers; the parts
+# that are the same in every environment stay literal.
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "timesvc.fullname" . }}
+  labels:
+    {{- include "timesvc.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "timesvc.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

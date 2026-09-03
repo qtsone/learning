@@ -1,0 +1,90 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "driver-choice",
+      "difficulty": "core",
+      "prompt": "You are starting a Postgres-only service. Make the case for pgx over `database/sql` + lib/pq — and then tell me when you would still reach for the stdlib interface.",
+      "expected_points": [
+        "lib/pq is in maintenance mode; its own maintainers point at pgx",
+        "pgx's native API (pgx/v5 + pgxpool) goes past what database/sql can express: binary protocol encoding, native arrays and jsonb, batching/pipelining, COPY, LISTEN/NOTIFY",
+        "structured errors — pgconn.PgError carries the SQLSTATE, so 'unique violation' is a field check instead of string matching",
+        "database/sql still wins when portability is the point: multi-engine code, libraries written against *sql.DB, or a codebase that only uses the common denominator",
+        "bonus: pgx/v5/stdlib gives the protocol quality while keeping the portable interface"
+      ]
+    },
+    {
+      "id": "migrations-forward-only",
+      "difficulty": "core",
+      "prompt": "Why did your S4 `CREATE TABLE IF NOT EXISTS` schema constant have to become a versioned migration list — and why are 'down' migrations not the production rollback plan?",
+      "expected_points": [
+        "IF NOT EXISTS means skip-if-present; it cannot express 'alter this table that already holds rows'",
+        "the schema becomes an ordered, append-only history plus a version the database itself records, so a runner applies exactly what is missing",
+        "shipped migrations are frozen — editing one makes already-migrated databases diverge from fresh ones with no record of which is which",
+        "rolling a schema back destroys data written in the new shape, and the old code you would roll back to is already replaced",
+        "the escape hatch is the next `up`: append a fixing migration"
+      ]
+    },
+    {
+      "id": "pool-exhaustion",
+      "difficulty": "core",
+      "prompt": "Your service is timing out, its CPU is nearly idle, and the database looks bored. Walk me through what is probably happening and the pool settings involved.",
+      "expected_points": [
+        "pool exhaustion: all connections busy, callers queueing inside database/sql waiting for one",
+        "signature is flat throughput, spiking tail latency, idle CPU, and `context deadline exceeded` from code that is not itself slow",
+        "evidence is db.Stats(): WaitCount and WaitDuration climbing",
+        "SetMaxOpenConns caps it — the defaults are unlimited open / 2 idle / kept forever",
+        "the cap exists to protect the database (Postgres spawns a backend per connection and has max_connections); it converts a shared outage into queueing in your own process",
+        "SetConnMaxIdleTime / SetConnMaxLifetime recycle connections before proxies kill them and let the pool drift after a failover"
+      ]
+    },
+    {
+      "id": "transaction-and-context",
+      "difficulty": "core",
+      "prompt": "Take me through your `Transfer`: why every statement goes through `tx`, what `defer tx.Rollback()` buys you, and what a canceled context does at each stage.",
+      "expected_points": [
+        "one transaction so the debit, the credit, and the log row all happen or none do",
+        "statements issued on s.db instead of tx sit outside the transaction and silently break atomicity",
+        "defer tx.Rollback() covers every early return and is a no-op once Commit succeeds (sql.ErrTxDone is expected)",
+        "BeginTx(ctx, nil) ties the transaction to the context: cancellation aborts the wait for a pool connection, the query in flight, and rolls the transaction back",
+        "errors must be wrapped with %w so callers can errors.Is them (context.Canceled, ErrNotFound, ErrInsufficientFunds)"
+      ]
+    },
+    {
+      "id": "placeholders-and-scanning",
+      "difficulty": "core",
+      "prompt": "The exercise stores a note of `x'); DROP TABLE transfers; --` and reads it back unchanged. Why is that safe, and how do rows become structs without an ORM?",
+      "expected_points": [
+        "placeholders are not escaping: the SQL text is a constant and the values travel separately, so a value can never become syntax",
+        "the note is data end to end — it round-trips verbatim, quotes and all",
+        "building SQL with fmt.Sprintf or concatenation is the injection bug, no matter how the value looks",
+        "Scan maps columns to fields positionally — select columns in the order the struct expects; loop with rows.Next, defer rows.Close, and check rows.Err",
+        "when hand-scanning gets old the Go answer is codegen (sqlc), not a runtime ORM"
+      ]
+    },
+    {
+      "id": "atomic-version-row",
+      "difficulty": "stretch",
+      "prompt": "Why does your runner commit a migration's SQL and its `schema_migrations` row in the *same* transaction? What does the process getting killed in between look like otherwise?",
+      "expected_points": [
+        "either both are visible or neither is — the database is always at a clean version boundary",
+        "kill between the two writes and the schema is changed but unrecorded: the next startup re-runs the migration and fails (or worse, half-applies again)",
+        "the failure test relies on this: earlier versions stay applied, the failing one leaves nothing behind, and a fixed re-run resumes from the recorded version",
+        "the schema_migrations table itself is created with IF NOT EXISTS because it is bookkeeping, not a migration"
+      ]
+    },
+    {
+      "id": "read-check-write-portability",
+      "difficulty": "stretch",
+      "prompt": "`Transfer` reads the balance, checks it, then debits. What does SQLite actually do when two of those run at once — and what changes on Postgres?",
+      "expected_points": [
+        "SQLite serializes writers, so the invariant holds — but a deferred BEGIN takes the write lock only at the first write, so the read-first sequence discovers a conflict late, when it tries to upgrade",
+        "on that upgrade SQLite returns SQLITE_BUSY immediately and does not consult the busy handler (waiting while holding a read lock would risk deadlock), so busy_timeout is inert for this pattern — SQLite protects the invariant by aborting the second transaction, not by queueing it",
+        "the fix is to begin the transaction as BEGIN IMMEDIATE — `_txlock=immediate` on the DSN — so the write lock is taken at BEGIN where waiting is safe; a one-connection pool is the blunt alternative",
+        "on Postgres writers run concurrently: two transactions can both read 100, both pass the check, and both withdraw",
+        "there the fix is to lock the row — SELECT … FOR UPDATE — or a stricter isolation level",
+        "same Go code, different engine semantics: integration tests belong on the engine you actually ship, not on a stand-in"
+      ]
+    }
+  ]
+}

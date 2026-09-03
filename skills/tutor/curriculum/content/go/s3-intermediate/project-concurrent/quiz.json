@@ -1,0 +1,69 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "architecture",
+      "difficulty": "core",
+      "prompt": "Sketch how linkcheck works end to end: where do goroutines, channels, and context each appear, and why does none of them show up in Check's signature?",
+      "expected_points": [
+        "jobs flow through a closed, buffered channel of indexes to a fixed pool of worker goroutines",
+        "a WaitGroup joins the workers; results land by index so order is preserved",
+        "the context flows from main (signal.NotifyContext) through Check into every request",
+        "Check's signature stays synchronous (slice in, slice out) so callers and tests never touch the concurrency"
+      ]
+    },
+    {
+      "id": "bounded",
+      "difficulty": "core",
+      "prompt": "Why bound the pool at all instead of one goroutine per URL, and what mechanism enforces the bound in your implementation?",
+      "expected_points": [
+        "unbounded fan-out can overwhelm the target and exhaust local resources (sockets, file descriptors, memory)",
+        "exactly Concurrency worker goroutines pull from the jobs channel, so at most that many requests are in flight",
+        "closing the jobs channel is the shutdown signal that ends each worker's range loop"
+      ]
+    },
+    {
+      "id": "timeouts",
+      "difficulty": "core",
+      "prompt": "Each request derives its own context.WithTimeout from Check's context. Why per request rather than one deadline around the whole run, and why does Ctrl-C still cut a request short?",
+      "expected_points": [
+        "a shared deadline makes URLs late in the list inherit a nearly spent budget after one slow target",
+        "per-request derivation gives every URL the same fresh budget",
+        "child contexts inherit cancellation, so canceling the parent aborts the request before its own deadline",
+        "defer cancel() releases the timer even on success"
+      ]
+    },
+    {
+      "id": "shutdown",
+      "difficulty": "core",
+      "prompt": "Walk through what happens between pressing Ctrl-C and seeing the summary line, and what 'partial results' means for the report.",
+      "expected_points": [
+        "signal.NotifyContext cancels the run context on SIGINT",
+        "in-flight requests abort because http.Client.Do honors the request context, returning errors wrapping context.Canceled",
+        "workers keep draining jobs but record ctx.Err() instead of making new requests",
+        "Check still returns one Result per URL, so the report accounts for every URL including the canceled ones"
+      ]
+    },
+    {
+      "id": "testing",
+      "difficulty": "core",
+      "prompt": "The tests never sleep and never touch the real network, yet they verify 'at most 3 requests in flight' and 'no new requests after cancel'. How? And what did the race detector add?",
+      "expected_points": [
+        "httptest servers on 127.0.0.1 with gate handlers: signal arrival on one channel, block on a release channel, so the test holds the pool in a known state",
+        "an in-flight counter in the handler records the maximum observed concurrency; the cancel test counts server hits",
+        "watchdog time.After selects convert would-be hangs into readable failures without making correct code flaky",
+        "-race reports unsynchronized access pairs (e.g. appending to a shared slice) even when tests pass; indexed writes plus wg.Wait stay silent because they are properly ordered"
+      ]
+    },
+    {
+      "id": "design-defense",
+      "difficulty": "core",
+      "prompt": "A reviewer asks: 'Why write results by index instead of sending them over a channel or guarding a slice with a mutex? And how would you pick a default for -c?' Defend your choices.",
+      "expected_points": [
+        "each index has exactly one writer and wg.Wait publishes the writes, so indexed assignment is race-free without locks and keeps input order",
+        "a results channel wins when results must stream out as they complete or the count is unknown; a mutex+append loses order for no benefit here",
+        "pool size trades throughput against pressure on targets and local limits; the workload is I/O-bound so it need not match GOMAXPROCS, and the right default is modest with a flag to tune"
+      ]
+    }
+  ]
+}

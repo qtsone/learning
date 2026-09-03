@@ -1,0 +1,93 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "flag-scopes",
+      "difficulty": "core",
+      "prompt": "You declare `--format` with `root.PersistentFlags()` and `--tag` with `addCmd.Flags()`. Which commands can read each one, and how would you check that in code?",
+      "expected_points": [
+        "a persistent flag is visible on the command that declared it and every descendant, at any depth",
+        "a local flag exists only on the command that declared it — `list` cannot see `add`'s `--tag`",
+        "cmd.Flags() is local plus inherited; LocalFlags() is what this command declared; InheritedFlags() is what came from ancestors",
+        "a persistent flag can be typed before or after the subcommand name"
+      ]
+    },
+    {
+      "id": "rune-not-exit",
+      "difficulty": "core",
+      "prompt": "Why does a cobra handler use `RunE` and return an error instead of calling `os.Exit(1)` when something goes wrong?",
+      "expected_points": [
+        "os.Exit ends the process immediately: defers do not run and buffers do not flush",
+        "a test cannot call that path in-process — it would kill the test binary",
+        "the error travels back out of Execute so exactly one place, main, maps it to an exit code",
+        "log.Fatal and cobra.CheckErr have the same problem"
+      ]
+    },
+    {
+      "id": "silence",
+      "difficulty": "core",
+      "prompt": "What do `SilenceErrors` and `SilenceUsage` change, and what do they deliberately not change?",
+      "expected_points": [
+        "SilenceErrors stops cobra printing `Error: ...` to stderr itself",
+        "SilenceUsage stops it dumping the usage block after a runtime failure",
+        "Execute still returns the error either way — they change who prints, not what happens",
+        "with both set, main is the single reporter, so tests can assert stderr is empty"
+      ]
+    },
+    {
+      "id": "testable-pattern",
+      "difficulty": "core",
+      "prompt": "Walk me through how your test runs `notes add \"x\" --format json` without starting a process. Which calls are involved, and why is the tree rebuilt for every test?",
+      "expected_points": [
+        "build the tree with a constructor, SetOut/SetErr to buffers, SetArgs, then Execute",
+        "handlers write to cmd.OutOrStdout() so the buffer captures everything",
+        "a cobra.Command stores parsed flag values on itself, so a shared tree leaks state between runs",
+        "dependencies arrive through an App struct rather than globals, so the test supplies its own store and env lookup"
+      ]
+    },
+    {
+      "id": "precedence-changed",
+      "difficulty": "core",
+      "prompt": "Your resolver layers default < environment < flag into one Settings struct. What role does the flag's `Changed` field play, and what breaks without it?",
+      "expected_points": [
+        "Changed reports whether the user actually typed the flag, as opposed to it sitting at its default",
+        "without it the default value overwrites whatever the environment supplied",
+        "Lookup returning nil tells you the command cannot see that flag at all",
+        "everything lands in one struct so handlers never re-derive configuration"
+      ]
+    },
+    {
+      "id": "cobra-vs-flag",
+      "difficulty": "core",
+      "prompt": "A colleague is starting a tool with one command and four flags and asks whether to use cobra. What do you tell them, and what would change your answer?",
+      "expected_points": [
+        "stdlib flag is enough for a single command: no dependency, tiny API",
+        "cobra earns its keep with a command tree, generated help, completions and suggestions",
+        "it costs three modules and a large API surface",
+        "flag syntax differs (-flag vs POSIX --flag/-f), so switching later changes the tool's published interface"
+      ]
+    },
+    {
+      "id": "viper-tradeoff",
+      "difficulty": "core",
+      "prompt": "Viper is cobra's usual companion. What does it buy you, and what does it cost?",
+      "expected_points": [
+        "buys: config files in several formats, automatic env binding, BindPFlag, Unmarshal into a struct",
+        "costs: the package-level API is a process-wide singleton, so tests share state — use viper.New()",
+        "costs: case-insensitive nested key resolution makes 'where did this value come from?' hard to answer",
+        "reasonable when there are many sources and keys; below that a readable hand-rolled resolver wins"
+      ]
+    },
+    {
+      "id": "group-command-trap",
+      "difficulty": "stretch",
+      "prompt": "`notes tag` exists only to hold `tag add` and `tag list`. If you give it no RunE, what happens when a user types `notes tag bogus`, and why?",
+      "expected_points": [
+        "cobra decides a non-runnable command needs help before it validates arguments",
+        "so it prints help and returns no error — exit code 0 on a typo, which scripts cannot detect",
+        "fix: give the group a RunE that calls cmd.Help() plus Args: cobra.NoArgs",
+        "then the typo becomes `unknown command \"bogus\" for \"notes tag\"`"
+      ]
+    }
+  ]
+}

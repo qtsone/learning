@@ -1,0 +1,31 @@
+# Your job: finish this file. Every numbered acceptance criterion in LESSON.md
+# maps to something you add here or in service.yaml. Run `bash check.sh` after
+# each edit — it grades what you wrote without needing a cluster.
+#
+# Indentation is spaces only, two per level. Tabs are illegal YAML.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timesvc
+  # TODO: which namespace does this object live in? (see namespace.yaml)
+spec:
+  # TODO: how many replicas, and why is 1 the wrong answer for a service?
+  # TODO: selector.matchLabels — which pods does this Deployment own? It must
+  #       agree with the template labels below, and it can never be changed
+  #       after creation.
+  # TODO: strategy — roll out without ever dropping below your declared
+  #       capacity.
+  template:
+    metadata:
+      # TODO: labels. This is the stamp on every pod: what the selector above
+      #       matches, and what the Service will match too.
+    spec:
+      containers:
+        - name: timesvc
+          # TODO: pin the image to a real tag — never latest, never untagged.
+          image: timesvc
+          # TODO: declare the port the process listens on (lesson two: 8080,
+          #       because a non-root process cannot bind below 1024). Naming
+          #       the port is optional and lets the Service refer to it by
+          #       name instead of by number.

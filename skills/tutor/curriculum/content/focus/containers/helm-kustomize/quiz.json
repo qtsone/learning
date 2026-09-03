@@ -1,0 +1,98 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "the-problem",
+      "difficulty": "core",
+      "prompt": "You have manifests for one service and three environments that differ by a few numbers. What goes wrong if you just copy the directory three times, and what do Helm and Kustomize each do about it?",
+      "expected_points": [
+        "copies drift: a fix lands in one copy and not the others, and nothing warns you — three directories of legal YAML that no longer agree about what the service is",
+        "both make one description authoritative and the differences explicit",
+        "Helm generates the manifests from templates filled in by values",
+        "Kustomize keeps plain manifests as a base and each environment is a small patch listing only what differs"
+      ]
+    },
+    {
+      "id": "chart-anatomy",
+      "difficulty": "core",
+      "prompt": "Walk me through your chart. What is in Chart.yaml, what is values.yaml for, and what is _helpers.tpl doing?",
+      "expected_points": [
+        "Chart.yaml: apiVersion v2 (Helm 3), name, description, and two different versions — version is the chart's own, appVersion is the software it installs",
+        "values.yaml holds the defaults and is the chart's public API: every key is a promise an installer can set and the next version has to keep",
+        "put in it only what an installer must be able to change; the rest stays literal in the templates",
+        "templates render with .Values, .Chart and .Release; _helpers.tpl defines named templates included everywhere, so the name and the selector labels cannot disagree between two files",
+        "the Deployment's spec.selector is immutable, so a name that disagrees is not always fixable in place"
+      ]
+    },
+    {
+      "id": "kustomize-anatomy",
+      "difficulty": "core",
+      "prompt": "Describe your kustomize base and overlays. What is allowed to live in an overlay, and what is not?",
+      "expected_points": [
+        "a directory is a kustomization because it contains kustomization.yaml; the base holds everything true everywhere and knows nothing about environments",
+        "each overlay lists the base directory under resources, plus its differences: namespace, replicas, patch files",
+        "a patch is a partial manifest: identity (apiVersion, kind, metadata.name, the container's name) plus only the fields that differ",
+        "the merge is strategic — maps merge key by key and lists of objects merge by name — so patching resources leaves the probes and env alone",
+        "an overlay may change how much of something an environment gets, never whether the service works: probes, drain settings and security context stay in the base"
+      ]
+    },
+    {
+      "id": "config-rollout",
+      "difficulty": "core",
+      "prompt": "Someone changes only a log level. How does that reach the running pods in Kustomize, and how in Helm? What breaks if you turn either mechanism off?",
+      "expected_points": [
+        "env vars from envFrom are snapshotted when the container is created, so editing a ConfigMap alone leaves running pods on the old values",
+        "Kustomize: configMapGenerator appends a hash of the content to the name and rewrites every reference, so a changed literal means a new name, a new pod template and a rollout — and the old ConfigMap survives, so rolling back the manifests rolls back the config",
+        "Helm: no generator, so the chart hashes the rendered ConfigMap into a checksum/config pod-template annotation, which changes the pod template and rolls the Deployment",
+        "both work by changing the pod template — that is the only thing that causes a rollout",
+        "disableNameSuffixHash: true, or a dropped annotation, means the upgrade reports success, the ConfigMap holds the new value, and the pods keep serving the old one"
+      ]
+    },
+    {
+      "id": "choosing",
+      "difficulty": "core",
+      "prompt": "Internal service across dev/staging/prod, versus software other organisations install into clusters you'll never see. Which tool for each, and what does each choice cost you?",
+      "expected_points": [
+        "Helm for software you distribute: a chart is a versioned artifact fetched by name and version, values.yaml is a documented API with defaults, and install/upgrade/rollback/uninstall are one tool's job",
+        "Kustomize for your own environments: a few values do not need a templating language, plain YAML keeps working in editors and reviews, and what you read is what applies",
+        "Helm's cost is templating pain forever — untypechecked text templating over whitespace-significant YAML",
+        "Kustomize's cost is the release lifecycle: no artifact and no stored revisions, so rollback is git revert plus apply, which is only as good as git being the record of what is deployed",
+        "the deciding question is who changes this and how they get it, not which is better"
+      ]
+    },
+    {
+      "id": "render-and-rollback",
+      "difficulty": "core",
+      "prompt": "How do you see what a one-line change actually produces before it touches a cluster — in each system — and how do you see it as a diff against what is running? Then tell me what a rollback is in each.",
+      "expected_points": [
+        "helm template <release> ./chart renders to stdout and contacts nothing; kubectl kustomize (or kustomize build) does the same for an overlay",
+        "against the live state: helm upgrade --dry-run or the helm-diff plugin, and kubectl diff -k for the overlay",
+        "review the rendered manifests, not the templates — a one-line values change can move a lot of YAML, and the render is the only honest description of what will happen",
+        "Helm rollback is specific: every revision is stored in the cluster (a Secret in the release namespace), so helm rollback <release> <n> re-applies revision n with no files on your side",
+        "Kustomize has no release history: rollback means checking out the previous commit and applying again"
+      ]
+    },
+    {
+      "id": "helm-pain",
+      "difficulty": "stretch",
+      "prompt": "Why is templated YAML a category of bug on its own, and what is the discipline that keeps it manageable?",
+      "expected_points": [
+        "Go templates produce text, not YAML, and YAML is whitespace-significant — a whitespace-chomping {{- that eats one newline too many splices two keys onto one line",
+        "the error names a line in the rendered output you cannot see, not a line in your template",
+        "nothing type-checks values: a misspelled path renders empty and ships a key with no value; editors' YAML support is useless inside a template",
+        "the discipline is to render every time — helm template is the debugger — and read the manifests rather than the templates"
+      ]
+    },
+    {
+      "id": "composition",
+      "difficulty": "stretch",
+      "prompt": "Can you use both together? When is that a good idea and when is it a smell?",
+      "expected_points": [
+        "helm template output is just manifests, so a chart can become the base of a kustomization; Helm can also call kustomize as a post-renderer",
+        "legitimate when somebody else's chart needs a change their values.yaml does not expose",
+        "a smell on a chart you control — the fix there is to expose the value, because you own the API",
+        "the cost is that you now run two tools and the release lifecycle only knows about one of them"
+      ]
+    }
+  ]
+}

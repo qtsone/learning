@@ -1,0 +1,88 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words, with at least one answer grounded in their own NOTES.md numbers; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "layers",
+      "difficulty": "core",
+      "prompt": "Walk me through the four packages of taskd and which way the dependencies point. Then: to move storage from SQLite to Postgres, what do you change?",
+      "expected_points": [
+        "cmd/taskd wires everything; httpapi is the HTTP edge; task is the domain; sqlitestore is storage",
+        "httpapi and sqlitestore both import task; task imports neither, so the domain depends on nobody",
+        "task.Store is declared by the consumer, so a new package satisfying it plus one line in main is the whole change",
+        "migrations live with the storage implementation and are append-only",
+        "handlers stay thin: decode, delegate, encode"
+      ]
+    },
+    {
+      "id": "auth-threat-model",
+      "difficulty": "core",
+      "prompt": "Explain the token strategy you shipped: how a request proves who it is, why the comparison is written the way it is, and three things this scheme does NOT protect against.",
+      "expected_points": [
+        "Authorization: Bearer <token> against tokens configured in the environment, never a default in source",
+        "digests compared with subtle.ConstantTimeCompare so response timing leaks neither the token nor its length",
+        "a bearer token is a shared secret: no expiry, no scopes, revocation means editing config and restarting",
+        "plaintext HTTP exposes it to every proxy, so TLS is required; tokens go in headers, never in URLs",
+        "anyone who can read the logs must not find it there — hence nothing but method/path/status/duration/request_id"
+      ]
+    },
+    {
+      "id": "observability",
+      "difficulty": "core",
+      "prompt": "Your API is 'failing'. Using only what taskd exposes, what do you look at and in what order — and what does /healthz tell you that /readyz doesn't?",
+      "expected_points": [
+        "metrics answer 'is it broken and how badly': http_requests_total by status, duration histogram, in-flight",
+        "the access log answers 'which requests and where', and request_id follows one request across its lines",
+        "healthz is liveness and touches nothing; readyz pings the database and reports 503 when storage is unusable",
+        "a liveness probe that checks dependencies gets healthy processes killed during someone else's outage",
+        "traces are the missing pillar; request_id is a poor substitute that stops at the process boundary"
+      ]
+    },
+    {
+      "id": "test-strategy",
+      "difficulty": "core",
+      "prompt": "Describe the levels of your test suite. What does the httptest suite catch that the service-layer tests cannot, and vice versa?",
+      "expected_points": [
+        "service tests are unit-level over a fake store, with no httptest and a fake clock — they check rules, fast",
+        "the httptest suite drives the real router over a real SQLite database: routing, status codes, envelopes, auth, wiring",
+        "store tests are integration-level, each on its own temp-file database so tests stay isolated",
+        "the API suite catches wiring and mapping mistakes; unit tests point at the broken rule instead of a status code",
+        "everything runs under -race because handlers share the service and the store across goroutines"
+      ]
+    },
+    {
+      "id": "errors-and-measurement",
+      "difficulty": "core",
+      "prompt": "Where does an error become a status code, and what reaches the client versus the log? Then tell me the one performance decision you measured, with numbers.",
+      "expected_points": [
+        "one function (respondError) maps validation/not-found/conflict/bad-request/default onto 400/404/409/400/500",
+        "adding a domain error later is one new case there, not a hunt through handlers",
+        "the client gets a generic 'internal error'; the log gets the real error plus request_id",
+        "the measured decision is the tasks(status) index: benchmark numbers with and without it, on fresh databases",
+        "names the index's cost (write amplification, space) and what would justify dropping it"
+      ]
+    },
+    {
+      "id": "shutdown-and-timeouts",
+      "difficulty": "core",
+      "prompt": "A deploy sends SIGTERM while requests are in flight. Trace what happens, and explain why requestTimeout < WriteTimeout < shutdownGrace.",
+      "expected_points": [
+        "signal.NotifyContext cancels the run context; Run calls srv.Shutdown with a grace deadline",
+        "Shutdown stops accepting, closes idle connections, and waits for active handlers; Serve returns ErrServerClosed, which is success",
+        "the grace period must exceed the request budget or shutdown cuts off requests that were still allowed to run",
+        "TimeoutHandler answers the client with 503 but cannot kill the handler goroutine — it stops when it checks its context"
+      ]
+    },
+    {
+      "id": "chain-order",
+      "difficulty": "stretch",
+      "prompt": "Justify the middleware order — and tell me what breaks if AccessLog and Recover swap places, or if Auth wrapped the whole mux.",
+      "expected_points": [
+        "RequestID outermost so every inner log line and the response header carry the same id",
+        "AccessLog outside Recover so a panic still yields one access line with status 500",
+        "Timeout innermost so it bounds the handler, not the middleware",
+        "Auth inside Routes so probes and scrapes need no credentials",
+        "the trade-off: the access log cannot name the client because Auth runs deeper than it"
+      ]
+    }
+  ]
+}

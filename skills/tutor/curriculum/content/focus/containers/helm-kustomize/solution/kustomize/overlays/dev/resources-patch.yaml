@@ -1,0 +1,19 @@
+# Reference solution — dev's share of a shared cluster. Identity plus the two
+# fields that differ; everything else is inherited, which is why a probe fix in
+# the base reaches dev without anyone editing this file.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timesvc
+spec:
+  template:
+    spec:
+      containers:
+        - name: timesvc
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi

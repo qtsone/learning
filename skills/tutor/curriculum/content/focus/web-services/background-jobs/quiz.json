@@ -1,0 +1,97 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "why-not-a-goroutine",
+      "difficulty": "core",
+      "prompt": "Your handler ends with `go sendConfirmation(order)`. Name three things that go wrong with that, and what a job queue gives you instead.",
+      "expected_points": [
+        "the goroutine dies with the process — deploy, crash, OOM — and the work is gone with no record",
+        "no retry and no visibility: a failed send leaves nothing to query, count or alert on",
+        "unbounded concurrency under load, so no backpressure on the dependency",
+        "the request context is cancelled when the handler returns, so anything using it stops mid-flight",
+        "a queue is durability plus a retry policy plus a concurrency limit"
+      ]
+    },
+    {
+      "id": "outbox",
+      "difficulty": "core",
+      "prompt": "Why is `tx.Commit()` followed by `queue.Publish(job)` unsafe, and why is swapping the two no better? What does the transactional outbox do about it?",
+      "expected_points": [
+        "a crash between the two loses the job silently — nothing failed, nothing retried, nothing logged",
+        "publishing first can leave a phantom job for a row whose transaction rolled back",
+        "two systems cannot be committed atomically, so no ordering is safe",
+        "write the job into the same database in the same transaction as the data that justifies it — both or neither",
+        "when the job must reach a broker, a relay publishes committed outbox rows, and may republish after a crash"
+      ]
+    },
+    {
+      "id": "at-least-once",
+      "difficulty": "core",
+      "prompt": "Why is delivery at least once rather than exactly once, and what does that force the consumer to do?",
+      "expected_points": [
+        "there is a gap between the effect happening and the queue recording it; a crash in that gap causes redelivery",
+        "no transaction spans your database and someone else's system, so the gap cannot be closed in general",
+        "the consumer must be idempotent: running the job twice has the effect of running it once",
+        "keyed on the job id — a dedup ledger inserted in the same transaction as the effect, or a naturally idempotent write, or the third party's idempotency key",
+        "exactly-once effect is achievable; exactly-once delivery is not"
+      ]
+    },
+    {
+      "id": "marker-in-the-transaction",
+      "difficulty": "core",
+      "prompt": "In the exercise, `MarkProcessed` runs in the same transaction as the handler's work rather than in a transaction of its own that commits first. Why does that matter, and what breaks if you mark the job processed and commit before the handler runs?",
+      "expected_points": [
+        "the effect and the record of the effect must commit together, or the queue's knowledge disagrees with reality",
+        "a marker written outside would survive a failed attempt, so the retry would skip the work it is retrying — silent loss",
+        "on rollback the marker disappears with the effect, so the retry is a real retry",
+        "a redelivery of committed work sees the marker, skips the handler and still finishes the job"
+      ]
+    },
+    {
+      "id": "retry-policy",
+      "difficulty": "core",
+      "prompt": "Describe the retry policy you implemented: backoff, jitter, and when a job stops being retried.",
+      "expected_points": [
+        "exponential: base doubled per attempt, capped at a maximum",
+        "jitter randomises each delay so jobs that failed together do not retry together and re-create the outage",
+        "the randomness is injected so the policy is testable, like the clock",
+        "a bounded attempt budget, after which the job is dead-lettered with its cause kept for a human",
+        "an error wrapping ErrPermanent skips the budget entirely — no retry fixes a deleted record or an unparseable payload"
+      ]
+    },
+    {
+      "id": "shutdown",
+      "difficulty": "core",
+      "prompt": "What exactly does graceful shutdown of the worker pool do, why does the in-flight job need `context.WithoutCancel`, and why is shutdown still not what makes the system correct?",
+      "expected_points": [
+        "stop claiming new jobs, finish the ones already claimed, then return",
+        "a claimed job that inherits the cancellation fails halfway, turning every deploy into a pile of retries",
+        "WithoutCancel keeps the values and drops the cancellation; production bounds the drain with a timeout",
+        "the lease is what makes a hard kill survivable — shutdown is politeness, redelivery is the guarantee"
+      ]
+    },
+    {
+      "id": "lease-sizing",
+      "difficulty": "stretch",
+      "prompt": "A worker holds a 30-second lease and its handler takes 45 seconds. What happens, and what are your options?",
+      "expected_points": [
+        "the lease expires and another worker claims the job while the first is still running it",
+        "the job runs twice concurrently, which is exactly the case idempotency has to survive",
+        "options: extend the lease from inside the handler (heartbeat), raise the lease toward the p99 duration, or split the job",
+        "a long lease costs redelivery latency when a worker really does die; the queue cannot tell slow from dead"
+      ]
+    },
+    {
+      "id": "periodic",
+      "difficulty": "stretch",
+      "prompt": "You need a nightly digest and you run three replicas. Why is `time.Ticker` in the process wrong, and what would you do instead?",
+      "expected_points": [
+        "three replicas means three digests, and zero on a night the ticking replica is restarting",
+        "an external scheduler that only enqueues the job",
+        "a leader elected through the database — a lock row or a schedules row claimed with a conditional update",
+        "idempotent scheduling: derive the job id from the tick so duplicate enqueues collide on the primary key"
+      ]
+    }
+  ]
+}

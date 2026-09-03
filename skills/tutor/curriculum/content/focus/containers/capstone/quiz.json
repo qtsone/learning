@@ -1,0 +1,95 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "pipeline-stages",
+      "difficulty": "core",
+      "prompt": "Walk me through your pipeline from a merged commit to running pods. What does each job do, what gates it, and what does it hand to the next one?",
+      "expected_points": [
+        "test, then build-push, then deploy-dev, then deploy-prod, chained with needs — jobs run in parallel otherwise",
+        "build-push builds, tags the image from the commit, pushes it, and publishes the digest as a job output",
+        "each deploy job points its overlay at that artifact and applies it, then waits for the rollout",
+        "prod is gated on dev being green and on a GitHub environment (a required reviewer and the prod credentials)",
+        "failure modes named per stage: publishing an untested image without needs, a deploy that is never waited on, a tag that moved between push and deploy"
+      ]
+    },
+    {
+      "id": "tagging",
+      "difficulty": "core",
+      "prompt": "Your Deployment says `image: ghcr.io/ada/timesvc:latest`. You ship a bad release and run `kubectl rollout undo`. What happens, and what should the reference have been?",
+      "expected_points": [
+        "the Deployment stores the image reference in the pod template and undo restores the previous template",
+        "with latest both revisions carry the same string, so the restored template is identical and nothing changes — the rollback silently no-ops",
+        "the tag has also moved, so re-pulling gets the bad image; with imagePullPolicy: IfNotPresent different nodes can run different code under one name",
+        "use an immutable reference: a sha-<commit> tag, or better the digest, which is the image's content hash and cannot be moved"
+      ]
+    },
+    {
+      "id": "promotion",
+      "difficulty": "core",
+      "prompt": "Why does the prod job deploy the digest the dev job used, instead of rebuilding the same commit? And what is the one thing the deploy changes in the overlay?",
+      "expected_points": [
+        "a rebuild of the same commit is a different image: base layers may have moved, cache and timestamps differ — dev proved the artifact, not the source",
+        "promotion means one artifact moving forward through environments",
+        "the deploy changes only the image reference (kustomize edit set image, or --set for a chart); replicas, resources, namespace and config already live in the overlay",
+        "the environments differ only where they are supposed to, so a diff between them is readable"
+      ]
+    },
+    {
+      "id": "carried-contract",
+      "difficulty": "core",
+      "prompt": "Your prod overlay raises the memory limit to 512Mi. What else has to change, what must not change, and why?",
+      "expected_points": [
+        "GOMEMLIMIT is a literal in the base and follows nothing, so it has to move with the limit — under it, with headroom (roughly 80-90%)",
+        "GOMAXPROCS does not need touching if it reads limits.cpu through the downward API",
+        "the probes, the preStop sleep, terminationGracePeriodSeconds and the drain budget stay in the base so a fix reaches every environment",
+        "an overlay changes how much of something an environment gets, never whether the service works"
+      ]
+    },
+    {
+      "id": "verify",
+      "difficulty": "core",
+      "prompt": "Your deploy step ran `kubectl apply` and the job is green. What have you actually proved, and which commands would prove the release landed?",
+      "expected_points": [
+        "apply returns when the API server stored the object: nothing has been scheduled, pulled or probed",
+        "kubectl rollout status --timeout blocks until every replica is updated and available and exits non-zero on a stalled rollout (progressDeadlineSeconds)",
+        "then check what is running: the Deployment's image, and GET /version from a pod behind the Service, compared against the commit shipped",
+        "get pods for restart counts; a --timeout shorter than the job's so a bad release does not hold a runner"
+      ]
+    },
+    {
+      "id": "rollback",
+      "difficulty": "core",
+      "prompt": "Prod is serving a bad release. Take me through the rollback, how you know it worked, and what it does not undo.",
+      "expected_points": [
+        "kubectl rollout undo restores the previous ReplicaSet's pod template, kept because of revisionHistoryLimit",
+        "it only works because the image reference is immutable and the two revisions differ",
+        "verify it: rollout status again, then the image and /version — the undo is a deploy and fails the same ways",
+        "pin the repository too (set the last good digest in the overlay) so the next apply does not reintroduce it",
+        "it does not undo anything outside the process — a schema migration, or data the bad version wrote"
+      ]
+    },
+    {
+      "id": "secrets",
+      "difficulty": "stretch",
+      "prompt": "List every credential your pipeline touches, where each lives, and why none of them is a password stored in the repository.",
+      "expected_points": [
+        "github.token is minted per run and expires with it; packages: write is granted on the publishing job only, not workflow-wide",
+        "cluster credentials live in per-environment secrets, reaching the runner as ${{ secrets.NAME }}",
+        "OIDC (id-token: write) exchanges a signed claim about the workflow for a short-lived cloud credential, so there is nothing stored to leak or rotate",
+        "never in an image layer (layers are immutable and pullable), never in a committed manifest (base64 is not encryption and git remembers), never echoed by a step"
+      ]
+    },
+    {
+      "id": "clean-state",
+      "difficulty": "stretch",
+      "prompt": "A cluster is gone. What in your repository lets you rebuild the service, and is git the record of what was running?",
+      "expected_points": [
+        "namespace, then apply the overlay (kubectl apply -k / kustomize build / helm install), plus access to the image in the registry — including a pull secret if the package is private",
+        "the committed overlay names a bootstrap image reference, which must be immutable so a clean install lands on a known revision",
+        "the deploy job edits the overlay on the runner, so unless a step commits it back, the workflow run is the record and git is only a starting point",
+        "whichever you choose, the runbook has to say which one is authoritative and where to read the digest"
+      ]
+    }
+  ]
+}

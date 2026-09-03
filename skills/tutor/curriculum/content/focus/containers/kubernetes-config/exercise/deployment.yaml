@@ -1,0 +1,53 @@
+# Carried over from Kubernetes Core. It deploys, and the Service in front of it
+# sends traffic to it. What it does not do is tell the platform anything about
+# how the process is configured, whether it is healthy, or how much of a node it
+# needs — so the scheduler guesses, and nothing has an opinion about a pod that
+# has wedged.
+#
+# Your job: everything marked TODO. Each one maps to a numbered acceptance
+# criterion in LESSON.md. Run `bash check.sh` after every edit.
+#
+# Indent with two spaces, spaces only — check.sh reads this file with a small
+# YAML parser that understands block mappings and block lists, not anchors.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: timesvc
+  namespace: timesvc
+  labels:
+    app: timesvc
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: timesvc
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  revisionHistoryLimit: 5
+  template:
+    metadata:
+      labels:
+        app: timesvc
+    spec:
+      containers:
+        - name: timesvc
+          image: timesvc:1.2.0
+          ports:
+            - name: http
+              containerPort: 8080
+          # TODO: inject the ConfigMap's env-style keys as environment
+          # variables, and API_KEY from the Secret — by reference, never by
+          # writing the value here.
+          #
+          # TODO: mount the ConfigMap's features.yaml as a file under
+          # /etc/timesvc/config (a volumeMount here, a volume below).
+          #
+          # TODO: startupProbe, livenessProbe and readinessProbe, each pointed
+          # at the endpoint that answers the question that probe asks.
+          #
+          # TODO: resources — requests so the scheduler can place this pod,
+          # limits so a leak cannot take the node with it.
+      # TODO: the volumes: list that backs the ConfigMap mount above.

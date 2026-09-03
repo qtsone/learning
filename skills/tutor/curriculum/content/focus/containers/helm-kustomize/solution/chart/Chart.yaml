@@ -1,0 +1,9 @@
+# Reference solution. Two versions, and they are not the same version:
+# `version` is this chart's, `appVersion` is the software it installs. A
+# template fix ships as 0.1.1 with appVersion untouched.
+apiVersion: v2
+name: timesvc
+description: The timesvc HTTP service, with the probes and drain settings it needs
+type: application
+version: 0.1.0
+appVersion: "1.1.0"

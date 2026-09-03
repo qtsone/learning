@@ -1,0 +1,11 @@
+# Keeps the build context small and keeps host junk out of the image.
+.git
+.gitignore
+*.md
+*.yaml
+check.sh
+Dockerfile*
+.dockerignore
+bin/
+dist/
+*.log

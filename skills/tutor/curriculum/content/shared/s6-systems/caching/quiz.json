@@ -1,0 +1,89 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "layers",
+      "difficulty": "core",
+      "prompt": "A request can hit a cache in the browser, a CDN, a gateway, the application, or the database. Pick two of those layers and tell me: what does each absorb that the others cannot, and what can it never cache?",
+      "expected_points": [
+        "browser: zero-network repeat views for one user; cannot help other users and cannot be invalidated once shipped",
+        "CDN/gateway: shared, URL-addressable HTTP responses, bandwidth and geography; cannot hold personalized responses without splitting them out",
+        "application layer: arbitrary non-HTTP data (rows, sessions, computed results) under the program's control",
+        "database caches make queries cheaper but cannot remove the network hop or the request arriving at all"
+      ]
+    },
+    {
+      "id": "write-patterns",
+      "difficulty": "core",
+      "prompt": "Product page read 10,000 times per write, 60-second staleness budget — versus a view counter taking 5,000 writes per second where losing a few seconds of counts is fine. Which caching pattern for each, and why?",
+      "expected_points": [
+        "product page: cache-aside (or read-through) with a TTL — read-heavy, bounded staleness is acceptable, misses repopulate lazily",
+        "view counter: write-behind — absorb and batch writes, acknowledge from the cache",
+        "names the write-behind trade-off: acknowledged writes can be lost on a crash before the flush, acceptable here by stated requirement",
+        "write-through contrasted: synchronous dual write, fresh reads, slower writes"
+      ]
+    },
+    {
+      "id": "invalidation",
+      "difficulty": "core",
+      "prompt": "Walk me through a cache stampede: a hot key expires under heavy concurrent traffic. What happens, and what are two mitigations and how does each work?",
+      "expected_points": [
+        "all concurrent requests miss at once and issue the same expensive origin query simultaneously, degrading the origin at peak",
+        "singleflight: one caller loads per key, concurrent callers wait and share the result",
+        "TTL jitter: randomize expiry times so correlated entries do not expire together",
+        "(bonus) serve-stale/soft-TTL: keep serving the expired value while one background refresh runs"
+      ]
+    },
+    {
+      "id": "eviction",
+      "difficulty": "core",
+      "prompt": "Your cache is full and a new key arrives. Which entry goes, why is that the default policy, and what data structures make the decision O(1)? Then: your hit ratio craters every night at 3 a.m. — what would you look for?",
+      "expected_points": [
+        "LRU evicts the entry unused for longest, betting that recent use predicts near-future use — right often enough to be the default",
+        "O(1) with a hash map for lookup plus a doubly linked recency list (S2 structures): map key to list element, move to front on use, evict from the back",
+        "LFU counts uses instead — keeps steady favorites but is slow to forget yesterday's hits and costlier to track; FIFO/random are nearly free and surprisingly decent, which is why Redis ships approximated sampling rather than exact tracking",
+        "3 a.m. crater means scan pollution: a batch job (export, crawler, backup) touches many keys once, and LRU dutifully evicts the genuinely hot set for entries nobody will ask for again"
+      ]
+    },
+    {
+      "id": "implementation",
+      "difficulty": "core",
+      "prompt": "In your exercise: why does the constructor take a now function, and why must the loader in GetOrLoad run outside the mutex?",
+      "expected_points": [
+        "injected clock lets tests control time deterministically — no sleeps, no flaky wall-clock assertions",
+        "holding the lock during a load would block every operation on every key behind one slow origin call",
+        "the flight publishes its result with a happens-before edge (write fields, then close the done channel) so waiters read safely"
+      ]
+    },
+    {
+      "id": "tool-choice",
+      "difficulty": "core",
+      "prompt": "When is an in-process cache the right call, when Redis, and when a CDN? Give one concrete example for each and the cost you accept.",
+      "expected_points": [
+        "in-process: small hot staleness-tolerant data (config, flags) — fastest, but per-replica copies with no cross-replica invalidation",
+        "Redis/Memcached: shared data across replicas (sessions, query results) — one copy, one invalidation, but a network hop and a service to operate",
+        "CDN: static or URL-cacheable HTTP responses — geography and bandwidth offload, useless for application state"
+      ]
+    },
+    {
+      "id": "aside-race",
+      "difficulty": "stretch",
+      "prompt": "Cache-aside deletes the key on write instead of setting the new value. Show the interleaving that makes 'set on write' dangerous, and the one that still bites you even with delete.",
+      "expected_points": [
+        "set-on-write: two writers' cache sets can interleave against database order, pinning the older value indefinitely",
+        "delete still races: reader misses, reads old value, writer writes and deletes, reader then caches the old value",
+        "which is why a TTL backstop remains even with explicit invalidation"
+      ]
+    },
+    {
+      "id": "miss-math",
+      "difficulty": "stretch",
+      "prompt": "Your cache's hit ratio drops from 99% to 97%. Marketing says 'only two percent'. What actually happened to your database, and what is the worst case you must plan for?",
+      "expected_points": [
+        "origin load is the miss rate: 1% to 3% of traffic means database load tripled",
+        "worst case is a cold or flushed cache: 100% of traffic hits the origin, so the origin must survive that at least briefly",
+        "a load-bearing cache is infrastructure, not an optimization"
+      ]
+    }
+  ]
+}

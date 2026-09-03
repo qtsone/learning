@@ -1,0 +1,108 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words, answered about their own project rather than in the abstract; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "coverage-ceiling",
+      "difficulty": "core",
+      "prompt": "Your suite is green and coverage is comfortably over the floor. What does that tell you, and what does it not? How would you find a line that is executed but not defended?",
+      "expected_points": [
+        "coverage counts lines executed, not behaviour asserted — a test with no assertions scores the same",
+        "mutation thinking: change a line (< to <=, drop a return, return nil instead of err) and ask which test goes red",
+        "no test goes red means the line is covered but undefended",
+        "the usual gaps are error paths, boundaries, concurrent interleavings, and the seams between packages"
+      ]
+    },
+    {
+      "id": "fuzz-target",
+      "difficulty": "core",
+      "prompt": "Where did you put a fuzz target in your project, and why there? What property does it assert, and what is the difference between the corpus you committed and the one in your build cache?",
+      "expected_points": [
+        "target sits where untrusted bytes become a trusted value — parser, decoder, path/query/command builder",
+        "the property must hold for every input: no panic, accepted output satisfies the invariants, round trip is identity",
+        "seed corpus in testdata/fuzz/<Target>/ is committed and runs on every plain go test, everywhere",
+        "the generated corpus is machine-local, lives in the build cache, and is not shared",
+        "a crasher gets minimised and written to the seed corpus — commit it with the fix"
+      ]
+    },
+    {
+      "id": "security-pass",
+      "difficulty": "core",
+      "prompt": "Walk me through the security pass on your own project: what were the trust boundaries, what did you check at each one, and what did the pass actually find?",
+      "expected_points": [
+        "names concrete boundaries — stdin/args/files, network, environment, responses from peers",
+        "validation happens once at the boundary and produces a value the rest of the code can trust",
+        "OWASP categories that reach this size: injection into any interpreter (SQL, shell, path, URL), access control and defaults, secrets, resource exhaustion",
+        "a real finding rather than a hypothetical one; a systematic checklist rather than 'I read it over'"
+      ]
+    },
+    {
+      "id": "regression-test",
+      "difficulty": "core",
+      "prompt": "Take the defect you fixed. Why write the failing test before the fix, and how do you know the test is any good?",
+      "expected_points": [
+        "the test proves the defect is understood, and a fix aimed at the wrong cause shows up immediately",
+        "it gives 'is it fixed?' an answer that is not opinion",
+        "it stops the bug returning during a later refactor",
+        "you know it is good by watching it fail against the old code (stash the fix and run it)",
+        "named for the behaviour it defends, kept beside that package's other tests"
+      ]
+    },
+    {
+      "id": "timeouts-context",
+      "difficulty": "core",
+      "prompt": "Why does an outbound HTTP client need a Timeout on the client itself, and why must a function that already receives a context.Context never call context.Background()?",
+      "expected_points": [
+        "http.DefaultClient and http.Get/Post have no timeout — an unanswering peer pins the goroutine and connection forever",
+        "Client.Timeout bounds the whole exchange: connect, TLS, request, response headers and body",
+        "per-phase transport timeouts can all pass while the call still hangs",
+        "a fresh root context discards the caller's deadline, cancellation and values",
+        "roots belong in main/run; deliberate detachment is context.WithoutCancel plus a timeout of its own"
+      ]
+    },
+    {
+      "id": "govulncheck",
+      "difficulty": "core",
+      "prompt": "What does govulncheck tell you that a plain dependency scanner does not, and when does its answer stop being true?",
+      "expected_points": [
+        "it reports reachability — a path from your code to the vulnerable symbol — not just 'you depend on an advisory'",
+        "that makes the output short enough to actually read",
+        "the answer expires on a toolchain upgrade (the standard library gets advisories too), on dependency changes, and on your own code changes that alter the call graph",
+        "run by hand, read every finding; grading is offline so no harness can run it for you"
+      ]
+    },
+    {
+      "id": "accepted-risk",
+      "difficulty": "core",
+      "prompt": "Name something you chose not to harden. Convince me that was engineering rather than laziness.",
+      "expected_points": [
+        "states the exposure concretely",
+        "states the reason, including the blast radius and the cost of fixing it",
+        "states the trigger that would reopen the decision",
+        "does not contradict a requirement in their own PRD",
+        "is written down in the security document, not just remembered"
+      ]
+    },
+    {
+      "id": "profiling-recon",
+      "difficulty": "core",
+      "prompt": "Show me the top CPU and allocation entries you wrote down. Which surprised you, and why are you not fixing any of them today?",
+      "expected_points": [
+        "produces the recorded top-N output, not a recollection — that file is the 'before' side of the next lesson's comparison",
+        "captured under a load defensible as realistic — sizes from the PRD, not ten items",
+        "can read the top entries: runtime.mallocgc/growslice means allocation in a loop; encoding/reflection means paying for convenience",
+        "surprises are the signal worth recording",
+        "optimising before the suite is trustworthy makes something fast and wrong; the measurement is kept for a later before/after comparison"
+      ]
+    },
+    {
+      "id": "limits",
+      "difficulty": "stretch",
+      "prompt": "List every size limit in your project. Now name an input that has none — what does an attacker do with it?",
+      "expected_points": [
+        "line/request length, decoded element counts, response bodies read from peers, slices allocated from a number in the input",
+        "without a limit the input decides how much memory the process uses",
+        "io.LimitReader, an explicit maximum constant, bufio.Scanner.Buffer; make([]T, n) with n from the wire is the anti-pattern"
+      ]
+    }
+  ]
+}

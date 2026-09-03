@@ -1,0 +1,77 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "why-sorted",
+      "difficulty": "core",
+      "prompt": "Why must the data be sorted before binary search, and where exactly in the algorithm does it rely on that?",
+      "expected_points": [
+        "the discard step is a proof: everything left of a smaller element is also smaller only when data is sorted",
+        "on unsorted data the discarded half may contain the target, so a wrong answer is returned confidently",
+        "one comparison against the middle eliminates half the candidates only because order is guaranteed"
+      ]
+    },
+    {
+      "id": "log-n",
+      "difficulty": "core",
+      "prompt": "A sorted slice holds a million elements. Roughly how many probes does binary search need and why? What happens to that count when the slice doubles?",
+      "expected_points": [
+        "about 20, because each comparison halves the candidates: n, n/2, n/4, ... 1",
+        "the number of halvings to reach one candidate is log2(n)",
+        "doubling the data adds just one more probe"
+      ]
+    },
+    {
+      "id": "classic-bugs",
+      "difficulty": "core",
+      "prompt": "Name the two classic binary-search implementation bugs and how you defend against each.",
+      "expected_points": [
+        "off-by-one / non-shrinking interval: lo = mid instead of mid+1 loops forever, hi = mid-1 under a half-open convention skips an unexamined index",
+        "defense: pick one interval convention, state the invariant, argue every update strictly shrinks the interval",
+        "midpoint overflow: (lo+hi)/2 can overflow fixed-size integers even when the result fits (the nine-year JDK bug)",
+        "defense: lo + (hi-lo)/2 computes the same midpoint without the overflowing sum"
+      ]
+    },
+    {
+      "id": "when-linear-wins",
+      "difficulty": "core",
+      "prompt": "Binary search is O(log n), yet sometimes plain linear search is the right choice. When, and why?",
+      "expected_points": [
+        "unsorted data with one lookup: sorting first costs O(n log n), more than one O(n) scan",
+        "tiny n: constants and simplicity dominate; Big-O describes growth, not small-input speed",
+        "linked structures: no O(1) random access, so jumping to the middle costs O(n) anyway",
+        "many lookups flip the answer: sort once and every search becomes O(log n)"
+      ]
+    },
+    {
+      "id": "first-occurrence",
+      "difficulty": "core",
+      "prompt": "Your sorted slice has a long run of duplicates of the target. Why doesn't the plain loop's return-on-equality give you the first occurrence, and what does the variant change?",
+      "expected_points": [
+        "mid can land anywhere inside the run, so which occurrence you get is accidental",
+        "walking left from a match is O(n) worst case (imagine the whole slice equal to the target)",
+        "instead search for the boundary: the first index with xs[i] >= target, halving until the interval is empty",
+        "then verify the landing index is in range and actually holds the target"
+      ]
+    },
+    {
+      "id": "hash-vs-binary",
+      "difficulty": "stretch",
+      "prompt": "You already keep the data in a hash table with O(1) lookup. What kinds of queries still need sorted data and binary search?",
+      "expected_points": [
+        "order questions: first element >= x, everything between a and b, nearest value, predecessor/successor",
+        "hashing scatters keys and destroys order, so it only answers exact-match questions"
+      ]
+    },
+    {
+      "id": "predicate-search",
+      "difficulty": "stretch",
+      "prompt": "Binary search with no target value at all: what does searching over a yes/no condition look like, and what must be true of the condition?",
+      "expected_points": [
+        "the answers over the range must be monotone: false...false true...true, never flipping back",
+        "you binary-search for the flip boundary, e.g. first commit where the build breaks",
+        "Go's sort.Search is exactly this shape: first index where a predicate is true"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "when-async",
+      "difficulty": "core",
+      "prompt": "Of these four, which would you move onto a queue and which stays in the request: sending a receipt email, checking a password at login, resizing an uploaded avatar, reserving the last ticket in stock? Then name the three bills the queue sends you.",
+      "expected_points": [
+        "queue the work that is slow, bursty, or independent of the response — receipt email and avatar resize",
+        "keep synchronous the work whose answer the caller needs now — password check, and the last-ticket reservation because the caller needs the yes/no",
+        "latency: the work is done eventually, not when the response returns",
+        "consistency: the caller gets 'accepted', not 'done' — read-your-writes is gone and the API must say so (202 plus a status URL)",
+        "complexity: one more system to run, plus a new failure vocabulary — redelivery, duplicates, poison messages"
+      ]
+    },
+    {
+      "id": "semantics",
+      "difficulty": "core",
+      "prompt": "A consumer charges a card and then crashes before its ack reaches the broker. What does the broker actually know, and what are its options? Use that to contrast at-most-once, at-least-once, and exactly-once.",
+      "expected_points": [
+        "the broker only sees a missing ack; it cannot distinguish 'crashed before the work' from 'crashed after' — that information does not exist on its side",
+        "at-most-once = never redeliver, so work can be lost; fine only when a loss is cheaper than a duplicate (metrics sample, presence ping)",
+        "at-least-once = redeliver until acked, so work can be duplicated; the default for anything that matters",
+        "exactly-once delivery is not a broker setting — the ack can always be lost after the side effect committed",
+        "what you can build is exactly-once processing: let the transport duplicate and make duplicates harmless at the consumer"
+      ]
+    },
+    {
+      "id": "idempotent-consumer",
+      "difficulty": "core",
+      "prompt": "Walk me through your `Handle`: the two ways to make a consumer idempotent, and why a *failed* attempt must not be recorded as done.",
+      "expected_points": [
+        "naturally idempotent operations — absolute statements ('status is shipped') dedupe themselves, deltas ('increment') do not",
+        "a dedupe record — check the processed-messages store by the dedupe key before working, record it after, skip and ack on a duplicate",
+        "the key is the broker's message ID only when redelivery is the sole source of duplicates; when a producer can republish the same work, key on the business event ID carried in the payload",
+        "acking a duplicate is honest because the work genuinely happened",
+        "recording a failed attempt turns the retry you designed for into a permanent skip, and the work never happens",
+        "in production the dedupe store is durable and shared by all replicas — ideally committed in the same transaction as the side effect"
+      ]
+    },
+    {
+      "id": "outbox",
+      "difficulty": "core",
+      "prompt": "Your order service must write the order to its database and publish an `order-placed` event. Why is there no safe ordering of those two writes, and how does the transactional outbox fix it?",
+      "expected_points": [
+        "dual-write problem: DB first then publish loses the event on a crash; publish first then DB tells downstream about an order that never happened",
+        "retries do not help — the crash lands between the two writes, with no process alive to retry",
+        "the fix is to stop doing two writes: insert the event into an outbox table in the SAME transaction as the state change",
+        "a separate relay polls unpublished rows, publishes them, and marks them published",
+        "a relay crashing between publish and mark republishes — atomicity bought with duplicates, absorbed by the idempotent consumer",
+        "those duplicates are distinct broker messages carrying one business event, so the consumer must dedupe on the event ID in the payload, not on the broker's message ID"
+      ]
+    },
+    {
+      "id": "poison-dlq",
+      "difficulty": "core",
+      "prompt": "A message with a malformed payload fails on every delivery. Describe what happens without a policy, and the retry/dead-letter policy you would put in place.",
+      "expected_points": [
+        "poison message: deliver, fail, time out, redeliver forever — burning consumer capacity and blocking work behind it",
+        "bounded attempts, small (3-5), with backoff between them — attempt six teaches nothing attempt five didn't",
+        "dead-letter queue: exhausted messages are parked with their content and delivery history, not deleted (deleting is at-most-once through the back door)",
+        "a non-empty DLQ is an alert — each message is work the system promised and didn't do",
+        "the payoff of parking is replay after fixing the bug; distinguish failure kinds — nack a downstream timeout and let it use the full budget, dead-letter a validation error on the first attempt"
+      ]
+    },
+    {
+      "id": "visibility-timeout",
+      "difficulty": "stretch",
+      "prompt": "The visibility timeout is a guess. What goes wrong when it is far too short, and what goes wrong when it is far too long?",
+      "expected_points": [
+        "too short: the broker redelivers a message a healthy consumer is still working on — a duplicate you manufactured yourself",
+        "too long: a crashed consumer's messages sit invisible for minutes before anyone retries them, delaying recovery",
+        "redelivery also reorders — a returned message joins behind newer ones, so queues are roughly FIFO, not FIFO",
+        "strict per-key ordering needs a partitioned log (Kafka-style), not a plain queue"
+      ]
+    },
+    {
+      "id": "channel-vs-queue",
+      "difficulty": "stretch",
+      "prompt": "A colleague says your in-process worker pool already has a queue — it uses a buffered channel. What is a channel missing, and dedupe aside, what does that cost you?",
+      "expected_points": [
+        "a channel receive consumes the value: no ack, so a consumer that crashes after receiving silently loses the work",
+        "no redelivery, no visibility timeout, no dead-lettering, no durability — it dies with the process",
+        "channels move work between goroutines inside one process; a queue moves work between processes that fail independently",
+        "the whole point of the ack is that work survives the death of the worker doing it"
+      ]
+    }
+  ]
+}

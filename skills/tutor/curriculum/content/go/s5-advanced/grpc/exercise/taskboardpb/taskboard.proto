@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package taskboard.v1;
+
+option go_package = "tutor.local/grpc-tasks/taskboardpb";
+
+// TaskService is the contract between the task-board server and its clients.
+// Regenerate the Go code after editing this file (see LESSON.md):
+//
+//   buf generate
+service TaskService {
+  // GetTask returns a single task by id.
+  //
+  // Errors: INVALID_ARGUMENT if id is empty, NOT_FOUND if no task has that id.
+  rpc GetTask(GetTaskRequest) returns (Task);
+
+  // ListTasks streams every task matching the filter, in insertion order.
+  rpc ListTasks(ListTasksRequest) returns (stream Task);
+}
+
+message Task {
+  string id = 1;
+  string title = 2;
+  Status status = 3;
+}
+
+enum Status {
+  STATUS_UNSPECIFIED = 0;
+  STATUS_OPEN = 1;
+  STATUS_DONE = 2;
+}
+
+message GetTaskRequest {
+  string id = 1;
+}
+
+message ListTasksRequest {
+  // STATUS_UNSPECIFIED means "no filter": stream every task.
+  Status status = 1;
+}

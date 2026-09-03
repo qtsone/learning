@@ -1,0 +1,65 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "call-stack",
+      "difficulty": "core",
+      "prompt": "When Factorial(3) runs, what does the call stack look like at its deepest point — and why does breaking the base case end in a stack overflow?",
+      "expected_points": [
+        "each call pushes a frame holding its own private copy of n; frames pop in reverse order as results return",
+        "at the deepest point frames for n=3, 2, 1, 0 are all live, each waiting on the call above it",
+        "with no reachable base case frames pile up until the stack limit is hit and the program dies (in Go a fatal error, not a recoverable panic)"
+      ]
+    },
+    {
+      "id": "spot-the-cases",
+      "difficulty": "core",
+      "prompt": "New problem, no code yet: count how many files live in a folder, including all nested subfolders. What is the base case, and what is the recursive case?",
+      "expected_points": [
+        "base case: a folder with no subfolders — return its own file count",
+        "recursive case: this folder's file count plus the recursive count of each subfolder",
+        "identifies both cases from the problem statement before writing code, and checks that recursion makes progress toward the base case"
+      ]
+    },
+    {
+      "id": "trace",
+      "difficulty": "core",
+      "prompt": "Trace Factorial(4) by hand: draw the stack frames as they are pushed, then walk the unwinding and say what each frame returns.",
+      "expected_points": [
+        "winding: frames for 4, 3, 2, 1, 0 pushed in order, each with its own n",
+        "unwinding: 0 returns 1, then 1, 2, 6, 24 as each frame multiplies its n by the returned value",
+        "keeps the two phases and each frame's variables clearly separate"
+      ]
+    },
+    {
+      "id": "your-code",
+      "difficulty": "core",
+      "prompt": "In your Sum, how does the shape of the code mirror the shape of a Node? And what would happen if Children could contain a cycle back to an ancestor?",
+      "expected_points": [
+        "the nil check is the base case; one recursive call per child mirrors 'a value plus nested nodes'",
+        "recursion handles nesting of unknown depth where a plain loop is awkward",
+        "a cycle means no progress toward the base case — infinite recursion ending in stack overflow"
+      ]
+    },
+    {
+      "id": "to-iteration",
+      "difficulty": "core",
+      "prompt": "Your SumIterative swaps recursion for a slice used as a stack. Why does it survive the million-node chain when a recursive version dies, and when would you reach for iteration first?",
+      "expected_points": [
+        "the explicit stack lives on the heap and grows with append — bounded by memory, not the goroutine stack limit",
+        "recursion costs one frame per level and Go does not optimize tail calls",
+        "prefer iteration for unbounded or user-controlled depth and flat linear data; prefer recursion for naturally nested data"
+      ]
+    },
+    {
+      "id": "fib-blowup",
+      "difficulty": "stretch",
+      "prompt": "Naive recursive fibonacci makes two calls per level. Roughly how does its running time grow with n, and what exactly is being wasted?",
+      "expected_points": [
+        "the call tree roughly doubles per level — exponential, about O(2^n) in the Big-O growth classes",
+        "the same subproblems (fib(3), fib(2), …) are recomputed many times",
+        "the definition is correct but repeats work — seeing the repeated subtrees is the skill; the fix comes in the dynamic-programming lesson"
+      ]
+    }
+  ]
+}

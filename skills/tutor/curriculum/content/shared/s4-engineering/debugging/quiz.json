@@ -1,0 +1,82 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "scientific-method",
+      "difficulty": "core",
+      "prompt": "A bug report lands on your desk. Describe the loop you follow before changing any code — and what makes an experiment worth running versus just 'trying something'?",
+      "expected_points": [
+        "reproduce deterministically first, then minimize the trigger",
+        "state a hypothesis before experimenting, one change at a time",
+        "an experiment is only useful if some outcome would rule something out",
+        "record results — ruled-out causes are progress, and end with a test that proves the fix"
+      ]
+    },
+    {
+      "id": "delve-basics",
+      "difficulty": "core",
+      "prompt": "In delve: what do `break`, `continue`, `next`, `step`, and `print` each do? And when you're paused on a line with a function call, how do you choose between `next` and `step`?",
+      "expected_points": [
+        "break sets a breakpoint at a function or file:line; continue runs until one hits",
+        "next steps over the current line; step goes into the function being called",
+        "print/locals inspect variables at the pause",
+        "step into when the callee is a suspect, over when it is trusted; conditional breakpoints rescue late-iteration bugs"
+      ]
+    },
+    {
+      "id": "bisect",
+      "difficulty": "core",
+      "prompt": "The suite passed at release time, fails today, and there are 200 commits in between. How does git bisect find the culprit, roughly how many steps does it take, and what does `git bisect run` add?",
+      "expected_points": [
+        "binary search over commits between a known-good and a known-bad point",
+        "each verdict halves the suspect range: ~log2(200) ≈ 8 checkouts, not 200",
+        "bisect run automates the verdict from a command's exit code, e.g. go test",
+        "needs no understanding of the code — only a reliable good/bad test"
+      ]
+    },
+    {
+      "id": "print-vs-debugger",
+      "difficulty": "core",
+      "prompt": "Give one concrete scenario where print/log debugging beats a debugger, and one where the debugger wins. What makes each the right instrument there?",
+      "expected_points": [
+        "prints win for behavior over time or volume (which of 10,000 iterations, event ordering), and where nothing can attach: CI, another machine, production logs",
+        "prints (plus the race detector) win for concurrency, because pausing at a breakpoint reshapes the timing under study",
+        "debugger wins for rich state at one moment on a small repro, or exploring unfamiliar code without editing it",
+        "summary shape: prints answer 'what happened over time', a debugger answers 'what is true right now'"
+      ]
+    },
+    {
+      "id": "trail",
+      "difficulty": "core",
+      "prompt": "Pick one of the three exercise bugs and walk me through your log: the symptom, your minimal reproduction, one hypothesis you ruled out (and how), and the root cause in one sentence.",
+      "expected_points": [
+        "names the failing test and its got/want message",
+        "shows real minimization, e.g. Total failing at one element while multiples of four pass",
+        "at least one hypothesis with the experiment that ruled it out or confirmed it",
+        "root cause stated crisply: zero sentinel in Lowest, dropped partial batch in Total, or in-place sort in Median"
+      ]
+    },
+    {
+      "id": "action-at-a-distance",
+      "difficulty": "stretch",
+      "prompt": "Every value `Median` returned was correct, and yet it was buggy. What was the fault, why is that class of bug nasty to hunt, and how did the fix and the test each address it?",
+      "expected_points": [
+        "it sorted the caller's slice in place — a side effect outside the return value",
+        "symptom shows up far from the cause, in code that merely shares the slice",
+        "fix: sort a clone (slices.Clone) so the input stays untouched",
+        "the test pins the contract by asserting the input is unchanged after the call"
+      ]
+    },
+    {
+      "id": "minimize-first",
+      "difficulty": "stretch",
+      "prompt": "Why minimize the reproduction before hypothesizing, instead of debugging the original 103-element failure directly?",
+      "expected_points": [
+        "smaller repro means fewer suspects and experiments that run in seconds",
+        "each shrink is itself a bisection step that discards half the possibilities",
+        "the minimal case often names the bug — 'multiples of four pass' points straight at the batch walk",
+        "a small repro fits in your head and becomes the regression test"
+      ]
+    }
+  ]
+}

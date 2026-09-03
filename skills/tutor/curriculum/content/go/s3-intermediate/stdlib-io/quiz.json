@@ -1,0 +1,78 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "universal-interface",
+      "difficulty": "core",
+      "prompt": "os.File, net.Conn, bytes.Buffer, and gzip.Reader are wildly different things. Why can one io.Copy call work with all of them, and what does that buy you when you write your own functions?",
+      "expected_points": [
+        "they all satisfy the tiny io.Reader/io.Writer interfaces",
+        "code written against the interface works with every source/destination, present and future",
+        "small interfaces are the composition points — accept io.Reader/io.Writer in your own APIs"
+      ]
+    },
+    {
+      "id": "reader-contract",
+      "difficulty": "core",
+      "prompt": "A Read call returns n = 5 and err = io.EOF at the same time. Is that reader broken? What must a correct caller do with that result?",
+      "expected_points": [
+        "not broken — the contract explicitly allows n > 0 together with io.EOF",
+        "consume p[:n] first, then handle the error",
+        "checking err before consuming the data silently drops the final bytes of the stream",
+        "partial reads (n less than len(p)) are also normal, not errors"
+      ]
+    },
+    {
+      "id": "adapter-shape",
+      "difficulty": "core",
+      "prompt": "Walk me through your UpperReader.Read: what do you delegate, what do you transform, and what do you pass through untouched? Why does the order of those steps matter?",
+      "expected_points": [
+        "delegate the actual read to the wrapped reader",
+        "transform only p[:n] — the bytes actually delivered",
+        "transform before inspecting err so data arriving with io.EOF is kept",
+        "return the inner n and err unchanged — the adapter must not reinterpret the stream"
+      ]
+    },
+    {
+      "id": "buffer-choice",
+      "difficulty": "core",
+      "prompt": "Pick the right tool and justify it: (a) assemble a string from many small pieces, (b) capture what some code writes for a test assertion, (c) write many small records to a file efficiently.",
+      "expected_points": [
+        "(a) strings.Builder — write-only accumulator, copy-free String(), avoids quadratic concatenation",
+        "(b) bytes.Buffer — an in-memory io.Writer (and Reader) you can inspect",
+        "(c) bufio.Writer around the file — batches small writes into few syscalls, must Flush()"
+      ]
+    },
+    {
+      "id": "streaming-memory",
+      "difficulty": "core",
+      "prompt": "Your Shout must handle a 10GB input on a small machine. Why does chaining NewUpperReader with io.Copy survive that when io.ReadAll would not?",
+      "expected_points": [
+        "io.Copy pumps fixed-size chunks (a 32KB buffer) through the chain",
+        "memory use is constant regardless of stream size",
+        "io.ReadAll holds the entire payload in memory — proportional to input size",
+        "each stage of a chain touches chunks in flight; nobody holds the whole payload"
+      ]
+    },
+    {
+      "id": "short-writes",
+      "difficulty": "stretch",
+      "prompt": "In CountingWriter.Write, why do you add the returned n to the count instead of len(p)?",
+      "expected_points": [
+        "writers may perform short writes — accept fewer than len(p) bytes and return an error",
+        "n is what was actually written; len(p) is only what was requested",
+        "counting len(p) would overreport on any failing or partial write"
+      ]
+    },
+    {
+      "id": "scanner-limit",
+      "difficulty": "stretch",
+      "prompt": "Your LineCount meets a log file containing a single 500KB line. What happens with your current code, and how would you fix it?",
+      "expected_points": [
+        "bufio.Scanner's default max token size is 64KB — it stops with bufio.ErrTooLong",
+        "sc.Err() surfaces the error, so LineCount reports it rather than silently undercounting",
+        "raise the limit with Scanner.Buffer (or switch to bufio.Reader for unbounded lines)"
+      ]
+    }
+  ]
+}

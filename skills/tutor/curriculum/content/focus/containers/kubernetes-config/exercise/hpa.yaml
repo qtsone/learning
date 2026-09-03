@@ -1,0 +1,10 @@
+# The HorizontalPodAutoscaler for timesvc.
+#
+# It reads pod CPU usage, divides it by the CPU *request* you wrote in the
+# Deployment, and adds or removes replicas to keep that ratio near the target.
+# Which means: no request, no autoscaler.
+#
+# TODO: write the whole object. It needs apiVersion autoscaling/v2, kind
+# HorizontalPodAutoscaler, a metadata.name and the same metadata.namespace as
+# everything else here, and a spec with scaleTargetRef, minReplicas,
+# maxReplicas and one metrics entry.

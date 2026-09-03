@@ -1,0 +1,8 @@
+background colour: #1e1e2e
+foreground colour: #cdd6f4
+accent colour:     #f38ba8
+border colour:     #313244
+cursor colour:     #f5e0dc
+selection colour:  #45475a
+comment colour:    #6c7086
+warning colour:    #f9e2af

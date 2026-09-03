@@ -1,0 +1,83 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "stranger-test",
+      "difficulty": "core",
+      "prompt": "What does it mean for a README to pass the stranger test, and why is the author the worst-placed person to judge their own README? What's the minimum a README must contain to pass?",
+      "expected_points": [
+        "the stranger: competent, zero context, clean machine — can state the purpose, install, and run one example without asking a human",
+        "authors fail because they silently assume context they forgot they have (curse of knowledge)",
+        "minimum spine: one-paragraph purpose, requirements, install steps, a quickstart with real commands and output, pointers onward",
+        "verification is mechanical: run every command exactly as written from a clean directory"
+      ]
+    },
+    {
+      "id": "contract-not-echo",
+      "difficulty": "core",
+      "prompt": "The old comment read `// Get gets a snippet.` What's wrong with it, and what did your replacement for the exercise's Get have to say? What's your test for whether a doc-comment sentence earns its place?",
+      "expected_points": [
+        "it's an echo — restates the signature, which the reader already has; adds no information",
+        "the contract states edge behavior: a missing name returns an error wrapping ErrNotFound, matched with errors.Is",
+        "test: every sentence is a promise a test could falsify; a sentence no test could catch lying is an echo — cut it",
+        "promises must be true of the code as-is: you write contracts by reading the body, not remembering intent"
+      ]
+    },
+    {
+      "id": "adr-anatomy",
+      "difficulty": "core",
+      "prompt": "Walk me through the four sections of an ADR and what each is for. Why must the consequences include costs, and why do you supersede an old ADR instead of editing it?",
+      "expected_points": [
+        "context = the forces at decision time (constraints, requirements), stated without smuggling in the conclusion",
+        "options considered = real alternatives with honest trade-offs — the losers prove the winner was chosen, not defaulted",
+        "decision = one sentence; consequences = what follows, good and bad",
+        "consequences without costs are advertising — the costs are what a future reader checks against changed circumstances",
+        "ADRs form an append-only log: a new ADR supersedes the old one, preserving the history of the project's thinking"
+      ]
+    },
+    {
+      "id": "changelog-curation",
+      "difficulty": "core",
+      "prompt": "The exercise's git log had nine commits but a good 0.2.0 entry has about five lines. Justify the gap: how do you decide what enters, which bucket it goes in, and where breaking changes belong?",
+      "expected_points": [
+        "changelog is for users, git log is for maintainers — only user-visible changes enter",
+        "filter: does a user of the binary or an importer of the package behave differently? refactors, CI, comment typos are out",
+        "buckets: Added / Changed / Fixed (plus Deprecated / Removed / Security when needed)",
+        "breaking changes come first, clearly marked, with what the user must do — e.g. -dir renamed to -path, Get now returning ErrNotFound",
+        "lines are written in the user's vocabulary, not the maintainer's"
+      ]
+    },
+    {
+      "id": "routing",
+      "difficulty": "core",
+      "prompt": "For each, name the home and justify it: (a) install steps, (b) 'Add silently overwrites an existing name', (c) 'why a JSON file and not SQLite', (d) 'the -dir flag is now -path', (e) the plan to add tag-based search someday.",
+      "expected_points": [
+        "(a) README — the stranger's first-contact question; (b) doc comment — the caller's mid-code moment, glued to the declaration",
+        "(c) ADR — it's a why, a decision with forces and costs; (d) changelog — an upgrader's question",
+        "(e) none of the four — aspirational content goes to the issue tracker; documentation records what is",
+        "principles: closest to what it describes, one home per fact (duplicates diverge), written for the reader's moment"
+      ]
+    },
+    {
+      "id": "aspirational-mismatch",
+      "difficulty": "stretch",
+      "prompt": "You find a doc comment claiming Store is safe for concurrent use, but there's no locking anywhere in the code. Name the two possible fixes, and say which one is a documentation change.",
+      "expected_points": [
+        "either correct the comment to match reality (the documentation fix) or add locking (a behavior change that needs code, tests, review — not a doc edit)",
+        "docs must record actual behavior; a false contract is disinformation with authority — callers will build on the lie",
+        "choosing between the fixes is a design decision, possibly ADR-worthy — not something you settle silently in a comment"
+      ]
+    },
+    {
+      "id": "rot-and-freshness",
+      "difficulty": "stretch",
+      "prompt": "All documentation rots. For each of the four forms, name the mechanism that keeps it honest.",
+      "expected_points": [
+        "README: run its commands from a clean directory; CI can execute the quickstart on every change",
+        "doc comments: adjacency — the same diff that changes behavior changes the promise, and review sees the pair together",
+        "changelog: maintained at merge time (an Unreleased section) rather than release-time archaeology",
+        "ADRs: immutable by design — they record a moment, so they can't rot; changed decisions get a superseding ADR"
+      ]
+    }
+  ]
+}

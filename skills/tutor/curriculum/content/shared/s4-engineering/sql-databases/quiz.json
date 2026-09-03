@@ -1,0 +1,77 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "schema-design",
+      "difficulty": "core",
+      "prompt": "The exercise splits data into `categories` and `expenses`. What goes wrong if you instead store the category name as a text column on every expense row?",
+      "expected_points": [
+        "the same fact is copied into many rows, so a rename must touch them all and a missed row makes the data disagree with itself (update anomaly)",
+        "typos silently create near-duplicate categories; UNIQUE and the foreign key can't protect a copied column",
+        "normalization means each fact lives once, with foreign keys pointing at it instead of copies"
+      ]
+    },
+    {
+      "id": "queries",
+      "difficulty": "core",
+      "prompt": "Your `TotalsByCategory` query uses JOIN, GROUP BY, and ORDER BY together. Walk through what each clause contributes to the final rows.",
+      "expected_points": [
+        "JOIN recombines the normalized tables by matching the foreign key to the primary key",
+        "GROUP BY collapses matching rows into one row per category, and SUM aggregates within each group",
+        "ORDER BY sorts the result (otherwise unordered), later columns breaking ties",
+        "after GROUP BY, the SELECT list may only hold grouped columns and aggregates"
+      ]
+    },
+    {
+      "id": "parameterized",
+      "difficulty": "core",
+      "prompt": "The tests store the description `O'Reilly'); DROP TABLE expenses; --` and nothing bad happens. Why is the placeholder version immune when string concatenation is not?",
+      "expected_points": [
+        "with placeholders the statement text is compiled first and values are bound afterwards as pure data, so a value can never change what the statement does",
+        "concatenation pastes the value into the SQL before parsing, letting crafted input rewrite the statement (SQL injection)",
+        "escaping quotes is a fragile patch; parameters remove the mixing of code and data entirely"
+      ]
+    },
+    {
+      "id": "crud-signals",
+      "difficulty": "core",
+      "prompt": "How does your code detect 'no such row' in `ExpenseByID` versus in `DeleteExpense` — and why are the two mechanisms different?",
+      "expected_points": [
+        "QueryRow surfaces a missing row as sql.ErrNoRows from Scan, checked with errors.Is and translated into the package's ErrNotFound",
+        "UPDATE and DELETE succeed even when WHERE matches nothing, so the signal is RowsAffected() == 0",
+        "both paths end in the same sentinel so callers have one error to check"
+      ]
+    },
+    {
+      "id": "transactions",
+      "difficulty": "core",
+      "prompt": "`AddBatch` fails on the second of three items. Describe the database afterwards with and without the transaction, and where in your Go code the rollback actually happens.",
+      "expected_points": [
+        "without a transaction the first item stays: a half-applied import that is wrong and unsafe to retry",
+        "with the transaction, rollback returns the database to its pre-BEGIN state — no items landed",
+        "defer tx.Rollback() fires on every early return and is a no-op after a successful Commit",
+        "every statement must run on tx, not db, or it escapes the transaction"
+      ]
+    },
+    {
+      "id": "pool-pragma",
+      "difficulty": "stretch",
+      "prompt": "Why does `Open` put `_pragma=foreign_keys(1)` in the DSN instead of running `db.Exec(\"PRAGMA foreign_keys = ON\")` after opening?",
+      "expected_points": [
+        "*sql.DB is a connection pool; an Exec runs on one arbitrary connection",
+        "PRAGMA state is per-connection, so only the DSN applies it to every connection the pool opens",
+        "sql.Open is lazy — it hasn't even connected yet"
+      ]
+    },
+    {
+      "id": "money-types",
+      "difficulty": "stretch",
+      "prompt": "Why does the schema store `cents INTEGER` rather than a REAL number of currency units?",
+      "expected_points": [
+        "binary floating point cannot represent most decimal fractions exactly (0.1 is already inexact)",
+        "summing many inexact values accumulates drift — unacceptable for money",
+        "integer cents are exact; format as currency only at the display edge"
+      ]
+    }
+  ]
+}

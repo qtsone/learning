@@ -1,0 +1,103 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "configmap-vs-secret",
+      "difficulty": "core",
+      "prompt": "You have a log level, a feature-flag file and an API key. Which go in a ConfigMap and which in a Secret, and how does each one reach the container?",
+      "expected_points": [
+        "log level and feature flags are non-secret: ConfigMap",
+        "the API key goes in a Secret and is referenced (secretKeyRef/envFrom secretRef/volume), never written as a literal value in the Deployment",
+        "scalars the process reads at startup fit environment variables; a whole config file fits a mounted volume, where the key name becomes the filename",
+        "both objects are namespaced and capped around 1 MiB because they live in etcd"
+      ]
+    },
+    {
+      "id": "base64-not-encryption",
+      "difficulty": "core",
+      "prompt": "A colleague says Secrets are safe because they're encrypted. What do you tell them, and what actually protects the value?",
+      "expected_points": [
+        "base64 is an encoding, reversible with base64 -d, no key involved; stringData exists precisely because the API server does the encoding for you",
+        "encryption at rest is an opt-in EncryptionConfiguration, so by default the value is in etcd in the clear",
+        "anyone with get on secrets in that namespace reads the plaintext",
+        "what helps: narrow RBAC, encryption at rest/KMS, and keeping the value out of git with SOPS, Sealed Secrets or External Secrets"
+      ]
+    },
+    {
+      "id": "env-vs-file-updates",
+      "difficulty": "core",
+      "prompt": "You edit a ConfigMap and re-apply it, touching nothing else. What happens to a value injected as an env var, and to one mounted as a file?",
+      "expected_points": [
+        "the env var does not change: the Deployment is unchanged so no rollout happens, and a process's environment is fixed at exec",
+        "a mounted file is refreshed by the kubelet, typically within a minute, and code that re-reads the file sees it without a restart",
+        "a subPath mount is the exception — copied once, never updated",
+        "to force a rollout on config change you must change the pod template, e.g. an annotation holding a hash of the config"
+      ]
+    },
+    {
+      "id": "probe-consequences",
+      "difficulty": "core",
+      "prompt": "Name the three probe types and the distinct consequence of each one failing.",
+      "expected_points": [
+        "readiness failing removes the pod from the Service's endpoints; it is not restarted",
+        "liveness failing makes the kubelet kill and restart the container",
+        "startup failing kills the container too, but while it is running the other two probes are suspended, so it is the boot budget",
+        "detection time is periodSeconds x failureThreshold, and the default timeoutSeconds of 1 is a real trap under load"
+      ]
+    },
+    {
+      "id": "liveness-cascade",
+      "difficulty": "core",
+      "prompt": "Why is it a bad idea to point the liveness probe at an endpoint that checks the database? Trace what happens during a forty-second outage.",
+      "expected_points": [
+        "every replica fails at once because they share the dependency, so all containers are killed simultaneously",
+        "they restart into the same broken dependency and back off into CrashLoopBackOff, making recovery slower than the outage",
+        "warm caches and connection pools are lost and every replica reconnects at once when the dependency returns",
+        "readiness would have removed them from endpoints and put them back with no restart — liveness must only fail for what a restart fixes"
+      ]
+    },
+    {
+      "id": "requests-vs-limits",
+      "difficulty": "core",
+      "prompt": "What is the difference between a request and a limit, and what actually happens when a container exceeds each of cpu and memory?",
+      "expected_points": [
+        "requests drive scheduling (the scheduler sums them to decide where the pod fits) and, at runtime, become the cgroup CPU weight that decides your share under contention, plus the baseline eviction ranks you against — but they are not a ceiling; that is the limit",
+        "limits are enforced by the kernel via cgroups",
+        "CPU is compressible: exceeding the limit throttles (CFS quota), showing up as latency with low average CPU, not as a crash",
+        "memory is incompressible: exceeding the limit means the OOM killer, OOMKilled, exit code 137, restart",
+        "the pair also sets the QoS class (Guaranteed/Burstable/BestEffort), which decides eviction order under node pressure"
+      ]
+    },
+    {
+      "id": "hpa-request",
+      "difficulty": "core",
+      "prompt": "Your HPA targets 70% CPU utilization. Seventy percent of what? What happens if you delete the container's CPU request?",
+      "expected_points": [
+        "70% of the pod's CPU request, not of the node",
+        "desired replicas = ceil(current x currentMetric/targetMetric), evaluated about every 15 seconds against metrics-server",
+        "with no CPU request there is no denominator: the HPA reports <unknown> and never scales",
+        "scale-down is deliberately slow (stabilization window) while scale-up is immediate"
+      ]
+    },
+    {
+      "id": "hpa-vs-git",
+      "difficulty": "stretch",
+      "prompt": "Your manifest says `replicas: 2` and your HPA scaled to 7. Something re-applies the manifest every five minutes. What happens, and what do you do about it?",
+      "expected_points": [
+        "the HPA and the apply take turns writing spec.replicas, so the count keeps snapping back to 2",
+        "keep the committed number inside the HPA's range and treat the HPA as the owner after the first apply",
+        "some setups drop the field from the committed manifest entirely for this reason"
+      ]
+    },
+    {
+      "id": "missing-configmap",
+      "difficulty": "stretch",
+      "prompt": "You reference a ConfigMap that does not exist yet. What state does the pod land in, and how do you find that out?",
+      "expected_points": [
+        "the container cannot start: CreateContainerConfigError",
+        "kubectl describe pod names the missing object in the events — describe and events first",
+        "the same applies to a missing Secret; ordering objects or marking the reference optional are the two ways out"
+      ]
+    }
+  ]
+}

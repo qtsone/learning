@@ -1,0 +1,79 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "pool-choreography",
+      "difficulty": "core",
+      "prompt": "Sketch the worker pool: which goroutines exist, which channels connect them, and who closes each channel? What goes wrong if a worker closes the results channel?",
+      "expected_points": [
+        "feeder sends jobs and closes the jobs channel (only sender closes)",
+        "N workers range over jobs, send results, exit when jobs closes",
+        "a closer goroutine does wg.Wait then closes results, because only the WaitGroup knows when all senders are done",
+        "a worker closing results panics another worker's send"
+      ]
+    },
+    {
+      "id": "goroutine-leaks",
+      "difficulty": "core",
+      "prompt": "What is a goroutine leak, and name two ways a worker pool can leak. What discipline prevents them?",
+      "expected_points": [
+        "a goroutine blocked forever on a channel nobody will service again, holding memory invisibly",
+        "examples: jobs channel never closed (workers stuck in range), results never closed (collector stuck), send with no receiver",
+        "for every channel know who closes it and why every send finds a receive"
+      ]
+    },
+    {
+      "id": "errgroup-contract",
+      "difficulty": "core",
+      "prompt": "State errgroup's contract: what happens when one function fails, what does Wait return, and when does Wait return? Which primitives did your mini version need?",
+      "expected_points": [
+        "first non-nil error is kept, later errors dropped",
+        "first error cancels the derived context so siblings can stop early",
+        "Wait blocks until every function returns — cancellation is a request, not a kill — then returns the first error",
+        "built from WaitGroup, sync.Once for the first error, and context.CancelFunc"
+      ]
+    },
+    {
+      "id": "semaphore-vs-pool",
+      "difficulty": "core",
+      "prompt": "A buffered channel can be a semaphore — how? And given both cap concurrency at N, when do you reach for a semaphore instead of a worker pool?",
+      "expected_points": [
+        "buffered channel of capacity n: Acquire sends (blocks when full), Release receives; the buffer is the count",
+        "pool owns long-lived workers pulling a queue — for a stream of homogeneous jobs",
+        "semaphore caps goroutines that already exist (e.g. one per request) without restructuring",
+        "TryAcquire via select/default enables load-shedding a pool queue can't express"
+      ]
+    },
+    {
+      "id": "graceful-shutdown",
+      "difficulty": "core",
+      "prompt": "Walk through graceful shutdown's three steps in your Queue, and explain why Submit needs a mutex-guarded flag rather than just checking a boolean.",
+      "expected_points": [
+        "stop accepting, drain in-flight work, bounded wait via select on done vs ctx.Done",
+        "send on a closed channel panics, so the closed flag and the close must be coordinated under one mutex",
+        "wg.Wait wrapped in a goroutine closing a done channel makes waiting selectable",
+        "on deadline it returns ctx.Err and stops waiting — the stuck goroutine is not killed"
+      ]
+    },
+    {
+      "id": "pattern-choice",
+      "difficulty": "core",
+      "prompt": "Pick a pattern and justify it via backpressure and failure handling: (a) a service resizing an endless stream of uploaded images; (b) rendering one page that needs five API calls, useless unless all succeed.",
+      "expected_points": [
+        "(a) worker pool: bounded workers, the jobs channel queues and blocks producers when saturated, one failed image is just a result",
+        "(b) errgroup: first failure cancels the other four fetches, one Wait returns the error",
+        "justification names who blocks under load and what one failure does to the rest"
+      ]
+    },
+    {
+      "id": "cancel-on-success",
+      "difficulty": "stretch",
+      "prompt": "Why does errgroup's Wait cancel the derived context even when every function succeeded?",
+      "expected_points": [
+        "a derived context holds resources until cancelled — never cancelling leaks them",
+        "same hygiene vet's lostcancel check enforces on ordinary WithCancel code",
+        "after Wait nothing should still be using the group context, so cancelling is free"
+      ]
+    }
+  ]
+}

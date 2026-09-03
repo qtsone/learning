@@ -1,0 +1,82 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "multi-stage",
+      "difficulty": "core",
+      "prompt": "Walk me through your Dockerfile: what does each stage do, and what exactly crosses from the first stage into the final image?",
+      "expected_points": [
+        "each FROM starts a fresh stage; only the last one becomes the shipped image",
+        "the build stage has the toolchain and compiles the binary",
+        "COPY --from=<stage> lifts only the binary across; nothing else travels",
+        "earlier stages are still built and cached, they are just not kept"
+      ]
+    },
+    {
+      "id": "cgo-static",
+      "difficulty": "core",
+      "prompt": "Why does a Go binary need `CGO_ENABLED=0` to run on `scratch`? What is actually different about the binary?",
+      "expected_points": [
+        "with cgo on, net and os/user use C implementations and the binary is dynamically linked against libc",
+        "a dynamically linked binary names a program interpreter (/lib64/ld-linux-x86-64.so.2) that scratch does not contain",
+        "the failure looks like 'exec …: no such file or directory' about a file that exists — the missing file is the loader",
+        "CGO_ENABLED=0 links statically with pure-Go DNS and user lookup, so the binary needs nothing outside itself"
+      ]
+    },
+    {
+      "id": "base-choice",
+      "difficulty": "core",
+      "prompt": "You picked a final base image. Defend it against the other two — what did you gain and what did you give up?",
+      "expected_points": [
+        "scratch is empty: no CA certificates, no tzdata, no /etc/passwd, no shell — each is your problem to solve",
+        "distroless static adds exactly those (certs, tzdata, nonroot uid 65532, /tmp) and still has no shell; :debug exists",
+        "alpine gives a shell and apk at ~8 MB but uses musl, which bites the moment cgo is on",
+        "the trade-off is debuggability and convenience against size and attack surface"
+      ]
+    },
+    {
+      "id": "layer-order",
+      "difficulty": "core",
+      "prompt": "Why do you copy `go.mod`/`go.sum` and run `go mod download` before copying your source? What happens if you don't?",
+      "expected_points": [
+        "a layer's cache is reused only if its inputs are unchanged, and invalidating one layer invalidates every later layer",
+        "COPY . . changes on any source edit, so a combined step re-downloads every dependency on every edit",
+        "manifests change rarely, source changes constantly — order instructions rarest-changing first",
+        "after the split, a source edit rebuilds only the build step"
+      ]
+    },
+    {
+      "id": "size-savings",
+      "difficulty": "core",
+      "prompt": "The naive image is ~900 MB and yours is ~10 MB. Where did the difference go, and why is the size a real cost rather than untidiness?",
+      "expected_points": [
+        "the toolchain, the stdlib source tree, and a full Debian userland never came across",
+        "the compiled binary already contains the parts of the stdlib it uses",
+        "cost: pull time on every node and deploy, cold starts, registry storage, and CVE surface to scan and patch",
+        "you cannot delete weight later — a RUN rm in a later layer only adds a whiteout"
+      ]
+    },
+    {
+      "id": "nonroot",
+      "difficulty": "stretch",
+      "prompt": "Why `USER 65532:65532` rather than `USER app`, and why bother with a non-root user inside a container at all?",
+      "expected_points": [
+        "container uid 0 is host uid 0 unless a user namespace remaps it — defense in depth",
+        "a name needs /etc/passwd, which scratch does not have, so it fails at startup",
+        "numeric uids are what orchestrators can verify",
+        "non-root cannot bind ports below 1024, which is why the service listens on 8080"
+      ]
+    },
+    {
+      "id": "flags",
+      "difficulty": "stretch",
+      "prompt": "What do `-ldflags=\"-s -w\"` and `-trimpath` each do, and what do you lose by using them?",
+      "expected_points": [
+        "-w drops DWARF debug info and -s drops the symbol table, typically a quarter of the binary",
+        "delve and nm no longer work on the shipped artifact; panic traces still do",
+        "-trimpath removes local filesystem paths, making builds reproducible and keeping your paths out of production",
+        "-X sets a string variable at link time, which is how version stamping works"
+      ]
+    }
+  ]
+}

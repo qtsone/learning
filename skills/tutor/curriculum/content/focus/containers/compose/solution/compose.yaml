@@ -1,0 +1,44 @@
+# Reference solution. One file describes the whole development environment:
+# `docker compose up` is the entire setup document for this project.
+
+name: tutor-compose
+
+services:
+  app:
+    build:
+      context: ./app
+      target: dev # the toolchain stage, so the bind mount below is compilable
+    environment:
+      PORT: "8080"
+      # db is a service name, resolved by Compose's DNS on the default network.
+      # 5432 is the container port — publishing is irrelevant between services.
+      DATABASE_URL: "postgres://app:${POSTGRES_PASSWORD}@db:5432/appdb?sslmode=disable"
+    ports:
+      - "${APP_PORT:-8080}:8080" # host side overridable per machine
+    volumes:
+      - ./app:/src # source, not data: edit on the host, compile in the container
+    depends_on:
+      db:
+        condition: service_healthy # not just "started"
+
+  db:
+    image: postgres:16.4-alpine
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_DB: appdb
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}"
+    volumes:
+      - dbdata:/var/lib/postgresql/data # data, not source: a named volume
+    healthcheck:
+      # $$ survives Compose interpolation so the container's shell expands it.
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    # No ports: the app reaches Postgres over the compose network. Publishing
+    # 5432 would fight any Postgres already running on this machine; if you want
+    # psql from the host, publish "${DB_PORT:-55432}:5432" instead.
+
+volumes:
+  dbdata:

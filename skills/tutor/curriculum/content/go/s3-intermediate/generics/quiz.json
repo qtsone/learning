@@ -1,0 +1,66 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "constraint-kinds",
+      "difficulty": "core",
+      "prompt": "You used three kinds of constraints in the exercise: `comparable`, the `Number` union, and `fmt.Stringer`. What does each one let the function body do with `T`?",
+      "expected_points": [
+        "comparable permits == and != — the same property required of map keys",
+        "a type-set union like ~int | ~int64 | ~float64 permits the operations all listed types share, e.g. arithmetic for Sum",
+        "a method interface like fmt.Stringer permits calling those methods on values of T",
+        "the constraint must grant every operation the body performs; any grants none"
+      ]
+    },
+    {
+      "id": "tilde",
+      "difficulty": "core",
+      "prompt": "The tests call `Sum` on a `[]Celsius` where `type Celsius float64`. Why does that compile — and what would break if `Number` said `float64` instead of `~float64`?",
+      "expected_points": [
+        "Celsius is a distinct defined type, not float64",
+        "~float64 admits any type whose underlying type is float64",
+        "without the tilde the union lists exact types only, so Sum[Celsius] would fail to compile"
+      ]
+    },
+    {
+      "id": "generics-vs-interfaces",
+      "difficulty": "core",
+      "prompt": "`DescribeAll` is generic over `[T fmt.Stringer]`. Why not declare it as `func DescribeAll(s []fmt.Stringer) []string`? And more generally, when do you pick a type parameter over an interface parameter?",
+      "expected_points": [
+        "a []point is not a []fmt.Stringer — slices don't convert element-wise, callers would have to copy",
+        "interfaces suit varying behavior at runtime (io.Reader style); generics suit identical code over varying types",
+        "with generics all elements share one concrete type fixed at compile time"
+      ]
+    },
+    {
+      "id": "inference",
+      "difficulty": "core",
+      "prompt": "The test writes `double := Map[int, int]` with explicit type arguments, but plain calls like `Map(nums, strconv.Itoa)` need none. Why the difference, and when else is explicit instantiation required?",
+      "expected_points": [
+        "inference works from call arguments; a call's slice and function types pin down T and U",
+        "assigning or passing the generic function without calling it gives nothing to infer from",
+        "a type parameter appearing only in the return type also can't be inferred"
+      ]
+    },
+    {
+      "id": "when-not",
+      "difficulty": "core",
+      "prompt": "A teammate makes a helper generic 'for flexibility', but the codebase only ever instantiates it with one type. Argue for the simpler form — what are the signs a generic isn't earning its keep?",
+      "expected_points": [
+        "one instantiation means the type parameter is pure cost — write the concrete type",
+        "generalize when real duplication with different types appears, not preemptively",
+        "readability of the signature matters; also prefer stdlib slices/maps helpers over hand-rolled generics"
+      ]
+    },
+    {
+      "id": "compile-time",
+      "difficulty": "stretch",
+      "prompt": "Compare `IndexOf[T comparable]` with a pre-generics version taking `[]any`: where does each catch the mistake of searching a `[]int` for a `\"string\"`?",
+      "expected_points": [
+        "the generic version rejects it at compile time — instantiation type-checks the call",
+        "the []any version compiles and only misbehaves at runtime (failed assertions or never-equal comparisons)",
+        "generics keep the compiler in the loop; no runtime type assertions in the body"
+      ]
+    }
+  ]
+}

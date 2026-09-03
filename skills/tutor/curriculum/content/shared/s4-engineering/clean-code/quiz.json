@@ -1,0 +1,77 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "naming-criteria",
+      "difficulty": "core",
+      "prompt": "Pick two renames you made in the exercise. For each, name the criterion that justifies it — and explain why `k` in the sorting loop did NOT need renaming.",
+      "expected_points": [
+        "criteria named explicitly: intent-revealing, not disinformative, one word per concept, distinct/searchable",
+        "scope-length rule: a name's length should match how far readers can be from its declaration",
+        "k is fine because its scope is a few lines with the declaration in sight; t/mn/x were wide-scope and carried real load"
+      ]
+    },
+    {
+      "id": "split-or-not",
+      "difficulty": "core",
+      "prompt": "When should a long function be split, and when does splitting make code worse? Give one concrete example of each.",
+      "expected_points": [
+        "split when multiple abstraction levels or reasons to change mix — e.g. DoData doing parsing, aggregating, and formatting (section comments are the confession)",
+        "don't split a cohesive single idea — e.g. carving a binary search into fragments that can't be understood alone",
+        "over-splitting signs: once-called helpers whose names restate their bodies, parameter/state threading between fragments",
+        "the test is number of reasons to change, not line count"
+      ]
+    },
+    {
+      "id": "cohesion",
+      "difficulty": "core",
+      "prompt": "What does 'a single reason to change' mean? Which reasons to change were tangled in the original DoData, and how does your refactored version separate them?",
+      "expected_points": [
+        "a reason to change is a requirement-shaped force: input format, statistics rules, output layout",
+        "the original mixed all three, so any change risked and required re-reading the others",
+        "after the split each function owns one force: parse / summarize / format, with data flowing via parameters and results"
+      ]
+    },
+    {
+      "id": "comment-triage",
+      "difficulty": "core",
+      "prompt": "What must a comment do to earn its place? Classify these from the exercise: `// loop over the lines`, the trailing-newline comment on the blank-line skip, the commented-out old DoData, and your new doc comment on the exported function.",
+      "expected_points": [
+        "a comment must say something the code cannot; justified kinds are why, warning, contract",
+        "`// loop over the lines` is narration — delete; the urge to narrate signals a rename/extract instead",
+        "the trailing-newline comment is a why — keep; commented-out code is dead — version control remembers it",
+        "the doc comment is a contract: starts with the name, states edge-case behavior callers rely on, not a signature echo"
+      ]
+    },
+    {
+      "id": "critique-method",
+      "difficulty": "core",
+      "prompt": "You open an unfamiliar 80-line function in a codebase you just joined. Walk me through how you critique it and how you'd order the cleanup — what comes first and why?",
+      "expected_points": [
+        "check names against the criteria, count reasons to change for size/cohesion, triage comments for narration vs why/warning/contract",
+        "a prioritized plan with a rationale, e.g. pin behavior with a test first, then safe renames, then structural splits",
+        "order justified by risk and by which fixes make later fixes easier"
+      ]
+    },
+    {
+      "id": "formatter-limits",
+      "difficulty": "stretch",
+      "prompt": "The starter code was already gofmt-clean, yet it was the worst code in the lesson. What can a formatter fix, and what can it never fix?",
+      "expected_points": [
+        "formatters fix layout: indentation, spacing, uniformity",
+        "they cannot fix meaning: names, cohesion, comment quality survive formatting untouched",
+        "uniform is not the same as clean"
+      ]
+    },
+    {
+      "id": "refactor-safety",
+      "difficulty": "stretch",
+      "prompt": "The exercise tests passed before you changed anything. What were they for, and why was editing their expected output forbidden?",
+      "expected_points": [
+        "characterization tests pin current observable behavior as a refactoring safety net",
+        "a refactor preserves behavior by definition, so expected outputs are the fixed point",
+        "renaming call sites in tests is part of a rename; changing expectations means you changed behavior, not structure"
+      ]
+    }
+  ]
+}

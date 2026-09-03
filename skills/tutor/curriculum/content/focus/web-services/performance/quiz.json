@@ -1,0 +1,117 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "measure-first",
+      "difficulty": "core",
+      "prompt": "Someone hands you a slow feed endpoint and asks you to make it fast. Before you change a line, what do you do — and how do you read the load test you run?",
+      "expected_points": [
+        "turn the request into a question with a number in it: rate, percentile, dataset size — \"is it fast?\" has no answer and no stopping condition",
+        "fix the dataset and warm up first; a service over 100 rows and the same service over ten million are different programs, and the first requests pay for empty pools and caches",
+        "read p50/p95/p99, never the mean — the mean hides the users you are losing, and percentiles compose: twenty calls per page against a p95 means roughly two page loads in three contain one",
+        "report throughput and error rate alongside latency; a fast p99 next to 30% 500s is not fast",
+        "drive at a fixed rate, not a closed loop — a generator that waits for each response throttles itself exactly when the service starts queueing, so the queue never forms",
+        "change one thing at a time and keep the baseline; a single benchmark run is noise (-count=10, benchstat)",
+        "pprof and benchmarks show where time and allocations went inside the process; the load test shows what the process looks like from outside"
+      ]
+    },
+    {
+      "id": "n-plus-one",
+      "difficulty": "core",
+      "prompt": "The starter `Feed` asks the store for one author per article. Explain why that is a bug, how you proved it was fixed, and when you would join instead of batch.",
+      "expected_points": [
+        "N+1: one query for the page plus one per row, so round trips scale with page size — 51 trips to serve 50 rows",
+        "it is the same bug as the GraphQL resolver N+1, one layer down; AuthorsByIDs is deliberately the dataloader's batch function without the queue",
+        "the proof is a count, not a stopwatch: the instrumented Store asserts exactly two round trips at limits 5, 20 and 50, and one for an empty feed",
+        "batch collapses duplicate ids (twenty articles by five authors is five parameters), omits missing rows rather than erroring, and makes no query at all for an empty list",
+        "join wins for one-to-one with small joined columns; batch wins when children are shared, when the child is a list (a join multiplies the result set), or when the two things live in different stores",
+        "the production version of that counter is a queries-per-request histogram beside the S5 request metrics"
+      ]
+    },
+    {
+      "id": "keyset",
+      "difficulty": "core",
+      "prompt": "Why did the feed move from `LIMIT ? OFFSET ?` to a cursor? Give me both reasons, and tell me what the cursor has to contain.",
+      "expected_points": [
+        "speed: the database cannot jump to row 200,000 — it produces and discards them all, so cost grows with depth, and keyset seeks to an anchor and reads LIMIT rows at constant cost",
+        "correctness: OFFSET counts rows, so inserts at the head push the window back and page 2 repeats page 1 (deletes make it skip rows, which nobody notices) — a cursor is anchored to a row, so it cannot shift",
+        "the sort key must be unique: created_at alone straddles ties, so the cursor carries (created_at, id) and the comparison is on the pair",
+        "the index must match the ordering — an index is a promise about one access pattern, not a speed setting",
+        "ask the planner: the row-value form plans as SEARCH into articles_feed, the logically identical OR form plans as a SCAN, which is correctness with no speed",
+        "make it opaque (base64) so clients cannot depend on its shape — opaque is not secret, so validate it (bad cursor is a 400) and always bind it as a parameter",
+        "what it costs: no jump-to-page-57, no free total count, and re-sorting means redesigning the cursor"
+      ]
+    },
+    {
+      "id": "http-caching",
+      "difficulty": "core",
+      "prompt": "Walk me through your `GET /articles` response headers. What does the ETag say, what does `Cache-Control` say, and what actually gets saved when a client comes back with `If-None-Match`?",
+      "expected_points": [
+        "the ETag names *what* this representation is; Cache-Control says *who* may keep it and *for how long* — two different statements",
+        "hashing the body is the tag that cannot be wrong; a cheaper tag from a version column or updated_at must account for every input that changes the output, including the one added next quarter",
+        "If-None-Match matching means 304 with no body — and the validators go on the 304 too, or the client's copy has no tag and no lifetime and the next request comes back unconditional",
+        "comparison is weak: `*` matches anything non-empty, the header is a comma-separated list, and W/\"abc\" matches \"abc\"",
+        "a 304 saves bandwidth, not work, unless something above it stopped you rebuilding the body",
+        "public means \"the same for everybody\" — get it wrong on a session-scoped response and a shared cache hands one user's data to the next; use private, and Vary when the body depends on a request header",
+        "no-cache means revalidate before reuse, not \"do not cache\"; no-store is the one for tokens"
+      ]
+    },
+    {
+      "id": "in-process-cache",
+      "difficulty": "core",
+      "prompt": "Your `Cache` is a map with a mutex. Why does it also need a TTL, an entry bound, and a `Purge` on the write path — and what changes about all of that when you run three replicas?",
+      "expected_points": [
+        "TTL bounds staleness (how wrong an answer may be); the entry bound bounds memory, and it is mandatory because the key is built from client-controlled limit and cursor — otherwise a stranger fills the heap one distinct key at a time",
+        "an expired entry read is a miss *and* a removal, or cold keys hold their bytes for as long as there is room",
+        "Purge is correctness, not tuning: without it a client does not see its own write for the whole TTL and reports the API as losing data",
+        "cache the rendered bytes with their tag, not the struct — a hit that still marshals and hashes gives back most of what it saved",
+        "hits/misses are the instrument: a cache with no hit rate is a guess with a mutex, and a hit rate that collapses after a deploy usually means a key grew a new dimension",
+        "three replicas: each sees a third of the traffic so hit rates fall, you hold three copies, and a purge on the writing replica leaves the other two stale until their own TTL — fine, but say the number out loud (\"at most 30 s stale\")",
+        "the alternative is a cache outside the process, which is another thing to run, monitor and invalidate",
+        "a hot key expiring is a stampede; single-flight, jittered TTLs or serve-stale-while-refreshing are the cures"
+      ]
+    },
+    {
+      "id": "order-of-work",
+      "difficulty": "core",
+      "prompt": "You may ship one change this week: add the cache, fix the N+1, or switch to keyset pagination. Which goes first, why, and what evidence would move you?",
+      "expected_points": [
+        "the order is: stop doing unnecessary work → fix the query shape → then cache → then the payload",
+        "unnecessary work (N+1, a missing index, columns you drop, COUNT(*) per page) is where the order-of-magnitude wins are and none of it costs correctness",
+        "caching first hides the problems underneath it until the cache misses — and it misses precisely when you are busiest: a deploy, a purge, a stampede; a cache in front of a bad query is a slow query with worse failure modes",
+        "caching also buys staleness, which is a product decision, where removing round trips buys nothing back",
+        "the evidence is specific: queries per request, the query plan (SCAN where you expected SEARCH), and p95/p99 at a fixed rate before and after — one change at a time",
+        "if the numbers say the endpoint is read-dominated and already minimal, caching does move to the front; the answer is defensible either way only with data"
+      ]
+    },
+    {
+      "id": "pool-and-compression",
+      "difficulty": "stretch",
+      "prompt": "Two dials people reach for: raising `SetMaxOpenConns` and turning on gzip. When does each make things worse?",
+      "expected_points": [
+        "MaxOpenConns is a concurrency limit, not a speed setting — past what the database can do at once you buy contention, context switches and memory, and throughput falls while latency rises",
+        "round numbers: a 5 ms query over 10 connections retires about 2,000 queries a second; more concurrency does not create capacity, it moves the wait into your process where db.Stats().WaitCount and WaitDuration make it visible",
+        "a bounded pool is a bulkhead protecting the database from your service, and a queue you can see beats a database you cannot",
+        "MaxIdleConns should usually equal MaxOpenConns, and ConnMaxLifetime rotates connections so a failover or an idle timeout does not hand you a dead one",
+        "gzip below ~1 KB can add bytes; it never compresses JPEG/PNG/MP4/zip; it always costs CPU on both ends, so it lowers throughput on a CPU-bound service and is nearly free on a database-bound one",
+        "Vary: Accept-Encoding is mandatory or a shared cache serves gzip to a client that asked for none",
+        "BREACH: do not compress a response mixing secrets with attacker-influenced content",
+        "often the right answer is neither hand-rolled middleware nor a dependency — let the reverse proxy or CDN do it"
+      ]
+    },
+    {
+      "id": "do-less",
+      "difficulty": "stretch",
+      "prompt": "The database is no longer the bottleneck and the endpoint is still not fast enough. What is left, and where do those techniques fight each other?",
+      "expected_points": [
+        "select only what you return (the feed omits article bodies): columns you drop cost wire bytes, driver memory and client parse time",
+        "precompute at write time — a maintained counter beats COUNT(*) per read, and reads usually outnumber writes by an order of magnitude",
+        "do startup work at startup: compile regexps and templates once",
+        "reuse buffers (sync.Pool, a reused bytes.Buffer) *after* pprof -alloc_objects says allocation is the problem, not before",
+        "stream with json.NewEncoder(w) instead of building the whole body with json.Marshal — but you cannot hash a body you did not buffer, so ETags and streaming pull against each other: buffer and tag small responses, stream large ones untagged",
+        "cache rendered bytes rather than structs, for the same reason",
+        "these are single-digit-percent moves once the big ones are gone, and worth having then — measured, one at a time"
+      ]
+    }
+  ]
+}

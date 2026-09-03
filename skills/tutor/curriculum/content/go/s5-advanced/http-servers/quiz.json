@@ -1,0 +1,92 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "handler-vs-handlerfunc",
+      "difficulty": "core",
+      "prompt": "What exactly is `http.HandlerFunc`, and how is it different from `http.Handler`? When would you still write a struct handler like `versionHandler` instead of a plain function?",
+      "expected_points": [
+        "http.Handler is the one-method interface: ServeHTTP(w, r) — everything (endpoints, mux, middleware, server) speaks it",
+        "http.HandlerFunc is a named function type with a ServeHTTP method that just calls the function — an adapter from an ordinary function to the interface, not a second kind of handler",
+        "a struct handler carries state with it (version string, logger, database handle); a closure can also capture dependencies, so the struct is a style choice for handlers with several fields or their own methods"
+      ]
+    },
+    {
+      "id": "mux-patterns",
+      "difficulty": "core",
+      "prompt": "Walk me through the routes you registered. What does `GET /health` give you for free that you would otherwise hand-code, why is the home page `GET /{$}` and not `GET /`, and how does the handler read the name out of `GET /greet/{name}`?",
+      "expected_points": [
+        "the method prefix means non-GET requests get 405 with a correct Allow header from the mux, no r.Method checks in handlers",
+        "a pattern ending in / is a subtree root, so \"/\" matches every path and unknown paths would never 404; {$} anchors the match to exactly \"/\"",
+        "{name} matches one path segment and r.PathValue(\"name\") reads it",
+        "when several patterns match, the most specific wins regardless of registration order; irreconcilable conflicts panic at registration"
+      ]
+    },
+    {
+      "id": "middleware-order",
+      "difficulty": "core",
+      "prompt": "`Chain(mux, RequestID, Logging(logger), Recover)` — trace a request through it, and explain why your loop over the middleware slice runs backwards. What breaks if RequestID and Logging swap places?",
+      "expected_points": [
+        "a middleware is func(http.Handler) http.Handler: a closure over next, adapted with HandlerFunc",
+        "execution nests like an onion: RequestID before, Logging before, Recover before, handler, then the after-halves in reverse order — the first listed is outermost and finishes last",
+        "wrapping backwards is what makes the first-listed middleware the outermost layer, since the middleware applied last ends up on the outside",
+        "with Logging outside RequestID the id is not on the context yet when the log line is written, so request_id comes out empty — nothing fails, the telemetry just gets worse"
+      ]
+    },
+    {
+      "id": "status-capture",
+      "difficulty": "core",
+      "prompt": "Your logger needs the response status, but `http.ResponseWriter` has no way to read it back. How did you solve that, and why does `statusWriter` have to start at 200?",
+      "expected_points": [
+        "embed http.ResponseWriter in a wrapper so it satisfies the interface for free, override WriteHeader to record the code before delegating, and pass the wrapper to next",
+        "a handler that only writes a body never calls WriteHeader — the server sends an implicit 200, so a zero-valued status field would log 0",
+        "a fresh wrapper per request, because handlers run concurrently on separate goroutines",
+        "bonus: the wrapper hides Flusher/Hijacker unless it offers Unwrap() http.ResponseWriter for http.NewResponseController"
+      ]
+    },
+    {
+      "id": "timeouts",
+      "difficulty": "core",
+      "prompt": "`http.Server`'s timeouts all default to zero. What does zero mean, and what specific failure does each of ReadTimeout, WriteTimeout and IdleTimeout prevent?",
+      "expected_points": [
+        "zero means wait forever — the default server has no defence at all",
+        "ReadTimeout caps reading the request (headers plus body): the defence against slow or deliberately dripping senders such as slowloris; ReadHeaderTimeout is the narrower version when uploads are legitimately slow",
+        "WriteTimeout caps producing and writing the response: bounds hung handlers and clients that read one byte at a time",
+        "IdleTimeout caps how long a keep-alive connection may sit between requests, so old clients cannot park sockets and exhaust file descriptors",
+        "they are whole-connection backstops, not per-request budgets — the per-request tool is the request context"
+      ]
+    },
+    {
+      "id": "graceful-shutdown",
+      "difficulty": "core",
+      "prompt": "A deploy sends your process SIGTERM while three requests are in flight. Walk me from the signal to the process exit, and say why `http.ErrServerClosed` is not an error.",
+      "expected_points": [
+        "signal.NotifyContext turns the signal into a cancelled context, so the rest of the program only deals with cancellation",
+        "Shutdown stops accepting new connections, closes idle ones, and waits for active requests up to the deadline of the context it is given — which must be a fresh context, not the one that was just cancelled",
+        "Serve unblocks with http.ErrServerClosed, which is the confirmation that shutdown happened; treating it as failure makes every clean deploy look like a crash",
+        "without this, in-flight requests die mid-response and users see errors on every restart"
+      ]
+    },
+    {
+      "id": "listener-injection",
+      "difficulty": "stretch",
+      "prompt": "Why does `Run` take a `net.Listener` instead of calling `srv.ListenAndServe()`? What does that buy the tests?",
+      "expected_points": [
+        "separating listen from serve makes the server testable: tests bind 127.0.0.1:0, so the OS picks a free port and nothing collides or reaches the network",
+        "the caller decides where to listen (systemd socket, a pre-bound port, a fake) — the same dependency-injection instinct as passing a clock or an http.Client",
+        "the test can watch the exact listener it created, e.g. to check that shutdown really closed it"
+      ]
+    },
+    {
+      "id": "concurrency",
+      "difficulty": "stretch",
+      "prompt": "The server runs every request on its own goroutine. What does that mean for state you put in a handler or middleware, and why do these exercises run under `go test -race`?",
+      "expected_points": [
+        "any value shared across requests (a map, a counter, a cached struct) is touched concurrently and needs synchronization or immutability",
+        "per-request values must be created inside the handler function — e.g. the statusWriter — or requests will overwrite each other",
+        "request-scoped data travels on the request context, not in package-level variables",
+        "the race detector catches exactly the bugs that load testing hides and production finds"
+      ]
+    }
+  ]
+}

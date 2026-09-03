@@ -1,0 +1,76 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "what-big-o-measures",
+      "difficulty": "core",
+      "prompt": "In your own words: what does Big-O notation measure, and why do we throw away constant factors and lower-order terms like the 5n in n^2 + 5n?",
+      "expected_points": [
+        "it measures how the number of basic operations grows as input size grows, not seconds",
+        "worst case by default",
+        "constants depend on hardware/implementation and don't change the growth shape",
+        "for large n the dominant term dwarfs the rest, so lower-order terms are noise"
+      ]
+    },
+    {
+      "id": "ranking-classes",
+      "difficulty": "core",
+      "prompt": "Rank these from best to worst — O(n log n), O(1), O(2^n), O(n), O(log n), O(n^2) — and give one concrete example algorithm or code shape for each.",
+      "expected_points": [
+        "O(1) < O(log n) < O(n) < O(n log n) < O(n^2) < O(2^n)",
+        "examples such as: array index / first element (O(1)), repeated halving like dictionary lookup (O(log n)), summing a list (O(n)), good sorting (O(n log n)), comparing every pair (O(n^2)), trying every subset (O(2^n))"
+      ]
+    },
+    {
+      "id": "loop-analysis",
+      "difficulty": "core",
+      "prompt": "A function loops over the input once, then has a second loop nested inside a third that both run over the whole input. What's the total complexity, and what are the rules you applied?",
+      "expected_points": [
+        "sequential loops add: n + n^2",
+        "nested loops that both scale with n multiply: n * n = n^2",
+        "addition keeps only the dominant term, so the total is O(n^2)",
+        "bonus: an inner loop with a constant bound would NOT multiply — it stays O(n)"
+      ]
+    },
+    {
+      "id": "space-auxiliary",
+      "difficulty": "core",
+      "prompt": "Your HasDuplicate and HasDuplicateSorted solve the same problem. What is the auxiliary space of each, and why doesn't the input slice count toward it?",
+      "expected_points": [
+        "HasDuplicate allocates a map with up to one entry per element: O(n) auxiliary space",
+        "HasDuplicateSorted uses a couple of variables: O(1) auxiliary space",
+        "auxiliary space counts only memory the algorithm allocates on top of its input; the caller already paid for the slice"
+      ]
+    },
+    {
+      "id": "trade-off",
+      "difficulty": "core",
+      "prompt": "You need duplicate detection on an unsorted slice inside a memory-starved embedded device, and separately inside a beefy web server. Which approach do you pick in each place, and how do you justify it?",
+      "expected_points": [
+        "embedded: the O(n^2)-time / O(1)-space pair comparison — no allocation, and n is often small",
+        "server: the O(n)-time / O(n)-space map — memory is cheap there and n can be large",
+        "the justification names both costs explicitly rather than calling one option 'better' absolutely"
+      ]
+    },
+    {
+      "id": "small-n-reality",
+      "difficulty": "stretch",
+      "prompt": "A colleague benchmarks your O(n) function against their O(n^2) one on 20-element inputs and theirs wins. Is Big-O broken?",
+      "expected_points": [
+        "no — Big-O describes growth for large n, not absolute speed at a fixed small n",
+        "constants and setup costs (like allocating a map) can dominate at small sizes",
+        "grow the input and the O(n) version must eventually win"
+      ]
+    },
+    {
+      "id": "hidden-quadratic",
+      "difficulty": "stretch",
+      "prompt": "In Go, what's the time complexity of building a big string by doing s = s + piece inside a loop that runs n times, and why?",
+      "expected_points": [
+        "strings are immutable, so each + copies the whole string built so far",
+        "copy work is 1 + 2 + ... + n, which is O(n^2)",
+        "a single loop can still be quadratic when each iteration does O(n) hidden work; strings.Builder keeps it linear"
+      ]
+    }
+  ]
+}

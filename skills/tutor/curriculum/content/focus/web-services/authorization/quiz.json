@@ -1,0 +1,97 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "authn-vs-authz",
+      "difficulty": "core",
+      "prompt": "Authentication and authorization are separate concerns in this service. What does each one answer, and how do their failures differ?",
+      "expected_points": [
+        "authentication answers who the caller is; authorization answers what they may do",
+        "an authentication failure is loud — people are locked out and report it immediately",
+        "an authorization failure is silent: everything works, and everyone can see everyone's data until someone outside notices",
+        "the split shows up in the status codes: 401 means unauthenticated, 403 means authenticated but refused",
+        "the authn middleware only annotates the request; every rejection comes from the authz layer, so there is one gate to audit"
+      ]
+    },
+    {
+      "id": "rbac-table",
+      "difficulty": "core",
+      "prompt": "Describe the RBAC model you implemented: what does a Rule hold, what is the lookup, and what does the indirection through roles buy you?",
+      "expected_points": [
+        "users get roles, roles carry permissions — one indirection instead of per-user grants",
+        "rules are data keyed by action: which roles may act, whether ownership is required, which roles are exempt",
+        "the lookup is a checked map read — a missing rule is a denial, not a skipped check",
+        "handlers name actions, never roles, so policy changes without touching handlers",
+        "the whole access model is reviewable on one screen"
+      ]
+    },
+    {
+      "id": "rbac-vs-abac",
+      "difficulty": "core",
+      "prompt": "When would you reach for ABAC over RBAC, and what does the extra expressiveness cost? Where does the ownership rule you wrote sit on that spectrum?",
+      "expected_points": [
+        "RBAC decides from who the subject is; ABAC decides from attributes of subject, resource, and environment",
+        "ownership is already an attribute rule — comparing subject.UserID to resource.OwnerID cannot be expressed in roles",
+        "ABAC costs reviewability (predicates instead of a table), testability (combinatorial instead of finite), and easy listing filters",
+        "sensible default: RBAC spine plus a small closed set of named relationship rules; full ABAC when rules genuinely vary with the data (tenancy, classification, per-record sharing)",
+        "do not build a general policy engine speculatively"
+      ]
+    },
+    {
+      "id": "deny-by-default",
+      "difficulty": "core",
+      "prompt": "A teammate ships a new route and forgets to add a policy rule for its action. What happens in your service, and why is that the behavior you want?",
+      "expected_points": [
+        "no rule matches, so the decision is deny — everyone gets 403, admins included",
+        "the forgotten case is the one that ships; deny-by-default makes it a bug report instead of an open endpoint",
+        "the same rule applies to missing information: an ownership rule with no resource supplied denies rather than assumes",
+        "the only way out of Check with allow is an explicit, reasoned grant"
+      ]
+    },
+    {
+      "id": "middleware-gate",
+      "difficulty": "core",
+      "prompt": "Why is the route-level check middleware rather than the first line of each handler, and what makes it impossible to register a route without a check?",
+      "expected_points": [
+        "middleware runs before the handler, so a denied request never enters handler code and cannot half-execute",
+        "a first-line check is one someone can forget, and forgetting is invisible",
+        "the route table binds a pattern to an action, so registering a route means naming an action",
+        "a forgotten action is the zero Action, which has no rule and is therefore denied"
+      ]
+    },
+    {
+      "id": "idor",
+      "difficulty": "core",
+      "prompt": "Bob has a valid session and the editor role. Walk me through what stops him from updating alice's document, and what would happen if only the route gate existed.",
+      "expected_points": [
+        "the route gate approves the role but cannot know the owner — the document is not loaded yet",
+        "the handler loads the document and asks the policy again with the resource in hand; owner mismatch denies",
+        "with only the route gate, changing the id in the URL returns or edits someone else's object — that is IDOR",
+        "the check must sit after the load and before any decode, write, or response",
+        "listings need the same decision per row, and ownership on create comes from the session, never the request body"
+      ]
+    },
+    {
+      "id": "decision-reason",
+      "difficulty": "stretch",
+      "prompt": "Why does the policy return a reason alongside the boolean, and why does the reason never appear in the response body?",
+      "expected_points": [
+        "tests can assert the request was denied for the expected reason — the same 403 can hide very different bugs",
+        "operators can answer 'why was this refused?' from a log query",
+        "allows and denials are both audited, at the enforcement points, so Check stays pure",
+        "telling the client 'not owner' confirms the object exists and belongs to someone else"
+      ]
+    },
+    {
+      "id": "403-vs-404",
+      "difficulty": "stretch",
+      "prompt": "Your service answers 403 for another user's document and 404 for one that does not exist. What does that leak, and what would you change if the resource were sensitive?",
+      "expected_points": [
+        "the difference is an existence oracle: an attacker can enumerate which ids are real",
+        "answering 404 for both hides existence, at the cost of confusing legitimate users and support",
+        "the trade-off is per resource sensitivity, decided deliberately",
+        "it is a one-line change because the denial response is written in exactly one place"
+      ]
+    }
+  ]
+}

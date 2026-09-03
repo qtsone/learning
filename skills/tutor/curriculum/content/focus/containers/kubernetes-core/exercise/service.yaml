@@ -1,0 +1,18 @@
+# Your job: finish this file too. A Service is a stable name and virtual IP in
+# front of pods that come and go.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: timesvc
+  # TODO: same namespace as the Deployment.
+spec:
+  # TODO: which type? Say it out loud even though one of them is the default.
+  # TODO: selector — a flat map of labels. A Service has no matchLabels, and a
+  #       selector that matches nothing is not an error anywhere: it just
+  #       silently sends traffic to no one.
+  ports:
+    - name: http
+      port: 80
+      # TODO: targetPort — the port on the pod. Leaving it out is not the same
+      #       as leaving it equal to 80.

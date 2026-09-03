@@ -1,0 +1,13 @@
+# prod: enough pods to survive a node going away mid-rollout, and enough CPU
+# and memory that the limits are a ceiling rather than a daily event.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# TODO: namespace.
+
+# TODO: resources — the same base directory dev builds on. That sharing is the
+#       entire point: a fix to the base reaches both environments.
+
+# TODO: replicas — prod runs at least three.
+
+# TODO: patches — apply resources-patch.yaml.

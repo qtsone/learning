@@ -1,0 +1,67 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "official-docs",
+      "difficulty": "core",
+      "prompt": "You search for help with git and get a blog post, a YouTube video, and git-scm.com. Which is official, how can you tell, and why does the difference matter?",
+      "expected_points": [
+        "official docs are published and maintained by the tool's makers, on the project's own site or shipped with the tool (man pages, --help)",
+        "recognizable by the domain / who maintains it, e.g. git-scm.com for git, go.dev for Go",
+        "unofficial content can rot (written for old versions) or be wrong with nothing forcing a correction",
+        "learn anywhere, but verify facts against the official reference"
+      ]
+    },
+    {
+      "id": "error-anatomy",
+      "difficulty": "core",
+      "prompt": "Take an error like `cat: recipes.txt: No such file or directory` — what are the parts of a typical error message, and how does a stack trace extend them?",
+      "expected_points": [
+        "who is speaking (the program), what went wrong (the message), and where (file/line or the thing involved)",
+        "a stack trace is the breadcrumb trail of function calls that led to the failure",
+        "look first at the deepest frame that is your own code"
+      ]
+    },
+    {
+      "id": "good-question",
+      "difficulty": "core",
+      "prompt": "What goes into a good question about a problem, and what surprising thing often happens while writing one?",
+      "expected_points": [
+        "what you were trying to do, what you expected, what actually happened, what you already tried",
+        "exact error text copy-pasted, never paraphrased",
+        "a minimal example: smallest steps that reproduce the problem",
+        "writing the question often reveals the answer (rubber-duck effect)"
+      ]
+    },
+    {
+      "id": "doc-kind",
+      "difficulty": "core",
+      "prompt": "Three situations: you're brand new to a tool; you need what one specific flag does; a guide's commands don't match what your version does. Which kind of documentation fits each, and why?",
+      "expected_points": [
+        "new to a tool: tutorial (teaches by doing, no need to know what to ask)",
+        "one exact fact: reference, e.g. a man page (complete and precise)",
+        "version mismatch: changelog / release notes (what changed between versions)",
+        "name the question first, then pick the document"
+      ]
+    },
+    {
+      "id": "first-error",
+      "difficulty": "stretch",
+      "prompt": "A tool prints fifteen errors at once. How many do you try to fix before running it again, and why?",
+      "expected_points": [
+        "only the first one",
+        "one mistake cascades into follow-on errors that may not be real",
+        "fix, re-run, repeat"
+      ]
+    },
+    {
+      "id": "search-craft",
+      "difficulty": "stretch",
+      "prompt": "You're about to paste an error message into a search engine. What two edits make the search work better?",
+      "expected_points": [
+        "put the exact message in quotes",
+        "strip parts specific to you (your file names and paths) so it matches other people's version of the same error"
+      ]
+    }
+  ]
+}

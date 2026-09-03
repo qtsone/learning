@@ -1,0 +1,12 @@
+Output of `git log --oneline v0.1.0..HEAD`, captured for the exercise —
+newest commit first. Release 0.2.0 ships from here.
+
+9f3c2a1 rename -dir to -path: the flag now names the storage file, not its folder
+41d0b77 store: Get reports a missing name with ErrNotFound instead of returning ""
+b2e91c4 store: List returns names sorted alphabetically
+7ac00d3 cli: add `get` command to print one snippet
+c31f9e0 store: marshal with encoding/json; multi-line snippets no longer corrupt the file
+88aa412 refactor: extract save helper from Add
+5b7ca29 fix typo in an internal comment
+e0d51f2 ci: run go vet and tests on pull requests
+2f6de10 (tag: v0.1.0) initial release: add and list commands, -dir flag

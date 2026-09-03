@@ -1,0 +1,71 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "purpose",
+      "difficulty": "core",
+      "prompt": "Your team has strong tests and strict CI. A teammate argues code review is now redundant. What does review still buy?",
+      "expected_points": [
+        "bug-catching is the weakest return; machines cover the mechanical part",
+        "knowledge sharing: two people understand every change, no single-owner code",
+        "consistency: one set of conventions across the codebase",
+        "design feedback at the last cheap moment, before the wrong shape calcifies"
+      ]
+    },
+    {
+      "id": "severity",
+      "difficulty": "core",
+      "prompt": "Why label review comments (blocking / suggestion / nit / question), and how do you decide which label a comment gets?",
+      "expected_points": [
+        "unlabeled comments force the author to guess: everything blocks (slow) or nothing does (defects merge)",
+        "decide by cost if ignored: defects and standard violations block; improvements are the author's call",
+        "severity inversion (nit on a security hole, blocking on taste) actively misleads",
+        "a question is real only if the answer could change the reviewer's mind"
+      ]
+    },
+    {
+      "id": "phrasing",
+      "difficulty": "core",
+      "prompt": "Take the comment 'You always ignore errors. Stop being sloppy.' Why does it fail even if the observation is true, and what would a usable version say?",
+      "expected_points": [
+        "it targets the person and generalizes about identity, so the only reply is self-defense",
+        "it names no line, no consequence, no way to resolve",
+        "usable version points at the code with the why: e.g. 'this Exec error is dropped, so a failed insert returns nil; check and wrap it'",
+        "same severity survives; hostility is not rigor"
+      ]
+    },
+    {
+      "id": "pr-hygiene",
+      "difficulty": "core",
+      "prompt": "What makes a PR reviewable before the reviewer even starts reading code?",
+      "expected_points": [
+        "small and single-purpose: one reason to change per PR, refactors separated from behavior changes",
+        "specific imperative title and a description covering what, why, and how to verify",
+        "a self-review pass first, reading your own diff as a stranger",
+        "mechanical checks (fmt, vet, tests) already green so the human reviews what machines can't"
+      ]
+    },
+    {
+      "id": "pushback",
+      "difficulty": "core",
+      "prompt": "A reviewer comments on your PR and you disagree. How do you decide between conceding and pushing back, and what does a good push-back look like?",
+      "expected_points": [
+        "concede on correctness, written convention, or consistency with surrounding code",
+        "push back only with reasoning the reviewer lacks: a requirement, measurement, or citable convention — never bare preference",
+        "preference ties go to the existing style",
+        "good but out-of-scope suggestions get agreement plus a follow-up, keeping the PR focused",
+        "every comment gets an answer; two stuck written rounds means talk, then record the outcome"
+      ]
+    },
+    {
+      "id": "green-ci",
+      "difficulty": "stretch",
+      "prompt": "In the exercise, the PR with the SQL injection passed gofmt, go vet, and the full test suite. What exactly did that green pipeline prove, and where is the boundary between CI's job and the reviewer's?",
+      "expected_points": [
+        "green proves only the properties someone encoded as checks; the injection was never encoded",
+        "CI owns the mechanical and repeatable; reviewers own design, scope, missing tests, and defects tests don't express",
+        "a green build on unreviewed code certifies the tests, not the change"
+      ]
+    }
+  ]
+}

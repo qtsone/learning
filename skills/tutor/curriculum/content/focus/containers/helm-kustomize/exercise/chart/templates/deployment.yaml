@@ -1,0 +1,94 @@
+# The base Deployment, copied into the chart untouched. Right now it is a
+# template that templates nothing: every number is hard-coded, so this chart
+# installs exactly one configuration and `helm install --set replicaCount=5`
+# does nothing at all.
+#
+# Turn the marked values into values.yaml lookups. Leave the rest literal —
+# a value nobody will ever change does not belong in your API.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "timesvc.fullname" . }}
+  labels:
+    {{- include "timesvc.labels" . | nindent 4 }}
+spec:
+  # TODO: replicas comes from values.
+  replicas: 2
+  selector:
+    matchLabels:
+      {{- include "timesvc.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      # TODO: annotate the pod template with a checksum of the rendered
+      #       ConfigMap, so that changing only configuration still rolls the
+      #       pods. The lesson gives you the one-liner.
+      labels:
+        {{- include "timesvc.selectorLabels" . | nindent 8 }}
+    spec:
+      # TODO: from values — an installer with a slower drain has to be able to
+      #       raise this without forking your chart.
+      terminationGracePeriodSeconds: 45
+      containers:
+        - name: {{ .Chart.Name }}
+          # TODO: repository and tag from values, and add an imagePullPolicy.
+          image: timesvc:1.1.0
+          ports:
+            - name: http
+              # TODO: from values — the ConfigMap's PORT and this number are
+              #       the same decision and must not drift.
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                # TODO: the name this chart's own ConfigMap renders under.
+                #       Hard-coding it breaks the moment two releases of this
+                #       chart share a namespace.
+                name: timesvc-config
+          env:
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+                  divisor: "1"
+            - name: GOMEMLIMIT
+              # TODO: from values, and quoted — the runtime refuses to start on
+              #       a value it cannot parse.
+              value: "110MiB"
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+            failureThreshold: 12
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+          lifecycle:
+            preStop:
+              sleep:
+                # TODO: from values, next to the grace period it is spending.
+                seconds: 10
+          # TODO: the whole block from values, in one line, with toYaml.
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 128Mi

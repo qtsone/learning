@@ -1,0 +1,65 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "promotion-shadowing",
+      "difficulty": "core",
+      "prompt": "`TaggedRecorder` embeds `Recorder`, and both have a `Record` method. Which one runs when you call `tr.Record(...)`, why, and how do you still reach the other one?",
+      "expected_points": [
+        "the outer (shallower) method wins — declaring it on TaggedRecorder shadows the promoted one",
+        "promotion is compiler shorthand for delegation through an ordinary field named after its type",
+        "the inner method stays reachable explicitly as tr.Recorder.Record — that's how the shadow delegates"
+      ]
+    },
+    {
+      "id": "composition-over-inheritance",
+      "difficulty": "core",
+      "prompt": "Go has no `extends`. What problems of classical inheritance is it avoiding, and which two Go tools split inheritance's job between them?",
+      "expected_points": [
+        "inheritance problems: fragile base class, premature is-a hierarchies, tight coupling to parent internals, diamond problem",
+        "embedding/composition handles behavior reuse (has-a)",
+        "interfaces handle substitutability (behaves-like-a) — embedding alone gives no subtyping"
+      ]
+    },
+    {
+      "id": "partial-wrapping",
+      "difficulty": "core",
+      "prompt": "You have a `Store` interface with three methods and want a wrapper that changes only the writes. How does embedding the interface in a struct save you work, and what runtime trap does it leave open?",
+      "expected_points": [
+        "embedding the interface promotes its whole method set, so the struct satisfies Store while you override only the methods that change",
+        "un-overridden calls delegate to the wrapped value with no hand-written pass-through methods",
+        "the embedded interface's zero value is nil — the type compiles, but calling a promoted method on a nil field panics at runtime"
+      ]
+    },
+    {
+      "id": "embed-vs-field",
+      "difficulty": "core",
+      "prompt": "You're designing a type that uses another type internally. How do you decide between embedding it and giving it a named field?",
+      "expected_points": [
+        "embedding promotes methods into the outer type's public API — it's a contract decision, not a shortcut",
+        "embed when callers should call the inner methods through you (e.g. a wrapper satisfying the same interface)",
+        "named field when the inner type is an implementation detail — smaller API, no shadowing/ambiguity surprises, and hand-delegating a method or two is cheap"
+      ]
+    },
+    {
+      "id": "no-virtual-dispatch",
+      "difficulty": "stretch",
+      "prompt": "`Animal` has `Name()` returning \"animal\" and `Describe()` returning \"I am \" + a.Name(). `Dog` embeds `Animal` and defines `Name()` returning \"dog\". What does `Dog{}.Describe()` print, and why is that the answer?",
+      "expected_points": [
+        "prints \"I am animal\"",
+        "the promoted Describe runs with the embedded Animal as receiver, which cannot see Dog, so its Name call is always Animal.Name",
+        "no virtual dispatch is deliberate — the embedded type behaves the same everywhere, which kills the fragile-base-class problem"
+      ]
+    },
+    {
+      "id": "ambiguous-promotion",
+      "difficulty": "stretch",
+      "prompt": "A struct embeds two types that both have a `Close()` method. Does it compile? What happens when someone calls `x.Close()`, and how do you fix it?",
+      "expected_points": [
+        "the type declaration itself is legal — same-depth ambiguity only errors at the point of use",
+        "calling x.Close() is a compile error because neither method is shallower",
+        "fix by naming the field explicitly (x.A.Close()) or declaring Close on the outer type to disambiguate"
+      ]
+    }
+  ]
+}

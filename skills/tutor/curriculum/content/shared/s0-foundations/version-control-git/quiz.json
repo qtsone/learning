@@ -1,0 +1,78 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "why-vcs",
+      "difficulty": "core",
+      "prompt": "Your friend backs up their project by copying the folder to `project_final_v3`. What can Git do for them that folder copies fundamentally can't?",
+      "expected_points": [
+        "one folder plus a history of labeled snapshots instead of copy sprawl",
+        "each commit records who, when, and a message saying why",
+        "you can compare any two versions and see exact line-by-line changes",
+        "you can rewind to any earlier snapshot reliably"
+      ]
+    },
+    {
+      "id": "three-places",
+      "difficulty": "core",
+      "prompt": "You edit a file, run `git add` on it, then edit it again. Where do your changes live right now, and what would a commit at this moment contain?",
+      "expected_points": [
+        "the first edit is in the staging area, the second only in the working tree",
+        "commit would record the staged version, not the latest saved file",
+        "add copies a file's state at that moment; later edits need another add"
+      ]
+    },
+    {
+      "id": "recording-loop",
+      "difficulty": "core",
+      "prompt": "Walk me through recording a change to a file, from editing it to it being in history — which commands, in what order, and what does each do?",
+      "expected_points": [
+        "git status shows each file's state and suggests what to do next",
+        "git diff shows unstaged line-by-line edits; git diff --staged reviews the draft",
+        "git add stages the file; git commit -m seals the snapshot with a message",
+        "a good message says what changed and why, not 'wip' or 'fix'"
+      ]
+    },
+    {
+      "id": "inspect",
+      "difficulty": "core",
+      "prompt": "What is the difference between what `git status`, `git diff`, and `git log` each show you?",
+      "expected_points": [
+        "status: current state of files across working tree and staging area",
+        "diff: exact line changes (unstaged by default, --staged for the draft)",
+        "log: the chain of past commits with authors, dates, and messages"
+      ]
+    },
+    {
+      "id": "gitignore-why",
+      "difficulty": "core",
+      "prompt": "Why must build artifacts and secrets stay out of commits, and how does .gitignore keep them out?",
+      "expected_points": [
+        "artifacts are regenerated from source and change every build — pure noise",
+        "secrets in a commit stay readable in history forever, even if deleted later",
+        "gitignore lists patterns for untracked files git should stop suggesting",
+        "it does not untrack files that were already committed"
+      ]
+    },
+    {
+      "id": "committed-secret",
+      "difficulty": "stretch",
+      "prompt": "You committed a password file three commits ago and deleted it in the next commit. `git status` is clean. Is the password safe? What does this tell you about commits?",
+      "expected_points": [
+        "not safe — the old commit still contains it and anyone with the repo can read it",
+        "history is append-only; deleting in a new commit doesn't alter old ones",
+        "the only reliable protection is never committing the secret at all"
+      ]
+    },
+    {
+      "id": "dot-git",
+      "difficulty": "stretch",
+      "prompt": "After `git init`, a hidden `.git` folder appears. What lives in there, and what happens to your project if you delete it?",
+      "expected_points": [
+        "the entire history and Git's bookkeeping live in .git",
+        "deleting it destroys the history; the working-tree files remain",
+        "the folder simply stops being a repository"
+      ]
+    }
+  ]
+}

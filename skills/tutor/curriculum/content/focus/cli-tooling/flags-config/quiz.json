@@ -1,0 +1,94 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "flag-value",
+      "difficulty": "core",
+      "prompt": "You want a repeatable `-tag` flag that collects into a `[]string`. What does the standard `flag` package need from you, and why does `Set` have a pointer receiver?",
+      "expected_points": [
+        "implement flag.Value: String() string and Set(string) error, registered with fset.Var",
+        "Set is called once per occurrence of the flag, so it appends",
+        "pointer receiver because Set mutates the value; a value receiver would append to a copy",
+        "String must be safe on a zero value — flag calls it while printing usage"
+      ]
+    },
+    {
+      "id": "precedence-order",
+      "difficulty": "core",
+      "prompt": "State the precedence chain you implemented, then convince me the order is right by describing what breaks if you swap environment and flags, or file and environment.",
+      "expected_points": [
+        "defaults < config file < environment < flags",
+        "each layer overrides the broader, less immediate one below it",
+        "if env beat flags, a stale exported variable would silently ignore what the user typed",
+        "if the file beat env, you could not point the same checked-in repo at staging without editing a tracked file",
+        "the order is a compatibility contract and belongs in --help"
+      ]
+    },
+    {
+      "id": "set-vs-zero",
+      "difficulty": "core",
+      "prompt": "A flag variable holds `false` and an env var reads as `\"\"`. How do you know whether the user set them, and what goes wrong if you guess?",
+      "expected_points": [
+        "fset.Visit reports only flags actually present on the command line (VisitAll reports all of them)",
+        "os.LookupEnv returns (value, ok); os.Getenv throws the ok away",
+        "config file: pointer struct fields, nil means absent from the document",
+        "guessing 'zero means unset' silently ignores anyone who explicitly asks for the default, e.g. -verbose=false over a config file"
+      ]
+    },
+    {
+      "id": "env-validation",
+      "difficulty": "core",
+      "prompt": "`TOOLKIT_RETRIES=abc` reaches your loader. Walk me from the raw string to the message the user reads, and say what the error type carries.",
+      "expected_points": [
+        "typed conversion (strconv.Atoi / time.ParseDuration / strconv.ParseBool) into the Config struct field",
+        "a *ValueError carrying field, source, the raw text, and the wrapped cause",
+        "Unwrap keeps errors.Is working for sentinels like ErrRange, errors.As gives callers the field and source",
+        "the message names which of the four places to go and edit"
+      ]
+    },
+    {
+      "id": "where-does-it-belong",
+      "difficulty": "core",
+      "prompt": "For each of these, pick flag, environment variable, or config file, and justify it by who changes it and how often: an API token; the list of directories to scan in a repo; `--verbose`; the retry limit.",
+      "expected_points": [
+        "token → environment: injected per machine/CI, and never a flag because command lines show up in ps and shell history",
+        "directory list → config file: shared, reviewable, checked in with the project",
+        "verbose → flag: a human deciding for this one run",
+        "retry limit → sensible default plus all three overrides; the point is who changes it and how often, not the setting's importance"
+      ]
+    },
+    {
+      "id": "provenance",
+      "difficulty": "core",
+      "prompt": "Why keep an `Origins` map next to the resolved `Config` instead of just returning the values?",
+      "expected_points": [
+        "answers 'where did this value come from?' for users and for support",
+        "costs one line per assignment, powers a --show-config style output",
+        "feeds error messages so a bad value points at the layer that supplied it",
+        "a value equal to the default can still have come from a real layer, so the value alone cannot tell you"
+      ]
+    },
+    {
+      "id": "testable-flags",
+      "difficulty": "stretch",
+      "prompt": "Why `flag.NewFlagSet(..., flag.ContinueOnError)` and `SetOutput`, rather than the package-level `flag` functions?",
+      "expected_points": [
+        "package-level flag writes to a hidden global FlagSet — shared state across tests",
+        "ContinueOnError returns the error instead of calling os.Exit inside library code",
+        "SetOutput sends usage and parse errors to an injected writer the tests can read",
+        "-h returns the flag.ErrHelp sentinel, which is a successful exit, not a failure"
+      ]
+    },
+    {
+      "id": "file-strictness",
+      "difficulty": "stretch",
+      "prompt": "You decode the config file with `DisallowUnknownFields`, but the JSON lesson said ignoring unknown fields is a feature. What changed?",
+      "expected_points": [
+        "an API payload comes from a peer that may legitimately add fields — tolerance keeps you compatible",
+        "a config file is written by a human, so an unknown key is almost always a typo",
+        "silently ignoring 'retires: 5' means the setting the user thinks they changed never takes effect",
+        "the cost of strictness here is low: the file has one author and one schema"
+      ]
+    }
+  ]
+}

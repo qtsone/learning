@@ -1,0 +1,99 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "reconciliation",
+      "difficulty": "core",
+      "prompt": "You run `kubectl apply -f deployment.yaml`. Does that create a pod? Walk me through what actually happens, and what keeps happening afterwards.",
+      "expected_points": [
+        "apply records desired state with the API server, which stores it (etcd); it does not create anything itself",
+        "controllers run a loop: observe actual, compare with desired, act to close the gap",
+        "the ReplicaSet controller creates pods, the scheduler assigns nodes, the kubelet starts containers — each independently, all talking only to the API server",
+        "level-triggered, not event-driven: the comparison repeats forever, so drift and missed events self-correct",
+        "spec is yours, status is written by controllers"
+      ]
+    },
+    {
+      "id": "pod-vs-deployment",
+      "difficulty": "core",
+      "prompt": "What is a pod, and why do you almost never write a `kind: Pod` manifest? Where do ReplicaSets fit in?",
+      "expected_points": [
+        "a pod is one or more containers scheduled together, sharing a network namespace (localhost) and IP",
+        "a pod is mortal and unrepairable: if its node dies it is gone, and nothing recreates it",
+        "a Deployment records the wish, so a controller recreates pods from the template",
+        "the Deployment manages ReplicaSets; the ReplicaSet keeps N pods matching its selector alive",
+        "usually one container per pod; sidecars are the exception"
+      ]
+    },
+    {
+      "id": "labels-selectors",
+      "difficulty": "core",
+      "prompt": "Every pod is Running but the Service serves nothing. How does a Service find pods in the first place, and how would you diagnose this?",
+      "expected_points": [
+        "nothing references anything by name — a selector matches labels on the pod template",
+        "a controller writes matching Ready pods' IPs into an EndpointSlice; kube-proxy programs forwarding rules",
+        "a selector that matches nothing is not an error anywhere: everything looks healthy",
+        "check kubectl get endpointslices, then compare the Service selector with the pod template labels",
+        "other cause: pods Running but not Ready, so they are excluded from endpoints"
+      ]
+    },
+    {
+      "id": "service-types",
+      "difficulty": "core",
+      "prompt": "ClusterIP, NodePort, LoadBalancer — what does each add, and which did you pick for `timesvc` and why?",
+      "expected_points": [
+        "cumulative: LoadBalancer is a NodePort is a ClusterIP",
+        "ClusterIP is an in-cluster virtual IP plus DNS; the default and right for internal callers",
+        "NodePort opens the same port on every node (30000-32767)",
+        "LoadBalancer provisions real cloud infrastructure per Service, which is why ingress usually fronts many ClusterIPs",
+        "kubectl port-forward reaches a ClusterIP from a laptop without changing the type"
+      ]
+    },
+    {
+      "id": "ports",
+      "difficulty": "core",
+      "prompt": "In your manifests, name every place a port number appears and say what each one means. What happens if you omit `targetPort`?",
+      "expected_points": [
+        "containerPort documents the port the process binds (8080, because non-root cannot bind below 1024)",
+        "Service port is what callers dial on the Service",
+        "targetPort is the port on the pod that traffic is forwarded to; it may be the container port's name",
+        "omitting targetPort defaults it to port, not to the container port — a silent forward to a closed port",
+        "a mismatch produces connection refused with healthy-looking endpoints"
+      ]
+    },
+    {
+      "id": "debug-backoff",
+      "difficulty": "core",
+      "prompt": "One pod is in ImagePullBackOff and another in CrashLoopBackOff. What do you run first for each, and what would you expect to find?",
+      "expected_points": [
+        "describe first and read the Events at the bottom — they are written by the component that made the decision",
+        "ImagePullBackOff: registry/tag typo, missing credentials, or with kind an image that only exists in the local Docker daemon (kind load docker-image)",
+        "CrashLoopBackOff: the process itself is exiting; read kubectl logs, with --previous because the crashed instance holds the interesting output",
+        "the kubelet restarts with exponential backoff, so the state is a symptom, not the cause"
+      ]
+    },
+    {
+      "id": "rollouts",
+      "difficulty": "stretch",
+      "prompt": "You rebuild the image, push it under the same `:latest` tag, and re-apply. Nothing happens. Why? And what does `kubectl rollout undo` actually do?",
+      "expected_points": [
+        "a rollout only starts when the pod template changes; an identical template means no new ReplicaSet",
+        "pin tags (or deploy by digest) so the template changes when the code does",
+        "undo scales an old ReplicaSet back up — fast, and limited by revisionHistoryLimit",
+        "maxUnavailable: 0 with maxSurge: 1 creates the replacement before removing anything"
+      ]
+    },
+    {
+      "id": "namespaces",
+      "difficulty": "stretch",
+      "prompt": "What does putting everything in a `timesvc` namespace actually give you, and what does it not give you?",
+      "expected_points": [
+        "a name scope: two teams can each own a Service called api",
+        "a handle for quotas, RBAC and kubectl delete namespace",
+        "not a network boundary — pods across namespaces reach each other unless a NetworkPolicy says otherwise",
+        "not a security boundary by itself",
+        "cross-namespace DNS is name.namespace.svc.cluster.local"
+      ]
+    }
+  ]
+}

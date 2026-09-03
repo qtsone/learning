@@ -1,0 +1,65 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "implicit-satisfaction",
+      "difficulty": "core",
+      "prompt": "How does Go decide that `*CountingWriter` satisfies `io.Writer`, given that your code never says so? What does this buy you compared to languages with an `implements` keyword?",
+      "expected_points": [
+        "satisfaction is structural: the compiler checks the method set against the interface, no declaration needed",
+        "a type can satisfy interfaces written after it, by authors who never saw it",
+        "implementing packages don't import the interface's package, so dependencies stay pointed at the consumer and coordination/import cycles disappear"
+      ]
+    },
+    {
+      "id": "method-sets",
+      "difficulty": "core",
+      "prompt": "`Write` on `CountingWriter` has a pointer receiver. Why does `io.Copy(w, src)` fail to compile while `io.Copy(&w, src)` works?",
+      "expected_points": [
+        "the method set of CountingWriter (the value) excludes pointer-receiver methods, so the value does not satisfy io.Writer",
+        "the method set of *CountingWriter includes both value- and pointer-receiver methods",
+        "the interface stores a copy; calling a pointer method on that copy would mutate an unreachable value, so the rule blocks it at compile time"
+      ]
+    },
+    {
+      "id": "writer-contract",
+      "difficulty": "core",
+      "prompt": "The starter's `Write` returned `(0, nil)` and `io.Copy` failed with `io.ErrShortWrite`. What does the `io.Writer` contract require of `Write`'s return values, and what else does it forbid?",
+      "expected_points": [
+        "Write must report how many bytes of p it consumed, with a non-nil error whenever that is less than len(p)",
+        "(0, nil) after receiving bytes claims nothing was consumed with no error, which io.Copy correctly treats as a short write",
+        "Write must not modify or retain p — the caller still owns the slice"
+      ]
+    },
+    {
+      "id": "consumer-side",
+      "difficulty": "core",
+      "prompt": "`Saver` is defined in the `report` package, next to `Archive`, and has exactly one method. Defend both choices against a teammate who wants a ten-method `Storage` interface exported by the storage package.",
+      "expected_points": [
+        "the consumer defines the minimal behavior it needs, so the interface documents Archive's true requirements",
+        "providers stay concrete and satisfy it implicitly without importing report",
+        "small interfaces are satisfied by more types and make test fakes trivial — the bigger the interface, the weaker the abstraction"
+      ]
+    },
+    {
+      "id": "stdlib-composition",
+      "difficulty": "core",
+      "prompt": "`io.Copy` moved data from a `strings.Reader` through your `UpperWriter` into a `bytes.Buffer` — three types that know nothing about each other. What makes that composition possible, and why does so much of the stdlib funnel through `io.Reader`/`io.Writer`?",
+      "expected_points": [
+        "each piece depends only on the one-method interfaces, not on concrete types",
+        "any Reader source composes with any Writer sink, so n types give n interoperable pieces instead of n-squared adapters",
+        "tiny interfaces are the stdlib's common currency, which is why wrapping writers like UpperWriter slot in anywhere"
+      ]
+    },
+    {
+      "id": "return-structs",
+      "difficulty": "stretch",
+      "prompt": "`NewUpperWriter` accepts an `io.Writer` but returns `*UpperWriter`, not `io.Writer`. Why is 'accept interfaces, return structs' the idiomatic shape?",
+      "expected_points": [
+        "accepting an interface makes the function usable with any conforming destination",
+        "returning the concrete type keeps the full method set available to callers",
+        "callers can always narrow a concrete type to their own interface later; a returned interface hides methods and abstracts prematurely"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "status-classes",
+      "difficulty": "core",
+      "prompt": "Your client gets a 400, a 429, a 503, and a 200 back from four requests. What does each one tell you, and what should the client do about each?",
+      "expected_points": [
+        "2xx: success — read and decode the body",
+        "4xx: the request is wrong; retrying the identical request fails identically, so fix it, don't retry",
+        "429 is the 4xx exception: an explicit invitation to slow down and retry later",
+        "5xx: the server's problem, likely transient — a retry with backoff can succeed"
+      ]
+    },
+    {
+      "id": "timeouts-incident",
+      "difficulty": "core",
+      "prompt": "Why is an HTTP client without timeouts described as a production incident waiting to happen? Walk through what actually goes wrong.",
+      "expected_points": [
+        "defaults in most libraries (including Go's http.DefaultClient) wait forever",
+        "a hung dependency parks a goroutine/socket/memory per in-flight call and they never return",
+        "requests pile up, the service stops answering its own callers, and the outage cascades upstream",
+        "fix is layered: a client-wide ceiling plus per-request context deadlines"
+      ]
+    },
+    {
+      "id": "resource-lifecycle",
+      "difficulty": "core",
+      "prompt": "What happens, concretely, if your client never closes response bodies? And why must the status be checked before decoding?",
+      "expected_points": [
+        "unclosed bodies leak pooled connections: sockets and file descriptors pin up until requests fail or redial from scratch",
+        "close on every path, success and error alike",
+        "error responses carry HTML or stack traces, not your JSON — decoding first hides the real failure behind a parse error",
+        "typed errors (like APIError with the status code) let callers branch on what the server said"
+      ]
+    },
+    {
+      "id": "retry-policy",
+      "difficulty": "core",
+      "prompt": "Design a retry policy for a client: which failures do you retry, which do you surface immediately, and how do you decide?",
+      "expected_points": [
+        "retry transport failures (request may never have arrived) and 5xx/429",
+        "never retry other 4xx — the request itself is wrong",
+        "never retry after context cancellation — the caller already gave up",
+        "only requests safe to repeat: idempotent methods like GET/PUT/DELETE; a blind POST retry can e.g. double-charge",
+        "cap total attempts and then surface the error"
+      ]
+    },
+    {
+      "id": "backoff-jitter",
+      "difficulty": "core",
+      "prompt": "A thousand clients all get a 503 from the same overloaded server at the same moment. Compare what happens with fixed-interval retries versus exponential backoff with full jitter.",
+      "expected_points": [
+        "fixed interval: all clients retry together — synchronized waves that re-spike the struggling server (thundering herd)",
+        "exponential backoff spaces attempts out and gives the server room to recover",
+        "jitter (uniform in [0, delay]) desynchronizes clients, flattening the retry load",
+        "both parts are needed: backoff alone still retries in waves"
+      ]
+    },
+    {
+      "id": "err-vs-status",
+      "difficulty": "stretch",
+      "prompt": "In Go, `resp, err := client.Do(req)` comes back. In which situations is err non-nil, and in which do you get err == nil but still a failure? Why does the distinction matter for retries?",
+      "expected_points": [
+        "err non-nil means no HTTP conversation completed: DNS failure, connection refused, timeout, cancelled context",
+        "a 404 or 500 is a completed conversation — err is nil and the failure lives in resp.StatusCode",
+        "retry policy treats them differently: transport errors are retryable (request may not have arrived), status errors depend on the code"
+      ]
+    }
+  ]
+}

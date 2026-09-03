@@ -1,0 +1,19 @@
+Canned errors for part 2. Read only — you don't need to run anything.
+
+--- Error A: a runtime error with a stack trace -------------------------
+
+A program that computes report statistics crashed while running:
+
+    error: cannot divide by zero
+      in compute_average (stats, line 12)
+      called by summarize (report, line 34)
+      called by main (main, line 8)
+
+--- Error B: a Go compiler error ----------------------------------------
+
+Someone in the next stage tried to compile their first Go program and the
+compiler refused:
+
+    ./main.go:7:2: undefined: fmt.Printlnn
+
+(The Go standard library has a printing function named fmt.Println.)

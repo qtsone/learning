@@ -1,0 +1,64 @@
+{
+  "pass_rule": "all core questions substantially correct in the learner's own words; stretch questions inform the grade, not the gate",
+  "questions": [
+    {
+      "id": "short-if",
+      "difficulty": "core",
+      "prompt": "What does `if r := n % 10; r == 0` do, step by step? Where does `r` exist, and why is that a feature?",
+      "expected_points": [
+        "the short statement runs first, then the condition is checked",
+        "r is scoped to the if (and its else) only — gone after the closing brace",
+        "keeps single-decision helpers from leaking into the surrounding function"
+      ]
+    },
+    {
+      "id": "switch-vs-if",
+      "difficulty": "core",
+      "prompt": "When do you reach for `switch` instead of an if/else chain, and what happens at the end of a Go `case` compared to C?",
+      "expected_points": [
+        "switch when comparing one value against fixed candidates; condition-less switch tidies long else-if chains",
+        "Go breaks implicitly — a finished case ends the whole switch",
+        "fallthrough exists but must be written explicitly and is rare"
+      ]
+    },
+    {
+      "id": "for-forms",
+      "difficulty": "core",
+      "prompt": "Go has one loop keyword. Describe the four shapes of `for` and give a situation where each fits.",
+      "expected_points": [
+        "classic init; condition; post — counting with a known range",
+        "condition-only — a while loop: repeat until something changes",
+        "bare for — infinite loop exited by break/return: wait-until-done work",
+        "range — do something n times / walk each element; over an int it yields 0..n-1"
+      ]
+    },
+    {
+      "id": "break-continue-labels",
+      "difficulty": "core",
+      "prompt": "In nested loops, what exactly do plain `continue`, plain `break`, and `continue outer` (with a label) each skip?",
+      "expected_points": [
+        "continue abandons the current iteration of the innermost loop; the post statement still runs",
+        "break exits the innermost loop entirely",
+        "a labeled continue/break acts on the named (outer) loop — e.g. rejecting a candidate from inside an inner divisor loop"
+      ]
+    },
+    {
+      "id": "switch-in-loop",
+      "difficulty": "stretch",
+      "prompt": "You write a `switch` inside a `for` and put `break` in one of its cases. What does that `break` actually exit, and how would you exit the loop instead?",
+      "expected_points": [
+        "it breaks the switch, not the for loop",
+        "label the loop and use a labeled break (or restructure with a return/condition)"
+      ]
+    },
+    {
+      "id": "range-int-values",
+      "difficulty": "stretch",
+      "prompt": "What values does `for i := range 5` produce, and when would that difference from 1..5 bite you?",
+      "expected_points": [
+        "0, 1, 2, 3, 4 — five values starting at zero",
+        "fine when only counting iterations; bites when the counter's value is used, e.g. summing 1..n or printing positions"
+      ]
+    }
+  ]
+}
