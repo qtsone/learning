@@ -148,7 +148,7 @@ O(n). That sounds alarming for a structure advertising O(1), but doubling
 means resizes become rarer as the table grows — most inserts are cheap, and
 averaged over any long sequence the cost per insert is still O(1). This is the
 same amortized-doubling argument you saw for Go's `append` growing a slice;
-the Big-O lesson called it amortized analysis.
+the arrays lesson called it amortized O(1).
 
 ## O(1) on average — O(n) in the worst case
 
