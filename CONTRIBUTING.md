@@ -92,6 +92,10 @@ Use [Conventional Commits](https://www.conventionalcommits.org/). Types in use:
 `feat`, `fix(engine)`, `docs`, `ci`, `chore(deps)`, and `content(<stage or pack>)`
 for curriculum changes.
 
+Releases are cut from `main` automatically by semantic-release: `feat` bumps the
+minor version, `fix` the patch, and a `BREAKING CHANGE:` footer the major. Other
+types do not trigger a release on their own and ship with the next one.
+
 ## Curriculum feedback from learners
 
 You don't have to author content to improve it. While teaching, the tutor logs
