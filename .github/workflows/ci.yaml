@@ -13,8 +13,25 @@ jobs:
   validate:
     if: github.event_name == 'push' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    outputs:
+      curriculum: ${{ steps.changes.outputs.curriculum }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: did the tutor skill change?
+        id: changes
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          # Unknown base (new branch, force push) means "run everything" rather than guess.
+          if git rev-parse -q --verify "$BASE^{commit}" >/dev/null 2>&1 \
+             && git diff --quiet "$BASE" HEAD -- skills/tutor .github/workflows/ci.yaml; then
+            echo "curriculum=false" >> "$GITHUB_OUTPUT"
+            echo "no changes under skills/tutor: the solutions job will be skipped"
+          else
+            echo "curriculum=true" >> "$GITHUB_OUTPUT"
+          fi
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -28,7 +45,11 @@ jobs:
           fi
 
   solutions:
+    # Skipped via `if` still reports success, so the ruleset's required check
+    # passes for docs-only changes; a path filter on the trigger would leave it
+    # pending and block the merge.
     needs: validate
+    if: needs.validate.outputs.curriculum == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
