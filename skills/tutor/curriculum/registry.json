@@ -5,6 +5,9 @@
     "go": {
       "name": "Go",
       "status": "available",
+      "verify": {
+        "type": "gotest"
+      },
       "path": [
         "s0",
         "s1",
@@ -14,11 +17,24 @@
         "s5",
         "s6",
         "s7"
+      ],
+      "workspace_ignore": [
+        "*.test",
+        "lessons/**/exercise/project-concurrent",
+        "lessons/**/exercise/containers-capstone",
+        "lessons/**/exercise/clockwork",
+        "lessons/**/exercise/deploying-go",
+        "lessons/**/exercise/dockerizing-go",
+        "lessons/**/exercise/app/compose-app",
+        "lessons/**/exercise/app/timesvc"
       ]
     },
     "python": {
       "name": "Python",
       "status": "stub",
+      "verify": {
+        "type": "pytest"
+      },
       "path": [
         "s0",
         "p1",
@@ -28,7 +44,8 @@
         "p5",
         "s6",
         "p7"
-      ]
+      ],
+      "workspace_ignore": []
     }
   },
   "stages": {
@@ -193,10 +210,21 @@
       "dir": "python/p1-basics",
       "lessons": [
         "python.basics.hello-python",
-        "python.basics.variables-control-flow",
+        "python.basics.variables-types",
+        "python.basics.control-flow",
         "python.basics.functions",
-        "python.basics.collections",
-        "python.basics.errors-testing",
+        "python.basics.modules-packages",
+        "python.basics.strings-bytes",
+        "python.basics.lists-tuples",
+        "python.basics.dicts-sets",
+        "python.basics.iteration-comprehensions",
+        "python.basics.references-mutability",
+        "python.basics.classes",
+        "python.basics.dunder-methods",
+        "python.basics.dataclasses",
+        "python.basics.exceptions",
+        "python.basics.testing-basics",
+        "python.basics.io-files",
         "python.basics.project-cli-tracker"
       ]
     },
@@ -206,10 +234,22 @@
       "pool": "python",
       "dir": "python/p3-intermediate",
       "lessons": [
-        "python.intermediate.idioms-iterators",
-        "python.intermediate.classes-protocols",
+        "python.intermediate.iterators-generators",
+        "python.intermediate.closures-decorators",
+        "python.intermediate.context-managers",
+        "python.intermediate.protocols",
+        "python.intermediate.inheritance-composition",
+        "python.intermediate.packaging",
+        "python.intermediate.pattern-matching",
         "python.intermediate.typing",
+        "python.intermediate.generics",
+        "python.intermediate.json-encoding",
+        "python.intermediate.time",
+        "python.intermediate.threads-gil",
         "python.intermediate.asyncio",
+        "python.intermediate.synchronization",
+        "python.intermediate.cancellation-timeouts",
+        "python.intermediate.concurrency-patterns",
         "python.intermediate.tooling",
         "python.intermediate.project-concurrent"
       ]
@@ -220,10 +260,17 @@
       "pool": "python",
       "dir": "python/p5-advanced",
       "lessons": [
-        "python.advanced.web-services",
+        "python.advanced.http-servers",
+        "python.advanced.rest-services",
+        "python.advanced.grpc",
         "python.advanced.databases",
+        "python.advanced.runtime-gil",
+        "python.advanced.memory-management",
+        "python.advanced.free-threading",
         "python.advanced.profiling",
+        "python.advanced.extension-boundary",
         "python.advanced.advanced-testing",
+        "python.advanced.metaprogramming",
         "python.advanced.observability",
         "python.advanced.project-service"
       ]
@@ -648,7 +695,7 @@
         "Choose between a time-optimal and a space-optimal approach for a given problem and justify the trade-off"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "shared.cs.arrays-linked-lists": {
@@ -661,7 +708,7 @@
         "Choose between a slice and a linked list for a described workload and justify the choice with access-pattern and memory arguments"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "shared.cs.stacks-queues": {
@@ -675,7 +722,7 @@
         "Name real systems where queues appear (task scheduling, BFS, buffering) and explain why FIFO fits each"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "shared.cs.hash-tables": {
@@ -689,7 +736,7 @@
         "Explain why hash table operations are O(1) on average but O(n) in the worst case, and what drives the degradation"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "shared.cs.recursion": {
@@ -703,7 +750,7 @@
         "Trace a recursive execution by hand, drawing the stack frames for a small input"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "shared.cs.sorting": {
@@ -717,7 +764,7 @@
         "Choose an appropriate sort for a given input size and ordering requirement and justify the choice"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "shared.cs.searching": {
@@ -730,7 +777,7 @@
         "Adapt binary search to variant problems such as finding the first or last occurrence of a value"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "shared.cs.trees": {
@@ -744,7 +791,7 @@
         "Choose between a BST and a hash table for a described lookup workload and justify using ordering and complexity arguments"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "shared.cs.heaps": {
@@ -757,7 +804,7 @@
         "Choose a heap over a sorted slice for a top-k or scheduling problem and justify the complexity difference"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "shared.cs.graphs": {
@@ -771,7 +818,7 @@
         "Apply graph traversal to a practical problem such as connectivity or reachability checking"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "shared.cs.dynamic-programming": {
@@ -785,7 +832,7 @@
         "Define the state, transition, and base cases for a new DP problem before coding it"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "shared.cs.problem-patterns": {
@@ -798,7 +845,7 @@
         "Solve the mixed problem set capstone by combining data structures and patterns from across the stage within the stated complexity bounds"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "go.intermediate.interfaces": {
@@ -1034,7 +1081,7 @@
         "Refactor a tangled single-file program into modules with clear boundaries while keeping its tests green"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "shared.eng.tdd": {
@@ -1048,7 +1095,7 @@
         "Explain how TDD pressures API design, with an example where writing the test first changed the interface"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "shared.eng.debugging": {
@@ -1062,7 +1109,7 @@
         "Diagnose and fix a seeded bug in a provided program, documenting the reproduce-minimize-hypothesize trail"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "shared.eng.sql-databases": {
@@ -1076,7 +1123,7 @@
         "Use a transaction to keep a multi-statement change atomic and demonstrate what rollback prevents"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "shared.eng.security": {
@@ -1090,7 +1137,7 @@
         "Identify and fix seeded vulnerabilities (injection, path traversal, hardcoded secret) in a provided program"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "shared.eng.http-clients": {
@@ -1104,7 +1151,7 @@
         "Choose which failures to retry versus surface immediately, and justify the policy"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "shared.eng.ci-cd": {
@@ -1341,7 +1388,7 @@
         "Implement a small program exercising raw TCP connections and TLS configuration and observe connection behavior"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "shared.systems.api-design": {
@@ -1381,7 +1428,7 @@
         "Explain when a CDN or Redis is the right tool versus in-process caching"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "shared.systems.message-queues": {
@@ -1395,7 +1442,7 @@
         "Design dead-letter and retry policies for poison messages"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "shared.systems.distributed-systems": {
@@ -1422,7 +1469,7 @@
         "Design a work-sharding scheme that distributes load across workers without hot spots and handles worker failure"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "shared.systems.reliability": {
@@ -1693,7 +1740,7 @@
         "Choose between sessions, JWT, and OAuth2/OIDC for a given service scenario and justify the trade-offs (revocation, statelessness, third-party login)"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       },
       "prereqs": [
         "go.advanced.rest-services"
@@ -1710,7 +1757,7 @@
         "Explain why authorization checks belong at the resource level (object ownership) and demonstrate preventing an IDOR-style bypass"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "focus.web.realtime": {
@@ -1724,7 +1771,7 @@
         "Explain how ping/pong heartbeats and client reconnection (including SSE Last-Event-ID) keep realtime connections healthy"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "focus.web.api-hardening": {
@@ -1738,7 +1785,7 @@
         "Explain why input validation at the boundary does not replace output encoding and parameterized queries downstream"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "focus.web.graphql": {
@@ -1752,7 +1799,7 @@
         "Explain why GraphQL needs its own hardening (query depth/complexity limits) beyond standard HTTP protections"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "focus.web.background-jobs": {
@@ -1766,7 +1813,7 @@
         "Explain the transactional outbox pattern and why writing to the database and enqueueing in one transaction prevents lost or phantom jobs"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "focus.web.performance": {
@@ -1780,7 +1827,7 @@
         "Choose which optimization (caching, query shape, pagination) to apply first for a measured slow endpoint and justify it with profiling or load-test data"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "focus.web.capstone": {
@@ -1794,7 +1841,7 @@
         "Defend the design in review: justify the auth model, realtime transport, and job-queue choices against the alternatives"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       },
       "prereqs": [
         "go.advanced.project-service"
@@ -1810,7 +1857,7 @@
         "Choose between flags, env vars, and a config file for a given setting and justify the choice in terms of who changes it and how often"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "focus.cli.cobra": {
@@ -1823,7 +1870,7 @@
         "Choose between the stdlib flag package and cobra for a given tool and justify the trade-off (dependency weight vs command-tree features)"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       },
       "prereqs": [
         "go.intermediate.interfaces"
@@ -1840,7 +1887,7 @@
         "Explain what a TUI framework's model-update-view loop (e.g. Bubble Tea) adds over line-based output, and identify when it is overkill"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "focus.cli.files-processes": {
@@ -1854,7 +1901,7 @@
         "Use filepath, os.UserHomeDir, and related APIs so paths and file handling work on both Unix and Windows"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       }
     },
     "focus.cli.distribution": {
@@ -1881,7 +1928,7 @@
         "Defend the tool's UX decisions (flag names, error messages, exit codes, help text) in a design review"
       ],
       "verify": {
-        "type": "gotest"
+        "type": "tests"
       },
       "prereqs": [
         "go.intermediate.project-concurrent"
@@ -1891,57 +1938,219 @@
       "title": "Hello, Python",
       "duration": "1-2h",
       "objectives": [
-        "Run Python code via scripts and the REPL",
-        "Explain how the interpreter executes a source file",
-        "Format code with a standard formatter"
+        "Explain what the interpreter does with a .py file (compile to bytecode, then execute) and what `__pycache__` is for, contrasting it with the foundations stage's compiler model",
+        "Run code three ways (`uv run file.py`, `python -m`, and the REPL) and say when each is the right tool",
+        "Write a program whose logic lives in a function that returns a string and an `if __name__ == \"__main__\":` block that prints it, and explain why the guard exists",
+        "Format source with `ruff format` and explain why one canonical style is enforced"
       ],
       "verify": {
         "type": "pytest"
       }
     },
-    "python.basics.variables-control-flow": {
-      "title": "Variables & Control Flow",
+    "python.basics.variables-types": {
+      "title": "Variables & Types",
       "duration": "2-3h",
       "objectives": [
-        "Use variables, core built-in types, and truthiness correctly",
-        "Write branching and looping logic with if/for/while",
-        "Explain dynamic typing and when it bites"
+        "Explain that a variable is a name bound to an object, not a box holding a value, and predict what rebinding does",
+        "Use the built-in scalar types (int, float, bool, str, None) and predict when arithmetic or comparison changes type or raises TypeError",
+        "Explain dynamic typing and why NameError and None replace Go's zero values, and demonstrate a bug a static type system would have caught",
+        "Predict the truthiness of common values and choose `is None` over `== None`, justifying when `is` is correct",
+        "Declare constants with UPPER_CASE names and `typing.Final`, and explain what the convention and the annotation each do and do not enforce"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.basics.control-flow": {
+      "title": "Control Flow",
+      "duration": "2-3h",
+      "objectives": [
+        "Write if/elif/else chains and conditional expressions, and explain why Python has no switch fall-through to worry about",
+        "Implement loops with `for` over any iterable and `while` with a condition, choosing range, enumerate, or zip to avoid index bookkeeping",
+        "Use break, continue, and the loop `else` clause correctly and explain what each skips",
+        "Write a `match` statement over literal and or-patterns as a readable switch, deferring class patterns to the intermediate stage"
       ],
       "verify": {
         "type": "pytest"
       }
     },
     "python.basics.functions": {
-      "title": "Functions & Modules",
+      "title": "Functions",
       "duration": "2-3h",
       "objectives": [
-        "Define functions with default, keyword, and variadic parameters",
-        "Organize code into modules and import between them",
-        "Explain scope rules and the mutable-default-argument pitfall"
+        "Define functions with positional, keyword, default, keyword-only (`*`) and positional-only (`/`) parameters and justify which to use in a signature",
+        "Return multiple values as a tuple and unpack them at the call site, contrasting with Go's (result, error) convention",
+        "Implement variadic functions with *args and **kwargs and call them by unpacking a list or dict",
+        "Explain the LEGB scope rule and predict the output of code that shadows or reads enclosing names",
+        "Write a one-line docstring that states what a function returns and read one back with `help()`"
       ],
       "verify": {
         "type": "pytest"
       }
     },
-    "python.basics.collections": {
-      "title": "Lists, Dicts, Sets & Tuples",
+    "python.basics.modules-packages": {
+      "title": "Modules & Packages",
       "duration": "2-3h",
       "objectives": [
-        "Choose the right built-in collection for a problem",
-        "Use slicing, comprehensions, and dict methods idiomatically",
-        "Explain mutability and copy semantics"
+        "Explain how `import` finds a module (sys.path, the current directory, site-packages), what runs on first import, and why circular imports fail",
+        "Organize code into a package with __init__.py and import between modules with absolute imports, explaining why relative imports are fragile",
+        "Explain the _name and __all__ conventions for a module's public surface and contrast them with Go's capitalization rule",
+        "Create a project with `uv init --no-package`, read what pyproject.toml records, add a dependency with `uv add`, and explain what the .venv and lockfile are for",
+        "Run a package as a program with `python -m pkg` and a __main__.py"
       ],
       "verify": {
         "type": "pytest"
       }
     },
-    "python.basics.errors-testing": {
-      "title": "Exceptions & Testing Basics",
+    "python.basics.strings-bytes": {
+      "title": "Strings & Bytes",
+      "duration": "3-4h",
+      "objectives": [
+        "Explain the difference between str (code points) and bytes (encoded), and convert between them with an explicit encoding",
+        "Predict len, indexing, and slicing results for non-ASCII text, including negative indexes and steps, and contrast with Go's byte-length strings",
+        "Use f-strings with format specs (width, precision, alignment, !r) to produce exact output",
+        "Solve text-processing tasks with split, join, strip, startswith, find, and replace",
+        "Use ''.join (or io.StringIO) for repeated concatenation and explain why += in a loop is quadratic"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.basics.lists-tuples": {
+      "title": "Lists & Tuples",
       "duration": "2-3h",
       "objectives": [
-        "Raise and handle exceptions with try/except/finally",
-        "Write pytest tests including parametrized cases",
-        "Explain EAFP versus LBYL error handling"
+        "Predict the result of indexing, negative indexing, and slicing a list, and explain why a slice is a copy rather than a view",
+        "Choose between a list and a tuple for a given value and justify the choice by mutability and intent (record vs sequence)",
+        "Implement common list manipulations (insert, remove, filter, reverse) with methods and unpacking without index bugs",
+        "Distinguish `list.sort()` from `sorted()` and `reverse()` from `reversed()`, and predict which return None",
+        "Explain why appending is amortised constant time while inserting at the front is linear, and reach for `collections.deque` when both ends matter"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.basics.dicts-sets": {
+      "title": "Dicts & Sets",
+      "duration": "2-3h",
+      "objectives": [
+        "Create, read, update, and delete dict entries, and use .get, `in`, and setdefault to distinguish a missing key from a falsy value",
+        "Explain why dict keys must be hashable and predict which built-in values can and cannot be keys",
+        "Explain that dicts preserve insertion order and iterate keys, values, and items in a stable order, contrasting with Go's randomized maps",
+        "Use set operations (union, intersection, difference) and explain when a set beats a list for membership tests",
+        "Use collections.defaultdict and Counter to replace manual key-initialisation code"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.basics.iteration-comprehensions": {
+      "title": "Iteration & Comprehensions",
+      "duration": "2-3h",
+      "objectives": [
+        "Explain the difference between an iterable and an iterator, and demonstrate it with `iter()` and `next()` on a list and a dict",
+        "Sort and select with `sorted`, `min`, and `max` and a `key=` function (tuple keys, `operator.itemgetter`, `reverse=`), and explain that Python's sort is stable",
+        "Show `functools.cmp_to_key` once and explain why key functions replace comparators in Python",
+        "Write list, dict, and set comprehensions and a generator expression, and explain when a plain loop reads better",
+        "Use `any`, `all`, and `sum` over generator expressions to express predicates without building intermediate lists"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.basics.references-mutability": {
+      "title": "References & Mutability",
+      "duration": "3-4h",
+      "objectives": [
+        "Explain that assignment copies a reference, never an object, and predict when two names alias the same list or dict (including a list of lists)",
+        "Trace what a function can and cannot change about its argument (mutate the object vs rebind the local name), contrasting with Go's pass-by-value and pointers",
+        "Explain the mutable-default-argument trap (defaults are evaluated once) and fix it with the `None` sentinel idiom",
+        "Choose between copy.copy, copy.deepcopy, and constructing a new object, and justify the choice for nested data",
+        "Predict when `AttributeError: 'NoneType'` will be raised and guard against it, as Go's nil-pointer analog"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.basics.classes": {
+      "title": "Classes & Methods",
+      "duration": "3-4h",
+      "objectives": [
+        "Define a class with __init__ and instance attributes, and explain what self is and how `obj.method()` becomes `Class.method(obj)`",
+        "Predict the difference between instance and class attributes, including the shared-mutable-class-attribute bug",
+        "Implement methods, a @property, and alternative constructors with @classmethod, justifying each over a plain function",
+        "Write __repr__ and __eq__ so instances print usefully and compare by value, and explain the default identity-based behaviour",
+        "Build a linked structure with a `Node` class whose `next` is `Node | None`, and traverse it without an AttributeError"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.basics.dunder-methods": {
+      "title": "Dunder Methods",
+      "duration": "2-3h",
+      "objectives": [
+        "Implement __len__, __iter__, __contains__, and __getitem__ so a class works with len, for, in, and indexing",
+        "Explain the __eq__/__hash__ contract and predict what happens when a class defines one without the other (unhashable instances, broken dict lookups)",
+        "Implement ordering with __lt__ and functools.total_ordering so instances can be sorted and heap-ordered",
+        "Return `NotImplemented` from a binary operator that does not recognise its operand so Python tries the reflected method (`__radd__`), and explain why raising TypeError there is wrong",
+        "Choose between __repr__ and __str__, explain which the REPL, f-strings, and tracebacks use, and identify when operator overloading hurts readability"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.basics.dataclasses": {
+      "title": "Dataclasses & Enums",
+      "duration": "2-3h",
+      "objectives": [
+        "Define a @dataclass and explain which dunders it generates and from what, having written them by hand in the previous lesson",
+        "Use field(default_factory=...) for mutable defaults and explain why a bare [] default is rejected",
+        "Choose between frozen=True, NamedTuple, and a mutable dataclass and justify by hashability and intent",
+        "Model a fixed set of states with enum.Enum or StrEnum and explain why it beats string constants",
+        "Model a small domain (a task with a status) with dataclasses and enums, and decide when a plain class with custom __init__ logic is still the right tool"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.basics.exceptions": {
+      "title": "Exceptions",
+      "duration": "3-4h",
+      "objectives": [
+        "Explain the exception hierarchy: why a bare `except:` swallows KeyboardInterrupt and SystemExit, why `except Exception` belongs only at a boundary, and why a handler names the specific exception it can fix",
+        "Implement try/except/else/finally correctly and predict the execution order, including what finally does to a return",
+        "Define custom exception classes and raise them with `from` so callers can inspect __cause__, as the analog of Go's %w wrapping and errors.Is",
+        "Choose between EAFP and LBYL for a given operation and justify it by race conditions and readability, using `contextlib.suppress` where a pass-through is intended",
+        "Read a traceback bottom-up to the failing line and use breakpoint() to inspect state where it failed"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.basics.testing-basics": {
+      "title": "Testing Basics",
+      "duration": "3-4h",
+      "objectives": [
+        "Write a test that pytest discovers by name and explain how assertion rewriting produces readable failures",
+        "Implement table-driven tests with @pytest.mark.parametrize and ids, and run one case with -k",
+        "Use built-in fixtures (tmp_path, monkeypatch, capsys) and write a small fixture of your own",
+        "Assert that code raises with pytest.raises and check the message",
+        "Measure coverage with pytest --cov and explain what coverage does and does not guarantee"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.basics.io-files": {
+      "title": "I/O & Files",
+      "duration": "3-4h",
+      "objectives": [
+        "Read and write files with open inside with, passing an explicit encoding, and explain what the context manager guarantees on error",
+        "Use pathlib.Path for paths, existence checks, and directory listing instead of string concatenation",
+        "Process a large file line by line and explain when streaming beats read()",
+        "Round-trip structured data with the json and csv modules",
+        "Read sys.argv and sys.stdin and write to sys.stdout/sys.stderr to build a filter-style program"
       ],
       "verify": {
         "type": "pytest"
@@ -1949,34 +2158,111 @@
     },
     "python.basics.project-cli-tracker": {
       "title": "Mini-Project: CLI Tracker",
-      "duration": "4-6h",
+      "duration": "5-8h",
       "objectives": [
-        "Build a small CLI tool combining functions, collections, files, and error handling",
-        "Cover the core logic with a pytest suite"
+        "Design and implement a small CLI tracker combining dataclasses, enums, lists, dicts, and methods, with logic that never prints or reads sys.argv",
+        "Persist tasks to a |-separated text file and load them back, treating a missing file as empty and a malformed line as CorruptError carrying the line number",
+        "Parse arguments with argparse to support add/list/complete subcommands and map exceptions to exit codes and stderr messages in one place",
+        "Write parametrised tests covering the core logic and the file format, using tmp_path",
+        "Structure the project as a package with a __main__.py that runs as `python -m tracker`, and keep the code ruff-clean"
       ],
       "verify": {
         "type": "pytest"
       }
     },
-    "python.intermediate.idioms-iterators": {
-      "title": "Pythonic Idioms & Iterators",
-      "duration": "2-3h",
+    "python.intermediate.iterators-generators": {
+      "title": "Iterators & Generators",
+      "duration": "3-4h",
       "objectives": [
-        "Write generators and use the iterator protocol",
-        "Use context managers and unpacking idiomatically",
-        "Recognize non-Pythonic code and refactor it"
+        "Implement the iterator protocol by hand (`__iter__`, `__next__`, StopIteration) and predict what iter/next do on a list, a file object, and a generator",
+        "Implement a generator with yield and explain how it suspends and resumes state, contrasting with building a list",
+        "Compose lazy pipelines with generator expressions, itertools (islice, chain, groupby, batched, pairwise), and yield from, as Python's analog of Go's io composition",
+        "Explain why generators are single-pass and identify the bug of iterating one twice",
+        "Choose between returning a list and yielding for a given function and justify by memory and caller needs"
       ],
       "verify": {
         "type": "pytest"
       }
     },
-    "python.intermediate.classes-protocols": {
-      "title": "Classes, Dataclasses & Protocols",
+    "python.intermediate.closures-decorators": {
+      "title": "Closures & Decorators",
+      "duration": "3-4h",
+      "objectives": [
+        "Implement a closure that captures and mutates enclosing state with nonlocal, and explain that variables are captured by reference",
+        "Explain the late-binding loop pitfall (all closures see the last value) and fix it with a default argument or partial",
+        "Implement a decorator that wraps a function with functools.wraps, preserving name, docstring, and signature",
+        "Implement a decorator factory that takes arguments (e.g. retry(times=3)) and explain the three nested layers",
+        "Identify where a decorator hides control flow badly and argue for an explicit call instead"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.intermediate.context-managers": {
+      "title": "Context Managers",
       "duration": "2-3h",
       "objectives": [
-        "Model data with classes, dataclasses, and dunder methods",
-        "Use Protocols for structural typing over inheritance",
-        "Explain composition versus inheritance trade-offs"
+        "Explain what `with` calls and when, and predict how __exit__ sees and can swallow an exception",
+        "Implement a context manager as a class and as a @contextlib.contextmanager generator (yield inside try/finally), and choose between them",
+        "Use ExitStack to manage a dynamic number of resources and explain why nested with does not scale",
+        "Use contextlib.suppress and closing and explain the resource-cleanup guarantee they provide, as the analog of Go's defer",
+        "Identify resources beyond files that deserve a context manager (locks, temporary directories, timers, database transactions)"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.intermediate.protocols": {
+      "title": "Duck Typing & Protocols",
+      "duration": "3-4h",
+      "objectives": [
+        "Explain duck typing and why Python code checks capabilities rather than types, and when that hurts",
+        "Implement a typing.Protocol that a class satisfies structurally without inheriting, contrasting with nominal ABCs and Go's implicit interfaces",
+        "Choose between a Protocol and an ABC with @abstractmethod for a given design and justify the choice",
+        "Design a small consumer-side protocol (1-2 methods) instead of a large provider-side one, and explain why it is defined where it is used",
+        "Use collections.abc bases (Iterable, Mapping, Sequence) as hints and as isinstance checks, and explain the virtual-subclass registration behind the latter"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.intermediate.inheritance-composition": {
+      "title": "Inheritance & Composition",
+      "duration": "2-3h",
+      "objectives": [
+        "Explain how the MRO resolves a method call in single and multiple inheritance and predict the output of a diamond",
+        "Implement a mixin correctly with cooperative super().__init__ calls",
+        "Implement delegation with an explicit field or __getattr__ and contrast it with Go's embedding",
+        "Choose between subclassing and composing for a given design and justify it by the Liskov and fragile-base-class arguments",
+        "Identify code that subclasses a built-in (dict, list) and explain the traps that make collections.UserDict or composition safer"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.intermediate.packaging": {
+      "title": "Packaging & Project Layout",
+      "duration": "2-3h",
+      "objectives": [
+        "Convert a flat module into a `src/` layout package with `[build-system]` uv_build and explain what the src layout prevents (importing the unbuilt tree by accident)",
+        "Declare metadata, `requires-python`, runtime dependencies, and dependency groups in pyproject.toml and explain which of them `uv sync` installs by default",
+        "Add a `[project.scripts]` console entry and run it with `uv run`, explaining how an entry point maps to a function",
+        "Explain what `uv lock` records, what `uv sync --locked` refuses to do, and why the lockfile is committed in applications but not in this course's exercises",
+        "Build a wheel with `uv build` and inspect its contents to confirm the package and entry point are included"
+      ],
+      "verify": {
+        "type": "script"
+      }
+    },
+    "python.intermediate.pattern-matching": {
+      "title": "Pattern Matching & Runtime Types",
+      "duration": "2-3h",
+      "objectives": [
+        "Implement match with class, sequence, and mapping patterns and guards to dispatch on the shape of data",
+        "Explain when isinstance is appropriate and when it signals a design that wants a protocol method instead",
+        "Predict which except clause catches a given exception and order clauses from specific to general, as the analog of errors.As",
+        "Walk an exception's __cause__/__context__ chain and explain the difference between implicit and explicit chaining",
+        "Handle ExceptionGroup with except* and explain where groups arise (TaskGroup, batch validation)"
       ],
       "verify": {
         "type": "pytest"
@@ -1984,23 +2270,125 @@
     },
     "python.intermediate.typing": {
       "title": "Static Typing",
+      "duration": "3-4h",
+      "objectives": [
+        "Explain that annotations are not enforced at runtime and what a type checker adds, including gradual typing with Any and where `# type: ignore` is acceptable",
+        "Run `mypy --strict` on a module, read its findings, and fix every one without weakening the types",
+        "Annotate functions and data with built-in generics, `X | None`, Literal, TypedDict, and Self, and explain what each documents",
+        "Narrow a union with isinstance, match, and a TypeIs guard, and explain why narrowing beats cast",
+        "Use @overload and reveal_type to describe and inspect a function whose return type depends on its arguments, and identify code where hints add weight without benefit"
+      ],
+      "verify": {
+        "type": "script"
+      }
+    },
+    "python.intermediate.generics": {
+      "title": "Generics",
+      "duration": "3-4h",
+      "objectives": [
+        "Implement a generic function and class with PEP 695 type parameters and check them with mypy --strict",
+        "Explain the difference between an unbounded parameter, a bound, and a constraint set, and choose one for a given problem",
+        "Define a `type` alias and a generic Protocol, and explain when a Protocol bound beats an ABC",
+        "Explain variance at an introductory level: why a `list[Dog]` is not a `list[Animal]` but a `Sequence[Dog]` is a `Sequence[Animal]`",
+        "Type a decorator with ParamSpec so wrapped signatures survive, and identify code where generics add annotation weight without benefit"
+      ],
+      "verify": {
+        "type": "script"
+      }
+    },
+    "python.intermediate.json-encoding": {
+      "title": "JSON & Encoding",
       "duration": "2-3h",
       "objectives": [
-        "Annotate functions and data with type hints, including generics",
-        "Run a type checker and fix reported errors",
-        "Explain gradual typing and where annotations pay off"
+        "Implement round-tripping between dataclasses and JSON with asdict and a classmethod constructor, controlling field names and omitted fields",
+        "Implement a custom encoder (default=) and decoder (object_hook=) for types JSON cannot represent (datetime, Decimal, enums)",
+        "Choose between None and an absent key to distinguish 'absent' from 'empty', and express optionality with TypedDict(total=False)",
+        "Stream JSON Lines over a file object and use `JSONDecoder.raw_decode` for concatenated documents instead of buffering whole payloads",
+        "Read configuration with `tomllib` and explain why `pickle` must never be used on untrusted input"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.intermediate.time": {
+      "title": "Time",
+      "duration": "2-3h",
+      "objectives": [
+        "Implement parsing and formatting with fromisoformat/strftime and explain why ISO 8601 is the interchange default",
+        "Explain the difference between naive and aware datetimes and why datetime.now(UTC) replaces utcnow()",
+        "Choose between time.monotonic, time.perf_counter, and datetime.now for a given measurement, and explain why elapsed time needs a monotonic clock",
+        "Implement duration arithmetic with timedelta and predict how zoneinfo affects arithmetic across a DST boundary",
+        "Inject a clock (Callable[[], datetime]) into code that reads time so tests control it"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.intermediate.threads-gil": {
+      "title": "Threads & the GIL",
+      "duration": "2-3h",
+      "objectives": [
+        "Implement concurrent I/O-bound work with ThreadPoolExecutor and collect results with as_completed",
+        "Explain what the GIL serialises and why threads speed up I/O-bound but not pure-Python CPU-bound work, and demonstrate both with a measurement",
+        "Start and join threads explicitly, explain what a daemon thread is, and identify a leaked thread in given code",
+        "Choose between threads, processes, and (previewed) asyncio for a described workload and justify the choice",
+        "Predict the outcome of unsynchronised `counter += 1` from two threads and explain why the GIL does not make it safe"
       ],
       "verify": {
         "type": "pytest"
       }
     },
     "python.intermediate.asyncio": {
-      "title": "Concurrency with asyncio",
-      "duration": "3-4h",
+      "title": "asyncio",
+      "duration": "3-5h",
       "objectives": [
-        "Write async/await code with tasks and gather",
-        "Explain the event loop, cooperative scheduling, and the GIL",
-        "Choose between asyncio, threads, and processes"
+        "Explain what `await` yields to and how the event loop schedules coroutines cooperatively, contrasting with preemptive threads",
+        "Implement concurrent I/O with create_task and gather, and explain why a task must be referenced to survive",
+        "Identify a call that blocks the loop and move it behind `asyncio.to_thread`",
+        "Implement a producer/consumer pipeline with asyncio.Queue and signal completion with asyncio.Event, as Python's channel analog",
+        "Write a TCP echo server and client with asyncio streams and test them in-process with pytest-asyncio"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.intermediate.synchronization": {
+      "title": "Locks & Synchronization",
+      "duration": "2-3h",
+      "objectives": [
+        "Implement a thread-safe counter and cache with threading.Lock, and explain why the lock must cover the whole check-then-act",
+        "Choose among Lock, RLock, Condition, Semaphore, and Event for a described coordination problem and justify it",
+        "Explain when asyncio code still needs asyncio.Lock or asyncio.Event despite single-threaded execution (await points inside critical sections)",
+        "Use functools.cache as a once-only initialiser and explain its thread-safety guarantee",
+        "Choose between a lock and a queue for sharing state and justify it, as the analog of 'share memory by communicating'"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.intermediate.cancellation-timeouts": {
+      "title": "Cancellation & Timeouts",
+      "duration": "2-3h",
+      "objectives": [
+        "Implement a timeout with asyncio.timeout and explain what the caller sees when it fires",
+        "Cancel a task and handle CancelledError correctly (clean up, re-raise), explaining why swallowing it breaks structured concurrency",
+        "Use asyncio.shield for work that must complete and justify each use",
+        "Propagate request-scoped values with contextvars across awaits and explain why a global would break",
+        "Implement cooperative cancellation for threads with an Event flag and explain why threads cannot be killed"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.intermediate.concurrency-patterns": {
+      "title": "Concurrency Patterns",
+      "duration": "4-6h",
+      "objectives": [
+        "Implement bounded fan-out with TaskGroup and a Semaphore, and explain how TaskGroup cancels siblings on failure",
+        "Implement a worker pool over asyncio.Queue with graceful shutdown that drains within a deadline",
+        "Handle partial failure with ExceptionGroup/except* and gather(return_exceptions=True), choosing between them",
+        "Move CPU-bound work to ProcessPoolExecutor and explain the pickling constraints on arguments and results",
+        "Write deterministic tests for concurrent code with Event gates and asyncio.timeout watchdogs, never sleeps"
       ],
       "verify": {
         "type": "pytest"
@@ -2010,32 +2398,67 @@
       "title": "Python Tooling",
       "duration": "2-3h",
       "objectives": [
-        "Manage environments and dependencies with modern tooling (venv/uv)",
-        "Lint and format with ruff; structure a packageable project",
-        "Explain lockfiles and reproducible installs"
+        "Configure ruff (rule families, per-file ignores) and explain what the 0.16 defaults already cover (isort, pyupgrade, bugbear) and where black/isort/flake8 fit historically",
+        "Compare mypy, pyright, and ty on the same code and justify mypy as the graded checker and ty as the editor LSP",
+        "Run pip-audit and pre-commit hooks and explain where each belongs in a workflow",
+        "Reproduce what uv automates with `python -m venv`, `pip install --group dev`, and `pip install -e .`, so a pip-only shop is survivable",
+        "Read a lockfile diff and explain what `uv lock --upgrade-package` changes and why"
       ],
       "verify": {
-        "type": "pytest"
+        "type": "discussion"
       }
     },
     "python.intermediate.project-concurrent": {
       "title": "Mini-Project: Concurrent Tool",
-      "duration": "4-6h",
+      "duration": "6-10h",
       "objectives": [
-        "Build a concurrent tool (e.g. parallel link checker) with asyncio",
-        "Handle cancellation, timeouts, and bounded concurrency"
+        "Design and implement an async link checker as a src-layout package with a console script, combining TaskGroup, Semaphore, and httpx.AsyncClient",
+        "Enforce per-request timeouts and bounded concurrency, and report results in input order regardless of completion order",
+        "Cancel cleanly on SIGINT, draining in-flight work within a deadline and exiting non-zero",
+        "Test against an in-process asyncio server with Event gates and timeout watchdogs, never sleeps",
+        "Keep the project ruff-clean and mypy --strict clean, with a pyproject that pins requires-python and dependency groups"
       ],
       "verify": {
         "type": "pytest"
       }
     },
-    "python.advanced.web-services": {
-      "title": "Web Services with FastAPI",
+    "python.advanced.http-servers": {
+      "title": "HTTP Servers & ASGI",
       "duration": "3-4h",
       "objectives": [
-        "Build a REST service with routing, validation, and error mapping",
-        "Use Pydantic models for request/response schemas",
-        "Structure a service for testability"
+        "Explain the ASGI contract (scope, receive, send) and write a raw ASGI app that answers a request without a framework",
+        "Route requests and serve JSON with Starlette, and explain what the framework adds over the raw callable",
+        "Implement middleware (request id, logging, error recovery) and predict the order in which layers run",
+        "Configure uvicorn timeouts and lifespan, and implement graceful shutdown that finishes in-flight requests",
+        "Explain where a sync function inside an async server blocks the loop and how the framework's threadpool handles it"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.advanced.rest-services": {
+      "title": "Building REST Services",
+      "duration": "3-5h",
+      "objectives": [
+        "Structure a FastAPI service into router, service, and repository layers and justify the dependency direction",
+        "Define Pydantic v2 request and response models and explain how field validation errors become 422 responses",
+        "Map domain exceptions to HTTP status codes in a single exception handler and explain why handlers should not do it inline",
+        "Inject dependencies with Depends so tests can substitute a repository, as the Protocol-based seam from the intermediate stage",
+        "Test endpoints with TestClient, covering success, validation failure, and a domain error"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.advanced.grpc": {
+      "title": "gRPC",
+      "duration": "3-5h",
+      "objectives": [
+        "Define a service in protobuf, generate code with grpcio-tools, and explain what the generated stubs contain",
+        "Implement unary and server-streaming RPCs with grpc.aio and test them against an in-process server",
+        "Propagate deadlines and map failures to gRPC status codes, explaining how they differ from HTTP status codes",
+        "Implement an interceptor for logging or auth and explain the ordering of the interceptor chain",
+        "Choose between REST and gRPC for a described interface and justify it"
       ],
       "verify": {
         "type": "pytest"
@@ -2043,11 +2466,55 @@
     },
     "python.advanced.databases": {
       "title": "Databases in Production",
+      "duration": "3-5h",
+      "objectives": [
+        "Connect with SQLAlchemy 2.0 and explain when Core and when the ORM is the right layer",
+        "Write and apply an Alembic migration and explain why schema changes must be versioned",
+        "Configure engine pooling and explain what a pool does under concurrent requests",
+        "Wrap multi-statement work in a transaction with rollback on failure and explain the isolation guarantee you rely on",
+        "Identify an N+1 query pattern and fix it with eager loading, proving the win by counting statements"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.advanced.runtime-gil": {
+      "title": "CPython Runtime & the GIL",
+      "duration": "2-3h",
+      "objectives": [
+        "Read the bytecode of a small function with dis and explain what the eval loop does per instruction",
+        "Explain what the GIL switch interval controls and demonstrate starvation of an I/O thread by a CPU thread",
+        "Measure the cost of a thread, a process, and a task and explain the orders of magnitude between them",
+        "Enable asyncio debug mode and find a slow callback that starves the loop",
+        "State the current status of the JIT and free-threaded builds in the interpreter you run and what each changes about the cost model"
+      ],
+      "verify": {
+        "type": "discussion"
+      }
+    },
+    "python.advanced.memory-management": {
+      "title": "Memory Management",
+      "duration": "2-4h",
+      "objectives": [
+        "Explain reference counting and the cyclic collector, and predict when an object is freed",
+        "Diagnose a reference cycle that keeps memory alive and break it with weakref",
+        "Measure allocations with tracemalloc and attribute a leak to a call site",
+        "Reduce per-instance memory with __slots__ and prove it with sys.getsizeof",
+        "Explain the hazards of __del__ and why context managers are the reliable cleanup mechanism"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.advanced.free-threading": {
+      "title": "Data Races & Free-Threading",
       "duration": "3-4h",
       "objectives": [
-        "Use an ORM/driver with migrations, pools, and transactions",
-        "Write integration tests against a real database",
-        "Explain N+1 queries and how to avoid them"
+        "Explain what the GIL does and does not guarantee about shared memory, and demonstrate a race in `+=` on the default build with a Barrier start and `sys.setswitchinterval(1e-6)`",
+        "State which operations on built-in containers are atomic and why relying on that is a bug waiting for a free-threaded interpreter",
+        "Establish happens-before with Lock, Queue, and Event so a data structure is correct on both the default and the free-threaded build",
+        "Run the exercise under `python3.14t`, measure the single-thread cost and multi-core speedup, and explain per-object locking",
+        "Decide when to opt into free-threading for a described workload and justify it with the measurement"
       ],
       "verify": {
         "type": "pytest"
@@ -2055,11 +2522,27 @@
     },
     "python.advanced.profiling": {
       "title": "Profiling & Optimization",
+      "duration": "3-5h",
+      "objectives": [
+        "Profile a CPU hotspot with cProfile and read pstats output to find the actual cost centre",
+        "Write a benchmark with timeit or pyperf that gives a stable number, and explain what makes a benchmark lie",
+        "Optimise a hotspot (algorithm, data structure, caching) and prove the win before/after with the same benchmark",
+        "Use a sampling profiler on a running process and explain when sampling beats deterministic profiling",
+        "Explain the measure-hypothesise-change-remeasure loop and reject an optimisation that the profile does not justify"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.advanced.extension-boundary": {
+      "title": "The Extension Boundary",
       "duration": "3-4h",
       "objectives": [
-        "Profile CPU and memory with cProfile and allocation tools",
-        "Optimize a hotspot and prove the win with benchmarks",
-        "Explain when to reach for C extensions or alternative runtimes"
+        "Parse a binary record format with struct and memoryview without copying, and prove zero-copy with tracemalloc",
+        "Explain the buffer protocol and why bytes, bytearray, array, and NumPy arrays interoperate through it",
+        "Demonstrate that hashlib and zlib on large buffers release the GIL and scale across threads while a pure-Python loop does not",
+        "Call a C function through ctypes (an ungraded lab with platform notes) and explain the marshalling cost at the boundary",
+        "Choose among staying in Python, Cython/mypyc, and a Rust extension via PyO3/maturin for a described hotspot and justify it with the profile"
       ],
       "verify": {
         "type": "pytest"
@@ -2069,9 +2552,25 @@
       "title": "Advanced Testing",
       "duration": "3-4h",
       "objectives": [
-        "Use fixtures, mocking, and property-based testing (Hypothesis)",
-        "Write integration tests with realistic doubles for external services",
-        "Explain test isolation and flakiness sources"
+        "Organise fixtures with scopes, factories, and conftest.py, and explain what sharing a fixture across modules costs",
+        "Use unittest.mock and monkeypatch for external boundaries and explain why hand-rolled doubles are still preferred inside the codebase",
+        "Write property-based tests with Hypothesis and explain shrinking",
+        "Implement golden-file tests with an --update flag and explain when they help and when they rot",
+        "Separate unit and integration tests with markers, run the integration set against a real temporary database, and explain sources of flakiness"
+      ],
+      "verify": {
+        "type": "pytest"
+      }
+    },
+    "python.advanced.metaprogramming": {
+      "title": "Descriptors, Metaclasses & Imports",
+      "duration": "3-4h",
+      "objectives": [
+        "Implement a descriptor and explain how @property, methods, and bound methods are built on the descriptor protocol",
+        "Use __init_subclass__ to register subclasses and explain when a metaclass is the only option",
+        "Inspect annotations and signatures at runtime with annotationlib and inspect, and explain what deferred evaluation changed in 3.14",
+        "Load plugins dynamically with importlib and explain the import-time side-effect risk",
+        "Argue when metaprogramming is justified and rewrite a metaclass-based design as a plain function or decorator"
       ],
       "verify": {
         "type": "pytest"
@@ -2081,9 +2580,11 @@
       "title": "Observability",
       "duration": "3-4h",
       "objectives": [
-        "Emit structured logs, Prometheus metrics, and OTel traces",
-        "Instrument a service to answer 'is it healthy?' from telemetry",
-        "Explain cardinality and sampling trade-offs"
+        "Emit structured JSON logs with structlog over logging.dictConfig and explain what a log line must carry to be searchable",
+        "Propagate a correlation id through contextvars so every log line and span in a request shares it",
+        "Expose Prometheus counters and histograms and explain cardinality and why user ids are not labels",
+        "Instrument a request with OpenTelemetry traces and propagate context across an outbound HTTP call",
+        "Answer 'is the service healthy?' from telemetry and justify sampling trade-offs"
       ],
       "verify": {
         "type": "pytest"
@@ -2091,10 +2592,13 @@
     },
     "python.advanced.project-service": {
       "title": "Mini-Project: Production Service",
-      "duration": "6-10h",
+      "duration": "8-12h",
       "objectives": [
-        "Build an HTTP service with auth, a database, and observability",
-        "Ship a test suite covering unit and integration levels"
+        "Build an HTTP service with token auth, a database, and migrations, structured in router/service/repository layers",
+        "Ship a test suite covering unit and integration levels, with the integration set against a temporary database",
+        "Expose structured logs, metrics, and health/readiness endpoints, and shut down gracefully on SIGTERM",
+        "Keep the service ruff-clean and mypy --strict clean with a reproducible pyproject and lockfile",
+        "Document the service well enough that the systems-design case studies and your capstone can refer back to it"
       ],
       "verify": {
         "type": "pytest"
@@ -2104,30 +2608,36 @@
       "title": "Capstone: Planning",
       "duration": "3-5h",
       "objectives": [
-        "Spec a capstone project with a PRD and ADRs",
-        "Decompose it into graded milestones with acceptance criteria"
+        "Spec a capstone project with a PRD and ADRs that name the alternatives rejected",
+        "Decompose it into graded milestones with acceptance criteria a harness can check",
+        "Choose the stack from the track (FastAPI or a CLI, SQLAlchemy, asyncio) and justify each choice against the requirements"
       ],
       "verify": {
-        "type": "pytest"
+        "type": "discussion"
       }
     },
     "python.capstone.build-core": {
       "title": "Capstone: Core Build",
       "duration": "20-30h",
       "objectives": [
-        "Implement the core milestones with idiomatic, typed Python",
-        "Keep a green pytest suite at every milestone"
+        "Implement the core milestones with idiomatic, typed Python in a src-layout package",
+        "Keep a green pytest suite, ruff, and mypy --strict at every milestone, with a coverage floor",
+        "Maintain README and MILESTONES so a reviewer can tell what is done from the repo alone"
       ],
       "verify": {
         "type": "pytest"
-      }
+      },
+      "prereqs": [
+        "python.capstone.planning"
+      ]
     },
     "python.capstone.hardening": {
       "title": "Capstone: Hardening",
       "duration": "8-12h",
       "objectives": [
-        "Deepen tests, run a security pass, and profile under load",
-        "Fix a real defect and add a regression test"
+        "Deepen tests with Hypothesis at parsing and input boundaries and integration tests at the service edge",
+        "Run a security pass (pip-audit, secrets, validation, parameterised queries) and fix what it finds",
+        "Profile under load, fix a real defect found by it, and add a regression test"
       ],
       "verify": {
         "type": "pytest"
@@ -2137,30 +2647,33 @@
       "title": "Capstone: Operations",
       "duration": "6-10h",
       "objectives": [
-        "Build CI, deploy repeatably, and instrument the service",
-        "Write a runbook covering rollback and top failure modes"
+        "Build CI with setup-uv that runs ruff, mypy, pytest, and pip-audit on every push",
+        "Deploy repeatably from a container image built with uv and roll back with one command",
+        "Instrument the service and write a runbook covering rollback and the top failure modes"
       ],
       "verify": {
-        "type": "pytest"
+        "type": "script"
       }
     },
     "python.capstone.oss-contribution": {
       "title": "OSS Contribution",
       "duration": "10-15h",
       "objectives": [
-        "Land a PR on a real open-source Python project",
-        "Navigate an unfamiliar codebase and follow its conventions"
+        "Land a PR on a real open-source Python project, or get one meaningfully reviewed",
+        "Navigate an unfamiliar codebase and follow its conventions, tooling, and review etiquette",
+        "Reflect on what differed from working in your own codebase and what you would do differently next time"
       ],
       "verify": {
-        "type": "pytest"
+        "type": "discussion"
       }
     },
     "python.capstone.performance": {
       "title": "Performance Engineering",
       "duration": "8-12h",
       "objectives": [
-        "Optimize a real bottleneck end-to-end with measured baselines",
-        "Defend the methodology and trade-offs in graduation review"
+        "Optimize a real bottleneck end-to-end with measured baselines and a statistically sound before/after",
+        "Choose the optimisation level (algorithm, caching, C path, extension) from the profile and justify it",
+        "Defend the methodology and trade-offs in the graduation review"
       ],
       "verify": {
         "type": "pytest"
