@@ -14,54 +14,116 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     outputs:
-      curriculum: ${{ steps.changes.outputs.curriculum }}
+      go: ${{ steps.changes.outputs.go }}
+      python: ${{ steps.changes.outputs.python }}
+      languages: ${{ steps.changes.outputs.languages }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
-      - name: did the tutor skill change?
+      - name: which language tracks changed?
         id: changes
         env:
           BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
         run: |
           # Unknown base (new branch, force push) means "run everything" rather than guess.
-          if git rev-parse -q --verify "$BASE^{commit}" >/dev/null 2>&1 \
-             && git diff --quiet "$BASE" HEAD -- skills/tutor; then
-            echo "curriculum=false" >> "$GITHUB_OUTPUT"
-            echo "skills/tutor unchanged since $BASE: skipping the solutions job"
+          go=false; python=false
+          if git rev-parse -q --verify "$BASE^{commit}" >/dev/null 2>&1; then
+            content=skills/tutor/curriculum/content
+            for f in $(git diff --name-only "$BASE" HEAD); do
+              case "$f" in
+                "$content"/go/*|"$content"/focus/*) go=true ;;
+                "$content"/python/*|ruff.toml|tools/*) python=true ;;
+                "$content"/shared/*|skills/tutor/scripts/*|skills/tutor/curriculum/registry.json|tests/*)
+                  go=true; python=true ;;
+                .github/workflows/ci.yaml)         go=true; python=true ;;
+              esac
+            done
           else
-            echo "curriculum=true" >> "$GITHUB_OUTPUT"
-            echo "skills/tutor changed since ${BASE:-<unknown base>}: running the solutions job"
+            go=true; python=true
           fi
+          languages=""
+          if [ "$go" = true ]; then languages='"go"'; fi
+          if [ "$python" = true ]; then languages="${languages:+$languages,}\"python\""; fi
+          {
+            echo "go=$go"
+            echo "python=$python"
+            echo "languages=[$languages]"
+          } >> "$GITHUB_OUTPUT"
+          echo "since ${BASE:-<unknown base>}: go=$go python=$python, solutions rows: [$languages]"
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.14"
-      - run: python3 skills/tutor/scripts/tutor.py validate
+      - run: python3 skills/tutor/scripts/tutor.py validate --strict
+      - run: python3 -m unittest discover -s tests -v
       - name: path hygiene guard
         run: |
           if grep -rnI --exclude-dir=.git --exclude-dir=.ruff_cache --exclude=ci.yaml \
-              -e "/Users/" -e "/home/" . | grep -vE "/(Users|home)/ada\b"; then
-            echo "user-specific absolute paths found (use the 'ada' example persona in lessons)"
+              -e "/Users/" -e "/home/" -e "/private/tmp/" -e "/opt/homebrew/" . \
+              | grep -vE "/(Users|home)/ada\b"; then
+            echo "machine-specific absolute paths found (use the 'ada' example persona in lessons)"
             exit 1
           fi
 
-  solutions:
+  track:
     # Pull requests only: the merged tree was already tested there, so a push to
-    # main would only repeat ~90 Go test suites. Skipped via `if` still reports
-    # success, so the ruleset's required check passes for docs-only changes; a
-    # path filter on the trigger would leave it pending and block the merge.
+    # main would only repeat every language's solution suites (~90 for Go). One
+    # row per language whose lessons changed, plus every language when the
+    # shared lessons, the engine, the registry, its tests or this workflow
+    # changed (so a pinned-action bump exercises every row); `solutions` below
+    # folds the rows into the ruleset's required check.
     needs: validate
-    if: github.event_name == 'pull_request' && needs.validate.outputs.curriculum == 'true'
+    if: github.event_name == 'pull_request' && needs.validate.outputs.languages != '[]'
+    name: solutions (${{ matrix.language }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ${{ fromJSON(needs.validate.outputs.languages) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
-        with:
-          go-version: stable
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.14"
-      - run: python3 skills/tutor/scripts/tutor.py ci
+      - if: matrix.language == 'go'
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: stable
+      - if: matrix.language == 'python'
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          enable-cache: true
+      - if: matrix.language == 'python'
+        run: uv python install 3.14
+      - run: python3 skills/tutor/scripts/tutor.py ci --language ${{ matrix.language }}
+      - if: matrix.language == 'python'
+        name: ruff over the Python content
+        run: |
+          targets="skills/tutor/scripts tests tools"
+          if [ -d skills/tutor/curriculum/content/python ]; then
+            targets="$targets skills/tutor/curriculum/content/python"
+          fi
+          uv tool run ruff@0.16.6 format --check $targets \
+            && uv tool run ruff@0.16.6 check $targets
+
+  solutions:
+    # The ruleset's required check. Matrix rows report as "solutions (go)" and
+    # "solutions (python)", never as "solutions", so this job folds them back
+    # into the one name the ruleset knows: green when validate passed and no
+    # row failed; rows that never ran count as green, so docs-only changes
+    # pass. Skipped via `if` still reports success on pushes to main; a path
+    # filter on the trigger would leave it pending and block the merge.
+    needs: [validate, track]
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "validate: ${{ needs.validate.result }}, rows: ${{ needs.track.result }}"
+          test "${{ needs.validate.result }}" = success
+          case "${{ needs.track.result }}" in
+            success|skipped) ;;
+            *) exit 1 ;;
+          esac
 
   cla:
     if: >-
