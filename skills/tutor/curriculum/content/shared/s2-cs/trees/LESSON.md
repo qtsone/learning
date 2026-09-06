@@ -212,20 +212,7 @@ The deciding question: **does the workload care about key ordering?**
   cannot answer these without visiting every key, because hashing deliberately
   destroys ordering.
 
-In Go:
-
-There is no tree in Go's standard library — `map` is the hash table, and when
-ordering is needed Go programmers usually sort a slice. So in the exercise you
-build the BST yourself, from the same raw material as your linked list —
-a struct and pointers, with `nil` as the empty tree:
-
-```go
-type Node struct {
-	Key   int
-	Left  *Node
-	Right *Node
-}
-```
+<!-- lang: bst-vs-hash-table -->
 
 ## Exercise
 

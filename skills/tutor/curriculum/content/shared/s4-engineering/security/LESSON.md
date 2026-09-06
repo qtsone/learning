@@ -77,20 +77,7 @@ A validation rule is a *specification*: "3-32 bytes, lowercase ASCII letters,
 digits, underscore, starting with a letter" is checkable, testable, and
 explainable in an error message. "No weird stuff" is none of those.
 
-In Go:
-
-Remember from the strings lesson that indexing a string yields *bytes*. For an
-ASCII-only allowlist that is exactly what you want — checking bytes means a
-sneaky multi-byte character can never pass as a letter:
-
-```go
-for i := 0; i < len(name); i++ {
-	c := name[i]
-	if c < 'a' || c > 'z' { // plus whatever else the allowlist admits
-		return fmt.Errorf("forbidden byte %q at index %d", c, i)
-	}
-}
-```
+<!-- lang: trust-boundaries-where-validation-lives -->
 
 ## Injection: never concatenate into an interpreter
 
@@ -116,17 +103,7 @@ will never parse. The same principle kills the other injections: pass
 arguments to processes as an argument *list* (never build a shell string) and
 escape output into HTML with the encoder, not by hand.
 
-In Go:
-
-You did this in the SQL lesson, perhaps without knowing what it was defending
-against — the `?` placeholder in `database/sql`:
-
-```go
-row := db.QueryRow("SELECT id, name FROM users WHERE name = ?", name)
-```
-
-`name` can contain quotes, `OR`, or an entire hostile query — the driver hands
-it to SQLite as a bound value, and it can only ever be compared as a string.
+<!-- lang: injection-never-concatenate-into-an -->
 
 ## Path traversal: the filesystem is an interpreter too
 
@@ -140,22 +117,7 @@ thinking again: before touching the filesystem, decide whether the *name* is
 one you are willing to serve — a bare filename is; anything absolute or
 upward-climbing is not.
 
-In Go:
-
-`filepath.IsLocal` answers exactly that question — is this path relative, and
-does it stay inside the directory it is joined to?
-
-```go
-if !filepath.IsLocal(name) {
-	return nil, fmt.Errorf("%w: %q", ErrBadName, name)
-}
-data, err := os.ReadFile(filepath.Join(dir, name))
-```
-
-It rejects `../secret.txt`, `a/../../b`, absolute paths, and (on Windows)
-reserved device names. Newer Go versions add `os.Root`, which makes the
-operating system itself enforce the boundary for a whole directory subtree —
-worth knowing once you serve files seriously.
+<!-- lang: path-traversal-the-filesystem-is-an -->
 
 ## Secrets never belong in source code
 
@@ -179,14 +141,7 @@ credential is a hardcoded secret with extra steps. And a secret that *has*
 leaked is revoked and reissued, not merely deleted from the code: assume
 every copy of history is public.
 
-In Go:
-
-```go
-key := os.Getenv("VAULT_API_KEY")
-if key == "" {
-	return "", errors.New("VAULT_API_KEY is not set")
-}
-```
+<!-- lang: secrets-never-belong-in-source-code -->
 
 (`os.LookupEnv` additionally distinguishes "unset" from "set but empty" when
 that matters.)
@@ -214,16 +169,7 @@ per password so equal passwords produce different hashes and precomputation
 buys nothing. The salt is not secret; it is stored inside the hash string
 alongside the cost, so verification needs no extra bookkeeping.
 
-In Go:
-
-`golang.org/x/crypto/bcrypt` does all of it — random salt, embedded cost,
-constant-time comparison:
-
-```go
-hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-// store string(hash); later:
-ok := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
-```
+<!-- lang: passwords-slow-hashes-unique-salts -->
 
 Note the API shape: there is no "hash the password again and compare strings"
 step. You *ask the library to verify*, because it must extract the salt and

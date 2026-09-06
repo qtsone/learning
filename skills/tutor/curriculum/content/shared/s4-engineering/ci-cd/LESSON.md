@@ -67,8 +67,7 @@ gives you the universal debugging move: anything a pipeline does, you can
 reproduce at your own prompt by running the same commands from a clean
 checkout.
 
-In Go: a typical pipeline runs exactly what you already type by hand —
-`go vet ./...` and `go test ./...` — plus a formatting check.
+<!-- lang: a-pipeline-is-just-your-commands-run-by -->
 
 ## Integration, delivery, deployment
 
@@ -153,21 +152,7 @@ them:
 Order gates cheapest-first: a formatting complaint in three seconds beats
 waiting out the whole test suite first.
 
-In Go, the two gates and one trap:
-
-- `go vet ./...` — the standard analyzer; exits non-zero on findings. Its
-  classic catch is a `Printf`-family format verb that disagrees with its
-  argument — code that compiles and prints garbage.
-- `gofmt -l .` — lists files that are not formatted. The trap: it *always
-  exits 0*, even when it finds offenders, so as a bare step it can never fail.
-  The idiom is to fail when its output is non-empty:
-
-  ```sh
-  test -z "$(gofmt -l .)"
-  ```
-
-  `test -z` exits non-zero when the string is non-empty — an offending file
-  name in the output turns the step red.
+<!-- lang: quality-gates -->
 
 ## Reading a red run
 

@@ -85,13 +85,7 @@ api-design crash story required the key record and the charge to
 commit **atomically**, and atomic-with-the-charge means *same store as
 the charge*. Consistency needs outrank workload shape.
 
-**In Go:** nothing about this choice is language-specific — that is
-the point — but you have lived one side of it: the `pgx` transaction
-in your S5 service that wrote a charge and its idempotency key in
-one commit is a multi-row invariant. Before moving any dataset to a
-key-value API, find every transaction in your code that spans it and
-something else: each one is a consistency requirement you would be
-giving up.
+<!-- lang: sql-or-nosql-decide-by-access-pattern -->
 
 ## Indexes: buying reads with writes
 
@@ -248,13 +242,7 @@ reads, never writes** — every replica still applies every write. When
 writes or sheer data size outgrow one node, copying is not enough.
 You have to split.
 
-**In Go:** replication makes read routing an *application* concern.
-Your S5 service held one `pgxpool` for one DSN; with replicas there
-are several pools, and "may this query read stale data?" becomes a
-parameter of your storage layer's API — the refund status read after
-a support action goes to the leader; the nightly reconciliation walk
-is happy on a lagging replica. Design the seam now or grep for every
-query later.
+<!-- lang: replication-copies-that-disagree -->
 
 ## Sharding: splitting the data itself
 

@@ -116,33 +116,7 @@ write rate two orders of magnitude higher (retries and the existence check
 start to bite), or a hard requirement for the shortest possible keys, both of
 which favor counter ranges.
 
-**In Go:** the store's conflict error drives the retry, and `randomKey`
-draws from `crypto/rand` — guessable keys would be a security bug, not a
-style choice:
-
-```go
-func (s *Shortener) Create(ctx context.Context, long string) (string, error) {
-	for attempt := 0; attempt < 5; attempt++ {
-		key, err := randomKey(7)
-		if err != nil {
-			return "", err
-		}
-		switch err := s.store.InsertIfAbsent(ctx, key, long); {
-		case err == nil:
-			return key, nil
-		case errors.Is(err, ErrKeyExists):
-			continue
-		default:
-			return "", err
-		}
-	}
-	return "", errors.New("shortener: no free key in 5 attempts")
-}
-```
-
-`InsertIfAbsent` is a port (architecture lesson) — a unique-index violation
-in SQL or a conditional put in a KV store is an adapter detail. The bound on
-the loop matters: unbounded retry turns a store outage into a spin.
+<!-- lang: key-generation -->
 
 ### Storage and the read path
 
@@ -277,29 +251,7 @@ where they accumulated. And every deploy disconnects everyone a gateway held —
 drain slowly and require jittered client backoff, or the deploy becomes a
 self-inflicted reconnect storm (reliability lesson).
 
-**In Go:** one goroutine per connection with a buffered outbound channel,
-where the `default` case is the whole point — a slow client must never block
-the fan-out serving everyone else:
-
-```go
-func (g *Gateway) deliver(userID string, msg []byte) {
-	g.mu.RLock()
-	sessions := g.sessions[userID] // one entry per connected device
-	g.mu.RUnlock()
-
-	for _, s := range sessions {
-		select {
-		case s.out <- msg:
-		default:
-			s.close() // the client resyncs from its cursor on reconnect
-		}
-	}
-}
-```
-
-Dropping a laggard is safe *only* because the durable log is the source of
-truth and the client can replay from its cursor — the same reasoning as
-your S3 worker-pool backpressure, applied to a socket.
+<!-- lang: holding-millions-of-connections -->
 
 ### Fan-out
 

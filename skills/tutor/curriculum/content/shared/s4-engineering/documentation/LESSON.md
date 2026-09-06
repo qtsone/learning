@@ -107,15 +107,7 @@ separate manual — the same diff that changes behavior must change the
 promise, and your reviewer (last lesson) sees the pair together or flags the
 mismatch.
 
-**In Go:** the contract has an official format —
-[doc comments](https://go.dev/doc/comment). The comment sits immediately
-above the declaration, is made of complete sentences, and its first sentence
-begins with the identifier's name: `// Open reads the snippet file at path…`.
-A `// Package store …` comment introduces the package as a whole. The reward
-for the convention is tooling: `go doc`, your editor's hover, and pkg.go.dev
-all render these comments as the package's reference documentation — you
-have been reading them since S1. Every exported identifier deserves one;
-`// Deprecated:` marks the ones callers should migrate away from.
+<!-- lang: doc-comments-the-contract-at-the-call -->
 
 ## ADRs: write down the why before it evaporates
 
@@ -176,10 +168,7 @@ Version numbers are the changelog's headline. Semantic versioning makes them
 a contract: breaking change → major, new feature → minor, fix → patch
 (pre-1.0 projects conventionally signal breakage with minor bumps).
 
-**In Go:** modules take that contract literally — versions are git tags like
-`v0.2.0`, and from v2 onward the major version becomes part of the module
-path (`example.com/mod/v2`), which is how the toolchain can promise that
-upgrading within a major version never breaks your build's import contract.
+<!-- lang: the-changelog-the-release-seen-from -->
 
 ## Routing: every fact has one home
 

@@ -133,21 +133,7 @@ while n > 1:
 And combinations compose: a halving loop *inside* a full loop over the input
 is n × log n → O(n log n).
 
-In Go, rule 3's shape looks like this — the pair-comparison loop you have
-already written by instinct:
-
-```go
-for i := 0; i < len(xs); i++ {
-	for j := i + 1; j < len(xs); j++ {
-		if xs[i] == xs[j] {
-			return true // early exit — but the worst case still visits every pair
-		}
-	}
-}
-```
-
-The `return true` does not change the class: Big-O rates the worst case, and
-the worst case (no duplicates) runs the full n²/2 comparisons.
+<!-- lang: reading-complexity-off-loops -->
 
 ## Space complexity
 
@@ -162,12 +148,7 @@ doesn't count**. You were handed the list; what you're charged for is the
 - A function that builds a table of every *pair* would use O(n²) — usually a
   design smell.
 
-In Go: `make(map[int]bool)` and `append` that grows a slice allocate memory
-proportional to what you put in them — that's auxiliary space. Indexing
-`xs[i]` or slicing `xs[2:5]` allocates nothing: a slice expression shares the
-backing array (remember the S1 slices lesson). The Go test helper
-`testing.AllocsPerRun` counts allocations, which makes "O(1) auxiliary
-space" something a test can actually check — the exercise uses it.
+<!-- lang: space-complexity -->
 
 ## The time-space trade-off
 

@@ -172,16 +172,7 @@ What drives an actual table toward the worst case:
    why serious runtimes, Go included, mix a random per-process seed into their
    hash so key-to-bucket mapping is unpredictable from outside.
 
-In Go:
-
-The `map` you have used since S1 is exactly this machinery, hidden behind
-syntax. The comma-ok idiom is `Get`, the `delete` builtin is `Delete`, and map
-keys must be comparable because the runtime must confirm "same key" after
-hashing. Even iteration order being deliberately randomized is this lesson:
-bucket order is an artifact of hashing, not something meaningful, and Go
-randomizes it so programs cannot accidentally depend on it. The standard
-library also ships FNV as [`hash/fnv`](https://pkg.go.dev/hash/fnv) — after
-the exercise you can check your implementation against it.
+<!-- lang: o-1-on-average-o-n-in-the-worst-case -->
 
 ## Exercise
 

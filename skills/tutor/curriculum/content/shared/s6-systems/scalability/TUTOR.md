@@ -135,7 +135,7 @@ Exercise-specific; all four files must pass under `-race`.
      find them all again later?"
 4. Verbal walkthrough of the shape only — for the ring: hash labels, record
    `position → owner`, keep positions sorted, binary search, wrap to index 0
-   — and let them type it. Never open `solutions/go/`.
+   — and let them type it. Never open the language overlay's `solution/`.
 
 If they are stuck for time, prioritise `app.go` and `queue.go`: statelessness
 and backpressure are what the remaining S6 lessons build on.

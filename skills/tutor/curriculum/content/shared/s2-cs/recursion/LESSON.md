@@ -115,16 +115,7 @@ Even *correct* recursion can overflow: one frame per level means the input's
 depth is your stack depth. A recursive walk over a million-element linked
 list needs a million live frames at once.
 
-> **In Go:** each goroutine's stack starts tiny and grows on demand, but only
-> up to a hard cap (about 1 GB on 64-bit machines by default). Blowing it is
-> not a recoverable panic — the program dies with:
->
-> ```
-> runtime: goroutine stack exceeds 1000000000-byte limit
-> fatal error: stack overflow
-> ```
->
-> You will meet this exact message in the exercise, on purpose.
+<!-- lang: when-it-goes-wrong-stack-overflow -->
 
 ## Tracing by hand
 
@@ -209,17 +200,7 @@ Every recursive solution can be rewritten iteratively:
 - **Simple shrink-by-one recursion** becomes a plain loop with an
   accumulator. Factorial needs no stack at all:
 
-  > **In Go:**
-  >
-  > ```go
-  > func factorial(n int) int {
-  > 	result := 1
-  > 	for i := 2; i <= n; i++ {
-  > 		result *= i
-  > 	}
-  > 	return result
-  > }
-  > ```
+<!-- lang: recursion-vs-iteration -->
 
 - **The general case** becomes a loop plus an **explicit stack** — the data
   structure from last lesson, now managed by you: push the work you would
@@ -237,9 +218,7 @@ When is iteration preferable?
   the recursive call is the very last act. If yours doesn't, "tail recursion"
   still costs one frame per level.
 
-> **In Go:** Go does *not* perform tail-call optimization — every recursive
-> call consumes a frame, tail position or not. That's why Go code iterates
-> over linear structures and typically saves recursion for nested ones.
+<!-- lang: recursion-vs-iteration-2 -->
 
 When is recursion preferable? Naturally nested data (this lesson's trees),
 and divide-and-conquer algorithms — the sorting lesson up next runs on

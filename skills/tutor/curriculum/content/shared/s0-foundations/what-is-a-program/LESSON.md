@@ -102,9 +102,7 @@ The trade-offs follow directly from the designs:
 (Real tools blur these lines in interesting ways, but these two pure models
 are the mental anchors — they'll serve you for years.)
 
-In Go: you'll meet these commands properly soon, but for a taste — `go build`
-invokes the Go compiler on your source and produces an executable; running
-that file executes pure machine code, no translator in sight.
+<!-- lang: compilers-and-interpreters -->
 
 ## From "run" to output, step by step
 

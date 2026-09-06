@@ -35,10 +35,7 @@ Every language has some unit of organization above the function — a module, a
 package, a namespace. The design questions are the same everywhere; only the
 keyword changes.
 
-In Go: the unit is the **package** — one directory, one package, as you saw
-in S1's packages lesson. (Careful with words: Go also has *modules*, the
-versioned unit with a `go.mod`. When this lesson says "module" in portable
-theory, the Go realization is *package*.)
+<!-- lang: one-level-up-from-clean-code -->
 
 ## What belongs together
 
@@ -58,11 +55,7 @@ Two consequences follow:
   callers need and keep the rest private. Every exported name is a promise
   you must keep; every hidden one is a decision you may still revise.
 
-In Go: the surface is exactly the capitalized identifiers, and package names
-read at the call site — `report.Summary(...)` explains itself, which is why
-`report.ReportSummary` would be a bad name (stutter) and `utils.Format` a
-useless one. Go also gives hiding teeth one level up: anything under a
-directory named `internal/` is importable only within your module.
+<!-- lang: what-belongs-together -->
 
 ## Dependency direction
 
@@ -107,8 +100,7 @@ without the other — they are one module wearing two names, with the
 complexity of two. Some languages tolerate cycles at runtime and reward you
 with initialization-order bugs.
 
-In Go: the compiler simply refuses — `import cycle not allowed`. That error
-is not the compiler being pedantic; it is a design smell made loud.
+<!-- lang: import-cycles -->
 
 Three standard ways to break a cycle (or a wrong-direction edge — same
 disease, milder form):
@@ -155,9 +147,7 @@ flat, tangled enough to show every mechanic of splitting. Real projects reach
 this fork constantly; what matters is choosing deliberately and being able to
 say why.
 
-In Go: the standard library is the model — `strings`, `sort`, `net/http`:
-each package one job, named for what it provides. And Go's culture leans
-flat: a 500-line package is normal; ten 50-line packages are a smell.
+<!-- lang: one-package-or-many -->
 
 ## Refactoring with the tests green
 

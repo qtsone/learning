@@ -34,9 +34,7 @@ interpreter at the core, plus helpers: a build tool, a test runner, a
 formatter, a way to download libraries. Languages ship these together so they
 work as one kit, usually behind a single command.
 
-In Go: the entire toolchain lives behind one command named `go`. You hand it a
-subcommand for each job — `go version`, `go build`, `go run`, and more you
-will meet in the next stage. Install that one command and you have everything.
+<!-- lang: what-a-toolchain-is -->
 
 ## Installing the toolchain
 
@@ -52,20 +50,7 @@ Whichever route you take, the test is the same: open a **new** terminal and
 ask the tool for its version. New terminal, because installers change startup
 configuration that your already-open windows never re-read.
 
-In Go:
-
-- macOS: `brew install go`, or download the `.pkg` installer from
-  [go.dev/dl](https://go.dev/dl/) and click through it.
-- Linux: prefer the official tarball (distro packages are often old). Follow
-  the three steps at [go.dev/doc/install](https://go.dev/doc/install) — they
-  unpack Go into `/usr/local/go` and add its `bin` directory to `PATH`.
-
-Then verify:
-
-```sh
-go version
-# go version go1.25.1 darwin/arm64
-```
+<!-- lang: installing-the-toolchain -->
 
 Read the output: the tool's name, its version, then your operating system and
 CPU type. If you see a version line, the toolchain is installed *and*
@@ -143,15 +128,7 @@ export PATH="$PATH:/the/missing/directory"
 
 `$PATH:` keeps everything already there and adds one more place to look.
 
-In Go: ask Go where that second directory is with `go env GOPATH` — installed
-tools land in the `bin` folder inside it (usually `~/go/bin`). The editor
-lesson introduced language servers; Go's is called `gopls`, and when you
-install the Go extension in VS Code it offers to install `gopls` — into
-exactly that folder. So add this line to your shell profile now:
-
-```sh
-export PATH="$PATH:$HOME/go/bin"
-```
+<!-- lang: path-and-the-toolchain -->
 
 ## A home for your projects
 
@@ -167,11 +144,7 @@ future "where did I put that?" disappears. The convention is simple:
 - `git init` immediately, and commit early. A repository from minute one
   costs nothing and means every experiment is undoable.
 
-In Go: one more day-one file. Every Go project starts by running
-`go mod init <name>` inside the project directory, which creates a file
-called `go.mod` — the project's ID card for the toolchain. What it contains
-becomes clear in the next stage; for now, treat "new Go project" as: make the
-directory, `go mod init`, `git init`.
+<!-- lang: a-home-for-your-projects -->
 
 ## The smoke test
 

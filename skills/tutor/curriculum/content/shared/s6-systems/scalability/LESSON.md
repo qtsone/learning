@@ -274,25 +274,7 @@ keys in milliseconds, but whatever lived only in that worker's memory is gone.
 Shards that hold state need replication (distributed-systems), typically to
 the next R distinct physical nodes clockwise.
 
-In Go:
-
-```go
-// The three pieces you build, sketched. Note the injected clock in the
-// limiter — same testing habit as the caching and message-queue lessons.
-tb := NewTokenBucket(20, 5, time.Now) // burst 20, sustained 5/s
-if !tb.Allow() {
-	w.Header().Set("Retry-After", strconv.Itoa(int(math.Ceil(tb.RetryAfter().Seconds()))))
-	http.Error(w, "rate limited", http.StatusTooManyRequests)
-	return
-}
-
-if !queue.Offer(job) { // bounded: full means shed, never grow
-	http.Error(w, "overloaded", http.StatusServiceUnavailable)
-	return
-}
-
-owner, _ := ring.Get(job.Key) // consistent hashing decides which worker
-```
+<!-- lang: sharding-work-dividing-without-hot-spots -->
 
 In production you would reach for `golang.org/x/time/rate` rather than writing
 a limiter — but a limiter you have not built is a limiter whose burst
