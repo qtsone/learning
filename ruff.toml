@@ -1,0 +1,9 @@
+# One bar for the engine, its tests, the tools and every Python exercise under
+# content/: CI runs `ruff format --check` and `ruff check` with these settings.
+target-version = "py314"
+line-length = 88
+
+# The engine and its tests keep the README's floor: any python3 from 3.8 on.
+[per-file-target-version]
+"skills/tutor/scripts/tutor.py" = "py38"
+"tests/*.py" = "py38"
