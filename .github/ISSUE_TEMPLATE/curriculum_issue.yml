@@ -8,7 +8,18 @@ body:
     attributes:
       label: Lesson id
       description: The stable slug, as in docs/curriculum-outline.md or your ROADMAP.md
-      placeholder: go.basics.slices
+      placeholder: go.basics.arrays-slices
+    validations:
+      required: true
+  - type: dropdown
+    id: track
+    attributes:
+      label: Language track
+      description: Which variant of the lesson you were on. Shared lessons have one per language.
+      options:
+        - Go
+        - Python
+        - shared theory (no language)
     validations:
       required: true
   - type: dropdown

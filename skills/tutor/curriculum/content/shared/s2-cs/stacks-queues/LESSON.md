@@ -149,14 +149,7 @@ pushes that preceded it and each push averages out to O(1). That averaged
 figure is called **amortized** O(1): individual operations may occasionally
 be expensive, but any sequence of n pushes costs O(n) total.
 
-In Go: a slice plus `append` is already 90% of a stack — this is why Go has
-no stack type in the standard library.
-
-```go
-s.items = append(s.items, r)          // push
-top := s.items[len(s.items)-1]        // read the top
-s.items = s.items[:len(s.items)-1]    // shrink by one: pop's second half
-```
+<!-- lang: implementing-a-stack -->
 
 For the empty case, follow the comma-ok convention you know from map lookups:
 `Pop` returns `(value, ok)` and reports `ok = false` instead of panicking on
@@ -175,10 +168,7 @@ bad options:
    abandoned slots are dead weight. The array only grows, and a long-lived
    queue drags its entire history behind it.
 
-In Go: option 2 is the tempting one-liner `q.items = q.items[1:]`. It reslices
-in O(1), but the backing array is not freed while any slice still points into
-it — dequeued elements stay reachable, so a busy queue quietly pins memory it
-will never read again.
+<!-- lang: implementing-a-queue-and-the-trap -->
 
 The clean fix you can build today is **linked nodes** with two pointers, one
 at each end:

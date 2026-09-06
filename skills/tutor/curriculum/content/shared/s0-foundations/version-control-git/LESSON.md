@@ -154,9 +154,7 @@ Two kinds of files must stay out of history:
   with the source can regenerate them, and they change on every build,
   burying your real edits in noise.
 
-  > **In Go:** once you reach the Go track, `go build` drops a compiled
-  > binary named after the folder into your project — a classic artifact to
-  > ignore.
+<!-- lang: what-never-gets-committed -->
 
 - **Secrets** — passwords, API keys, private tokens. Here is the part that
   burns people: *commits are forever*. Deleting the file in a later commit

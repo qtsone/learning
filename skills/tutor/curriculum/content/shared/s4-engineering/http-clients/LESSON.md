@@ -86,20 +86,7 @@ never gets back. Each leaked body pins a socket and its buffers; under load
 you run out of file descriptors and every request starts dialing from
 scratch — or failing.
 
-In Go:
-
-```go
-resp, err := client.Do(req)
-if err != nil {
-	return err // transport failure: DNS, refused, timeout — there is no response
-}
-defer resp.Body.Close() // ALWAYS, on every path, before touching the status
-```
-
-Note the split: `err != nil` means *no HTTP conversation happened*. A 404 is
-a successful conversation with a disappointing answer — `err` is nil and
-`resp.StatusCode` is 404. Confusing these two is the classic first bug in
-every Go HTTP client.
+<!-- lang: the-lifecycle-of-a-request -->
 
 ## Timeouts: the incident you schedule in advance
 
@@ -122,22 +109,7 @@ Timeouts come in layers, and you usually want two:
 - A **per-request deadline** carried by the call's context, so a caller with
   200ms of budget can pass that budget down.
 
-In Go:
-
-```go
-client := &http.Client{Timeout: 10 * time.Second} // ceiling for everything
-
-ctx, cancel := context.WithTimeout(ctx, 200*time.Millisecond)
-defer cancel()
-req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
-```
-
-You met `context` in the concurrency arc — this is its natural habitat.
-`http.NewRequestWithContext` ties the request to the context: when the
-deadline passes or the caller cancels, the transport abandons the request and
-`Do` returns an error wrapping `context.DeadlineExceeded` or
-`context.Canceled`. And never reach for `http.DefaultClient` in production
-code: it is the shared, zero-timeout client.
+<!-- lang: timeouts-the-incident-you-schedule-in -->
 
 ## Decoding responses safely
 
@@ -153,23 +125,7 @@ callers can react to *what the server said* rather than string-matching an
 error message. You built this muscle in S1's error-handling lesson; here it
 earns its keep.
 
-In Go:
-
-```go
-type APIError struct {
-	StatusCode int
-	Body       string
-}
-
-func (e *APIError) Error() string {
-	return fmt.Sprintf("api error: status %d", e.StatusCode)
-}
-```
-
-Callers use `errors.As(err, &apiErr)` to fish it out of a wrapped chain, then
-branch on `apiErr.StatusCode`. For the happy path, decode straight from the
-body stream (`json.NewDecoder(resp.Body).Decode(&v)` in Go) into the struct
-you defined — the JSON techniques from S3 apply unchanged.
+<!-- lang: decoding-responses-safely -->
 
 ## Retries: backoff, jitter, and knowing when to stop
 
@@ -218,15 +174,7 @@ on a loopback port, whose handler you script: "answer 503 twice, then
 succeed." Your client code is exercised end to end — real sockets, real
 headers — against a server you fully control.
 
-In Go this is `net/http/httptest`:
-
-```go
-ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, `{"name":"go"}`)
-}))
-defer ts.Close()
-// ts.URL is the server's address — point your client at it
-```
+<!-- lang: testing-a-client-without-a-network -->
 
 You'll write handlers properly in the next stage; here you only need to read
 them. The exercise tests also inject a fake *sleep* function so retry waits

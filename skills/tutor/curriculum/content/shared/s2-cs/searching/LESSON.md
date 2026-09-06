@@ -108,24 +108,7 @@ exact bug sat in Java's standard library binary search for nine years.
 `lo + (hi - lo) / 2` computes the same value and cannot overflow, since
 `hi - lo` never exceeds the array length.
 
-**In Go:** `int` is 64 bits on mainstream platforms, so a slice large enough
-to overflow `lo + hi` won't fit in memory — but write the safe form anyway.
-It costs nothing, it is correct in every language and on 32-bit targets, and
-reviewers recognize it as the hand of someone who knows the history.
-
-```go
-for lo < hi {
-	mid := lo + (hi-lo)/2
-	switch {
-	case xs[mid] == target:
-		return mid
-	case xs[mid] < target:
-		lo = mid + 1
-	default:
-		hi = mid
-	}
-}
-```
+<!-- lang: binary-search-carefully -->
 
 ## How fast is halving?
 
@@ -211,15 +194,7 @@ practice: any monotone yes/no question over an ordered range — "first commit
 where the build breaks", "smallest capacity that fits the load" — is
 searchable this way, no explicit target value required.
 
-**In Go:** the standard library ships both flavors, and both return the
-*boundary*, not "any match":
-
-```go
-i, found := slices.BinarySearch(xs, target)      // i = lower bound; found = presence
-j := sort.Search(len(xs), func(i int) bool {     // first i where the predicate
-	return xs[i] >= target                       // flips to true
-})
-```
+<!-- lang: variants-first-and-last-occurrence -->
 
 In real code you reach for these. In this exercise you build them from
 scratch — owning the invariant is the point.

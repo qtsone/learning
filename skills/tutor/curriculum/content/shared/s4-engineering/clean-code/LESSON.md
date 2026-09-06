@@ -61,13 +61,7 @@ justify a rename with:
   no load. The same `i` as a field on a long-lived struct is a defect. The
   further a reader can be from the declaration, the more the name must carry.
 
-**In Go:** the conventions you've absorbed since S1 are these criteria
-applied. `MixedCaps`, never underscores; short receiver names (`func (s
-*Server)`) because the receiver's scope is one function and its type is a line
-away; `err` and `ok` as fixed idioms; and no package stutter — a name is
-always read *with* its package qualifier, so `report.Builder`, not
-`report.ReportBuilder`. Effective Go's advice that a name's length should
-match its scope is exactly the last criterion above.
+<!-- lang: names-that-reveal-intent -->
 
 ## Function size: split on reasons, not line counts
 
@@ -138,10 +132,7 @@ instead of shared mutable state. You proved in S1 and S3 that functions
 returning values beat functions with side effects for testability — cohesion
 is the same force at design scale.
 
-**In Go:** cohesion also has a project-scale form — which code shares a
-package, and which direction imports may point (Go refuses import cycles
-outright, as the interfaces lesson hinted). That scale is exactly the next
-lesson; here you practice cohesion inside a single file first.
+<!-- lang: cohesion-one-reason-to-change -->
 
 ## Comment discipline
 
@@ -166,13 +157,7 @@ then delete the comment. Commented-out code is narration's zombie cousin —
 version control (S0) remembers every deleted line; the graveyard in the file
 just scares readers who can't tell whether it's coming back.
 
-**In Go:** contracts have a concrete form — doc comments. Every exported
-identifier gets a `// Name ...` comment, a complete sentence starting with the
-name, and `pkg.go.dev` renders it as the package's documentation; you have
-been reading these since S1. Note what the convention does *not* license: a
-doc comment that merely echoes the signature (`// GetUser gets a user.`) is
-narration in a contract's clothing. State what the caller can rely on —
-behavior at the edges, what happens on empty input, what errors mean.
+<!-- lang: comment-discipline -->
 
 ## Refactoring without breaking things
 

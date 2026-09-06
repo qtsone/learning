@@ -71,10 +71,7 @@ internal high-volume hops get the efficient one. Defaults are starting
 points, not answers: in the review you will be asked *why* it holds (or
 doesn't) for your concrete scenario, with the drivers named.
 
-**In Go:** both cost you one import — `net/http` + `encoding/json` on
-one side, `protoc`-generated stubs + `google.golang.org/grpc` on the
-other. Implementation effort is a wash. The real cost of the choice
-lands on your *consumers*, which is exactly why audience decides.
+<!-- lang: rest-or-grpc-decide-by-audience-first -->
 
 ## Versioning: define "breaking" before choosing a mechanism
 

@@ -68,12 +68,7 @@ top-down through concerns, most expensive first:
 5. **Style nits.** Last, and mostly not at all: the formatter and linter
    already had this argument so you don't have to.
 
-**In Go:** step 5 nearly vanishes. `gofmt` ends layout debates, `go vet`
-catches a class of mistakes, and the
-[Code Review Comments wiki](https://go.dev/wiki/CodeReviewComments) gives
-reviewers a shared, citable vocabulary for the rest. That page exists so
-Go reviews can say "see the wiki on error strings" instead of relitigating
-taste per PR — citing a convention beats asserting a preference.
+<!-- lang: reading-a-diff-like-a-reviewer -->
 
 ## Severity: say which comments block
 
@@ -157,10 +152,7 @@ more to check.
   yourself is a review round you don't spend a colleague on. Five
   minutes; highest ratio in this lesson.
 
-**In Go:** the mechanical pre-review is your CI/CD lesson verbatim —
-`gofmt`, `go vet`, `go test ./...` locally before pushing. A PR that
-fails the robot's checks wastes the human's attention on what the robot
-would have said for free.
+<!-- lang: the-author-s-chair-part-1-a-reviewable -->
 
 ## The author's chair, part 2: receiving review
 

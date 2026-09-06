@@ -79,11 +79,7 @@ each editor implements the protocol once and each language ships one server:
 N+M. This is why a niche editor can offer the same Go or Python smarts as
 VS Code — they all dial the same server.
 
-> **In Go:** the language server is called `gopls` ("go please"). Once your Go
-> toolchain is installed — that happens in this stage's dev-environment
-> lesson — the Go extension runs `gopls` for you, and typing `fmt.` pops up
-> everything the `fmt` package offers, with `F12` jumping into the standard
-> library itself.
+<!-- lang: the-editor-is-simple-the-language -->
 
 ## Extensions
 

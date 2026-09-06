@@ -62,9 +62,7 @@ Before forming any hypothesis, collect the free evidence:
 - **What changed.** Bugs rarely appear spontaneously; if it worked yesterday,
   the diff since yesterday is the prime suspect list.
 
-In Go: a panic prints the full goroutine stack; scan for the first line in
-your package. Run one test in isolation with `go test -run TestName`, and see
-every subtest verdict with `go test -run TestName -v`.
+<!-- lang: step-zero-read-what-the-bug-already -->
 
 ## Reproduce, then minimize
 
@@ -106,12 +104,7 @@ Discipline keeps it honest: label every print with where it came from
 can diff two runs, and delete the prints once the bug is dead — or promote the
 genuinely useful ones to real log statements.
 
-In Go: `fmt.Printf` with the `%#v` verb prints a value in Go syntax —
-`[]float64{1.5, 2}` — which distinguishes `nil` from empty and string from
-number at a glance. Inside tests prefer `t.Logf`, which stays silent until a
-test fails or you pass `-v`, so diagnostic output never pollutes a green run.
-For narration that deserves to survive the debugging session, use `log/slog`
-with key-value pairs — a later stage builds full observability on top of it.
+<!-- lang: print-debugging -->
 
 ## Interactive debuggers
 
@@ -129,33 +122,7 @@ code does. You get to interrogate a live program without editing it, which
 also makes it the best tool for exploring code you've never read — pause at
 the entry point and walk.
 
-In Go the debugger is **delve**. Install it once, then run your test suite
-under it:
-
-```sh
-go install github.com/go-delve/delve/cmd/dlv@latest
-cd exercise
-dlv test                      # compile the tests, attach the debugger
-```
-
-A session looks like this — the commands to know:
-
-```text
-(dlv) break ledger.Lowest         # breakpoint at a function
-(dlv) break ledger.go:24          #   …or at a file:line
-(dlv) continue                    # run until a breakpoint hits
-(dlv) next                        # step over: run this line, stop at the next
-(dlv) step                        # step into the function being called
-(dlv) print lowest                # show one variable
-(dlv) locals                      # show every local in scope
-(dlv) break ledger.go:30 if i == 8  # conditional breakpoint
-(dlv) continue                    # …until the next hit; Ctrl-D or quit to leave
-```
-
-Your editor wraps the same engine: the VS Code Go extension from your S0
-dev-environment lesson drives delve behind its "Debug Test" links, with
-breakpoints as clickable margins. Learn the CLI once anyway — it works over
-ssh, in containers, everywhere the mouse can't reach.
+<!-- lang: interactive-debuggers -->
 
 ## Bisecting over history
 

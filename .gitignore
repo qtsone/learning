@@ -11,4 +11,21 @@ skills/tutor/curriculum/content/**/exercise/deploying-go
 skills/tutor/curriculum/content/**/exercise/dockerizing-go
 skills/tutor/curriculum/content/**/exercise/app/compose-app
 skills/tutor/curriculum/content/**/exercise/app/timesvc
+
+# `uv run` and `pytest` inside an exercise write caches and venvs in-tree, and
+# anyone running a lesson's own instructions produces them. Never ship them —
+# `uv.lock` and `.python-version` ARE committed: they pin the lesson's toolchain
+# the way `go.mod` and `go.sum` do for Go.
 __pycache__/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.hypothesis/
+*.egg-info/
+.coverage
+htmlcov/
+.tox/
+.nox/
+dist/
+build/

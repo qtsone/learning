@@ -83,12 +83,7 @@ Two consequences to internalize now:
   Kafka (a partitioned, replayable log with consumer offsets — recognize the
   name; we don't need its machinery here).
 
-In Go: a buffered channel looks like a queue and is not one. A value received
-from a channel is *gone* — there is no ack, so a consumer that crashes after
-`<-ch` silently loses the work, and there is no redelivery, no visibility
-timeout, no dead-lettering. Channels move work between goroutines inside one
-process; a message queue moves work between *processes that fail
-independently*. The exercise makes you build the difference.
+<!-- lang: the-shape-of-a-queue -->
 
 ## Delivery semantics: pick which failure you keep
 

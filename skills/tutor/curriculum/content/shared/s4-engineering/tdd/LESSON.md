@@ -103,26 +103,7 @@ mock or spy only when the interaction *is* the behavior: sending a
 notification, charging a card, writing an audit record. There is no return
 value to inspect — the call itself is the observable outcome.
 
-In Go: you rarely need a mocking framework. Declare a small interface where
-the dependency is *consumed* (remember S3 — interfaces belong to the
-consumer), and hand-roll the double in the test file:
-
-```go
-type stubClock struct{ now time.Time }
-
-func (c stubClock) Now() time.Time { return c.now }
-
-type spyNotifier struct{ messages []string }
-
-func (s *spyNotifier) Notify(m string) error {
-	s.messages = append(s.messages, m)
-	return nil
-}
-```
-
-Ten lines, no dependencies, and the double's behavior is in plain sight
-inside the test that uses it. This is idiomatic Go testing, and it only works
-because the interfaces are small — one more reason to keep them that way.
+<!-- lang: test-doubles-stub-fake-mock -->
 
 ## Designing for testability
 
@@ -157,10 +138,7 @@ small: the function depends on an abstraction it is handed, not on a global
 it reaches for. Hidden time, hidden randomness, hidden environment variables,
 hidden files, printing directly — the injection cure is identical for each.
 
-In Go the injected dependencies are interface (or func) fields, and the
-zero-cost fake for anything that writes text is `io.Writer` — pass
-`os.Stdout` in production and a `bytes.Buffer` in tests, exactly the S3 io
-philosophy paying rent.
+<!-- lang: designing-for-testability -->
 
 ## TDD as design pressure
 

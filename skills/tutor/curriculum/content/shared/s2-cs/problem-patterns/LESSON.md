@@ -80,11 +80,7 @@ finished, deduplicated output so far, and `r ≥ w` — the reader stays ahead o
 the writer, so nothing is overwritten before it has been read. One pass, no
 second array: O(n) time, O(1) extra space.
 
-> **In Go:** remember from the arrays-and-linked-lists lesson that a slice is
-> a small header pointing at a backing array. Writing `nums[w] = …` inside
-> the function writes to the *caller's* backing array — that is what "in
-> place" means here. The convention is to return the new length `k` and let
-> the caller keep working with `nums[:k]`.
+<!-- lang: two-pointers-flavor-two-reader-and -->
 
 ## Sliding window, fixed size
 
@@ -140,9 +136,7 @@ of argument — total work across all iterations, not worst case per iteration
 — is called **amortized** analysis, and you already used it when you analyzed
 append's occasional array-doubling in the arrays lesson.
 
-> **In Go:** substring problems mean runes, not bytes — the strings-runes
-> lesson applies in full. Convert once with `[]rune(s)` and index that, and
-> keep the sightings in a `map[rune]int`.
+<!-- lang: sliding-window-variable-size -->
 
 ## A field guide to the patterns
 

@@ -81,20 +81,7 @@ copies so rare that the *average* append is still O(1). This "expensive
 sometimes, cheap on average" accounting is called **amortized** O(1) — you'll
 see the word again in this stage.
 
-**In Go:** this is exactly the `len`/`cap` machinery from S1. A slice is a
-view onto a backing array; `append` writes into spare capacity when it can
-and allocates a bigger backing array when it can't:
-
-```go
-xs := make([]int, 0, 4)
-for i := 0; i < 10; i++ {
-	xs = append(xs, i)
-	fmt.Println(len(xs), cap(xs)) // watch cap jump: 4, 8, 16…
-}
-```
-
-That is also why S1 warned you to keep the result of `append`: after a
-growth step, the slice points at a *new* backing array.
+<!-- lang: what-contiguity-costs -->
 
 ## Linked lists: trade the street for a treasure hunt
 
@@ -217,12 +204,7 @@ the list's showcase — is often fine as a slice until n gets large, because
 one contiguous memcpy is fast and pointer-chasing is not. Measure before
 you reach for the exotic structure; default to the slice.
 
-**In Go:** the standard library ships a doubly linked list
-(`container/list`), yet you'll rarely see it in production Go — slices win
-almost every benchmark that doesn't specifically need O(1) splicing. You are
-building a list from scratch here not because Go needs another one, but
-because pointer-linked nodes are the atom that stacks, queues, trees, and
-graphs — the rest of this stage — are built from.
+<!-- lang: choosing-slice-or-list -->
 
 ## Exercise
 
