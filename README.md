@@ -52,22 +52,23 @@ result.
 
 | Subcommand | What it does |
 |------------|--------------|
-| `init <language> [--focus a,b]` | Create the workspace, or add focus packs to an existing one, then sync. Refuses to run inside this repo. |
+| `init <language> [--focus a,b] [--carry-over DIR]` | Create the workspace (seeding its `.gitignore`), or add focus packs to an existing one, then sync. `--carry-over DIR` copies passed shared-lesson grades from another language's workspace into notes; those lessons stay `todo`. Refuses to run inside this repo. |
 | `sync` | Re-scaffold from the curriculum and print a diff report: `added`, `updated`, `conflicts`, `renamed`, `removed`, `removed_files`, `needs_review`, `pending_content`. |
 | `status [--json]` | Session briefing: progress counts, lessons needing review, open conflicts, the next lesson and its directory. Compares the workspace against the curriculum and flags `sync_needed` with a preview of the sync report under `pending`; writes nothing. |
 | `mark <lesson-id> <status\|resolved> [--grade A..F] [--note ...]` | Set a lesson to `todo`, `in_progress`, `passed`, `skipped`, or `needs_review`. `resolved` returns a reviewed lesson to the status it held before the change. |
-| `verify <lesson-id>` | Run the lesson's checks in its exercise directory (`go test -race ./...` or `bash ./check.sh`), record an attempt, and exit with the check's status. Discussion lessons have no automated check. |
+| `verify <lesson-id>` | Run the lesson's checks in its exercise directory with the workspace language's runner (`go test -race ./...`, `uv run -q --locked pytest -q`, or `bash ./check.sh`), record an attempt, and exit with the check's status. Discussion lessons have no automated check. |
 | `guidance <guided\|standard\|spartan>` | Set how much hand-holding the tutor gives. |
 | `custom add <slug> --title T` | Register a tutor-authored lesson under `lessons/90-custom/`; custom lessons are outside sync. |
 | `graph [--language X] [--focus a,b] [--format tree\|mermaid\|json]` | Show the language matrix, or the composed roadmap for one language. Needs no workspace. |
-| `validate [--strict]` | Repo check: registry schema, prerequisite order, content presence, no stray build artifacts. |
-| `ci [--filter substr]` | `validate`, then run every solution against its exercise tests. |
+| `validate [--strict]` | Repo check: registry schema, prerequisite order, verify-type and layout invariants, content presence per language, anchors and snippets, no stray build artifacts. `--strict` turns completeness warnings into errors. |
+| `ci [--filter substr] [--language X]` | `validate --strict`, then run every exercise/solution pair on disk for every language that has one. |
 
 ### Workspace layout
 
 ```
 workspace/
 ├── ROADMAP.md                     # generated: ordered roadmap, checkboxes, grades
+├── .gitignore                     # seeded by init: venvs, caches, exercise binaries
 ├── lessons/<NN>-<group>/<NN>-<slug>/
 │   ├── LESSON.md                  # theory, objectives, exercise brief, further reading
 │   └── exercise/                  # starter code and the tests that define "done"
@@ -84,7 +85,8 @@ Sync never overwrites a file you changed. If upstream changed it too, the new
 version lands beside yours as `<file>.upstream` and the report lists a conflict for
 the tutor to walk you through. A lesson you already passed that changes upstream
 flips to `needs_review`, and the tutor covers the delta before you move on.
-Tutor-only files (`TUTOR.md`, `quiz.json`, `solution/`) are never scaffolded.
+Tutor-only files (`TUTOR.md`, `quiz.json`, `solution/`, `snippets/`) are never
+scaffolded; snippets reach you only rendered into `LESSON.md` for your language.
 
 ## Roadmap
 

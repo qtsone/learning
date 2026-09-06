@@ -25,6 +25,15 @@ inside the curriculum repo itself (it will refuse).
 2. **Never reveal or scaffold solutions.** Canonical solutions, `TUTOR.md`,
    and `quiz.json` live only in `$SKILL_DIR/curriculum/content/...` — read
    them yourself; never copy them into the workspace or paste them wholesale.
+   For a language-pool lesson they sit beside it under
+   `content/<language>/<stage>/<lesson>/`. For a shared or pack lesson the
+   shared `TUTOR.md` and `quiz.json` live under `content/shared/...` (or
+   `content/focus/...`), and the workspace language's overlay,
+   `content/<language>/shared/<stage>/<lesson>/` (packs:
+   `content/<language>/focus/<pack>/<lesson>/`), adds `solution/`, an
+   additive `TUTOR.md`, and a `quiz.json` whose questions replace same-id
+   shared questions. Read the overlay for the workspace language (`status`
+   shows it) — never grade a learner against another language's solution.
    If the learner insists on seeing the solution before passing, show it, mark
    the lesson `skipped` (not `passed`), and note it in the journal.
 3. **Never mark `passed` without the full gate** (below). Never advance past a
@@ -36,7 +45,9 @@ inside the curriculum repo itself (it will refuse).
 ## Session start — every session, no exceptions
 
 1. Run `status` (add `--json` when you want the raw fields). If there is no
-   workspace yet, this is a first run — see *First run*.
+   workspace yet, this is a first run — see *First run*. `status` may print
+   warnings (an ancestor `pyproject.toml`, a focus pack that adds nothing):
+   relay them once, then move on.
 2. If status shows `SYNC NEEDED` (its `pending` field previews the report
    below without changing anything), run `sync` and read its JSON report:
    - `needs_review` lessons: the curriculum changed after the learner passed
@@ -53,7 +64,8 @@ inside the curriculum repo itself (it will refuse).
    - `removed`: lessons dropped upstream. Their directories are parked in
      `.tutor/attic/`, never deleted — tell the learner where their work went.
    - `added` and `pending_content`: new lessons scaffolded, and lessons the
-     registry declares but nobody has authored yet (skipped until they exist).
+     registry declares but nobody has authored yet (including shared lessons
+     that have no exercise for this language yet; skipped until they exist).
 3. Brief the learner in 3-5 lines: where they are, what's next, anything
    pending. Then continue where `status.next` points.
 
@@ -61,10 +73,16 @@ inside the curriculum repo itself (it will refuse).
 
 Ask (or take from the invocation) the language and any focus areas, then:
 
-    python3 "$SKILL_DIR/scripts/tutor.py" init <language> [--focus a,b]
+    python3 "$SKILL_DIR/scripts/tutor.py" init <language> [--focus a,b] [--carry-over <workspace>]
 
 - `graph` (no args) lists supported languages; `graph --language X` previews
   the composed roadmap. Offer focus packs relevant to their goals.
+- One workspace per language. A learner who already passed shared lessons
+  in another language's workspace should init with
+  `--carry-over <that workspace>` so those grades land in the lessons' notes.
+- Fast track: for a shared lesson whose notes say "carried over", skip the
+  reading assignment, run a short spaced-review check from its quiz, require
+  the new language's exercise, and grade as usual.
 - If they want a focus that isn't a registry pack (e.g. "game servers"), note
   it: you'll weave it in via custom lessons (see below) at sensible points.
 - If the workspace isn't a git repo, recommend `git init` + a first commit —
@@ -78,8 +96,10 @@ For the lesson `status.next` points at (dir shown in `next_dir`):
 
 1. **Assign reading.** Point them at `<lesson dir>/LESSON.md` (link it). Read
    the curriculum-side `TUTOR.md` and `quiz.json` for this lesson yourself
-   *before* discussing — they hold misconceptions, grilling points, rubric,
-   and the remediation ladder. Mark it: `mark <id> in_progress`.
+   *before* discussing — for a shared or pack lesson, both the shared files
+   and the workspace language's overlay (hard rule 2) — they hold
+   misconceptions, grilling points, rubric, and the remediation ladder. Mark
+   it: `mark <id> in_progress`.
 2. **Socratic check-in.** When they've read it, verify understanding in
    conversation: work through the `core` questions from `quiz.json` (in your
    own words, one at a time — it's a conversation, not an exam form), plus
@@ -88,9 +108,13 @@ For the lesson `status.next` points at (dir shown in `next_dir`):
    right in *their own words*.
 3. **Exercise.** They write code in the lesson's `exercise/` dir. Support per
    guidance mode. When they think they're done: `verify <id>` — it runs the
-   lesson's checks in that directory, records an attempt, and exits non-zero
-   with the output when they fail. Failing tests → use TUTOR.md's remediation
-   ladder — hints escalate gradually; never jump to the answer.
+   workspace language's runner in that directory (`go test`, `uv run pytest`,
+   or `check.sh`), records an attempt, and exits non-zero with the output when
+   they fail. If it refuses because no exercise is scaffolded, the lesson is
+   content-pending for this language — say so and move on. If it reports a
+   missing toolchain, help them install it (the message carries the hint).
+   Failing tests → use TUTOR.md's remediation ladder — hints escalate
+   gradually; never jump to the answer.
 4. **Code review.** Tests green ≠ done. Review their code against the rubric
    in TUTOR.md: correctness beyond the tests, idiom, naming, the *why* behind
    each caveat. Explain what would make it better even when passing. For
@@ -149,7 +173,7 @@ When the learner asks (or accepts your offer at a stage boundary, if
 observations exist): aggregate `## Observations`, group by lesson, and turn
 them into concrete edits to the curriculum repo (the git repo containing
 `$SKILL_DIR`; resolve symlinks). Create a branch `curriculum/<short-topic>`,
-apply the edits, run `python3 skills/tutor/scripts/tutor.py validate` there,
+apply the edits, run `python3 skills/tutor/scripts/tutor.py validate --strict` there,
 show the learner the full diff, and only after their explicit OK: commit
 (conventional commits), push, and open a PR with `gh pr create`, listing each
 observation it addresses. Clear the incorporated observations from the

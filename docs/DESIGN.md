@@ -25,12 +25,13 @@ Lessons are real files in this repo (`skills/tutor/curriculum/content/`), not pr
 that ask an LLM to generate a lesson at scaffold time. This was the foundational choice,
 for two reasons:
 
-1. **Idempotency.** Scaffolding is a pure function of repo content: `init` and `sync`
-   copy files, so running them twice produces the same workspace. An LLM generating
-   content at scaffold time would produce a different curriculum for every learner and
-   every run — impossible to test, review, version, or reason about. With pre-authored
-   content, quality is fixed in the repo by an author/review loop (and CI), not left to
-   inference-time luck.
+1. **Idempotency.** Scaffolding is a pure function of repo content and the workspace
+   language: `init` and `sync` copy files (rendering `LESSON.md` on the way, see
+   Per-language rendering below), so running them twice produces the same workspace.
+   An LLM generating content at scaffold time would produce a different curriculum for
+   every learner and every run — impossible to test, review, version, or reason about.
+   With pre-authored content, quality is fixed in the repo by an author/review loop (and
+   CI), not left to inference-time luck.
 2. **Hash-diffable change detection.** Because every scaffolded file has exactly one
    upstream source, `sync` can record its hash in `manifest.json` and later distinguish
    with certainty: *upstream changed*, *learner changed it*, *both changed*. That single
@@ -50,9 +51,19 @@ lives in pools: `content/shared/`, `content/go/`, `content/focus/`, `content/pyt
 
 The driver is **multi-language composition without duplication**. Roughly half the
 curriculum (S0 foundations, S2 CS fundamentals, S4 engineering practice, S6 systems &
-design — see `docs/curriculum-outline.md`) is language-agnostic. Writing it once in
-`shared/` with per-language exercise variants (`exercises/go/`, `exercises/python/`)
-means adding a new language track is: add registry entries + author exercise variants.
+design — see `docs/curriculum-outline.md`) is language-agnostic and written once in
+`shared/`. Adding a language track is a bounded list, and none of it touches `shared/`,
+`go/` or `focus/`:
+
+- a `languages.<code>` registry entry with its runner (`verify.type`) and its path (which
+  shared stages it takes, in which order, around its own stages);
+- its stage lessons under `content/<code>/<stage>/<lesson>/`;
+- one overlay folder under `content/<code>/shared/<stage>/<lesson>/` (and, once packs are
+  ported, `content/<code>/focus/<pack>/<lesson>/`) for every shared or pack lesson it takes
+  that needs an exercise, a solution or language-specific tutor notes;
+- snippets at the anchors where the shared theory leaves room for a language to speak;
+- a row in the CI `solutions` matrix.
+
 No theory is forked, so an errata fix in a shared lesson reaches every track at once.
 
 Splitting graph from content also gives each side the right change-review granularity:
@@ -65,6 +76,28 @@ because `manifest.json` is keyed by lesson id, not by path.
 Focus packs (`containers`, `web-services`, `cli-tooling`) are the same mechanism at a
 smaller scale: registry-declared lesson sets with insertion points where prerequisites
 are met, composable onto any track instead of being baked into one.
+
+### Per-language rendering
+
+A shared lesson's `LESSON.md` is one neutral file with `<!-- lang: <slot> -->` anchors
+where a language may add a paragraph or a code block; each language keeps its blocks as
+`snippets/<slot>.md` in its own overlay folder under `content/<lang>/`, beside that
+language's exercise and solution for the lesson. Overlays live under the language, not
+under the shared lesson, because that is what keeps adding a language a pure addition: a
+Python contributor creates files under `content/python/` and never edits a file Go learners
+are scaffolded from, so Go's rendered bytes stay identical and no Go learner gets a
+`needs_review` for a change that was never about Go. The alternatives both fail this test:
+a `LESSON.<lang>.md` per language forks the theory this section exists to keep single, and
+fenced per-language blocks inside the shared file make every language edit the same 42
+files.
+
+`LESSON.md` is rendered at scaffold time rather than stored per language for the same
+reason content is pre-authored: one upstream source per scaffolded file. The engine splices
+the workspace language's snippets in at the anchors (an anchor with no snippet vanishes
+together with the blank line after it, so paragraph spacing and every other language's
+rendered bytes are unchanged) and hashes the rendered bytes into `manifest.json`, so `sync`
+still knows exactly what it wrote. A stored per-language copy would be a second source of
+truth that drifts from the neutral text; a rendering is a pure function of the two.
 
 ## Why script-owned state
 
@@ -174,6 +207,7 @@ while keeping a human hand on every merge.
 | `skills/tutor/SKILL.md` | LLM behavior: teaching protocol, intent → script map |
 | `skills/tutor/scripts/tutor.py` | Deterministic engine, sole writer of state |
 | `skills/tutor/curriculum/registry.json` | The graph: lessons, prereq DAG, tracks, packs |
-| `skills/tutor/curriculum/content/` | Pre-authored pools: `shared/`, `go/`, `focus/`, `python/` |
-| `.github/workflows/ci.yaml` | validate → solutions → CLA gate |
+| `skills/tutor/curriculum/content/` | Pre-authored pools: `shared/` and `focus/` (neutral), `go/` and `python/` (language stages plus that language's overlays for shared and pack lessons) |
+| `tests/` | `test_engine.py`: black-box engine tests against a synthetic curriculum (stdlib `unittest`) |
+| `.github/workflows/ci.yaml` | validate (+ engine tests) → solutions matrix per language → CLA gate |
 | `LICENSE`, `LICENSE-EXCEPTION.md`, `.github/CLA.md`, `NOTICE` | The licensing mechanism |

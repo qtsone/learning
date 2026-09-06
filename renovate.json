@@ -1,7 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "description": [
-    "Only this repo's own GitHub Actions workflow is managed. Everything under the curriculum, including workflow files inside exercises and solutions, is teaching material with deliberately pinned versions."
+    "Only this repo's own GitHub Actions workflow is managed. Everything under the curriculum, including workflow files inside exercises and solutions, is teaching material with deliberately pinned versions.",
+    "Python pins inside exercises (pyproject.toml, uv.lock) are deliberate teaching material too; they are bumped by manual content(deps) sweeps, never by Renovate."
   ],
   "extends": [
     "config:recommended",

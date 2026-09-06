@@ -23,11 +23,19 @@ body:
       render: shell
     validations:
       required: true
-  - type: input
-    id: python
+  - type: dropdown
+    id: track
     attributes:
-      label: Python version
-      placeholder: python3 --version
+      label: Language track
+      options:
+        - Go
+        - Python
+        - not track-specific
+  - type: input
+    id: toolchain
+    attributes:
+      label: Toolchain versions
+      placeholder: python3 --version; go version; uv --version
   - type: input
     id: os
     attributes:
